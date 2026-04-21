@@ -1,0 +1,33 @@
+{
+  "name": "AI Architecture Generator",
+  "short_name": "AI Architect",
+  "description": "Generate production-ready system architectures using AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["productivity", "development", "utilities"],
+  "screenshots": [
+    {
+      "src": "/Image_Animation_and_VFX_Generation.gif",
+      "sizes": "1280x720",
+      "type": "image/gif",
+      "form_factor": "wide"
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+    
+    <!-- Viewport for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- Primary Meta Tags -->
+    <title>ArchitechAI — AI-Powered System Design Generator</title>
+    <meta name="title" content="ArchitechAI — AI-Powered System Design Generator" />
+    <meta name="description" content="Transform your project idea into a complete, production-ready system architecture in seconds using the power of AI. Generate database schemas, APIs, diagrams, and cost estimates instantly." />
+    <meta name="keywords" content="AI architecture, system design, database schema, API design, software architecture, project planning, cost estimation" />
+    <meta name="author" content="ArchitechAI" />
+    
+    <!-- Theme Color for Mobile Browsers -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="msapplication-TileColor" content="#2563eb" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ArchitechAI — AI-Powered System Design Generator" />
+    <meta property="og:description" content="Transform your project idea into a complete, production-ready system architecture in seconds using AI." />
+    <meta property="og:image" content="/logo.jpg" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ArchitechAI — AI-Powered System Design Generator" />
+    <meta name="twitter:description" content="Transform your project idea into a complete, production-ready system architecture in seconds using AI." />
+    <meta name="twitter:image" content="/logo.jpg" />
+    
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    
+    <!-- Preload critical fonts with font-display swap -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    
+    <!-- Inline critical CSS for faster initial render -->
+    <style>
+      /* Critical CSS - Above the fold */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+      
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      
+      #root {
+        min-height: 100vh;
+      }
+      
+      /* Loading spinner */
+      .app-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 9999;
+      }
+      
+      .app-loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* Prevent layout shift */
+      img, video {
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading indicator -->
+    <div id="root">
+      <div class="app-loading">
+        <div class="app-loading-spinner"></div>
+      </div>
+    </div>
+    
+    <!-- Main application script -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker for PWA (optional) -->
+    <script type="module">
+      // Register service worker for offline support (production only)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Service worker registration failed, continue without it
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

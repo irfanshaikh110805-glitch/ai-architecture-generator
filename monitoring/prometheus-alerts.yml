@@ -1,0 +1,83 @@
+groups:
+  - name: ai_architecture_generator_alerts
+    interval: 30s
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: rate(architecture_generation_total{status="error"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors/sec for the last 5 minutes"
+      
+      # Slow response time alert
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(architecture_generation_duration_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow architecture generation"
+          description: "95th percentile response time is {{ $value }}s"
+      
+      # Service down alert
+      - alert: ServiceDown
+        expr: up{job="ai-arch-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service is down"
+          description: "Backend service has been down for more than 2 minutes"
+      
+      # High rate limit hits
+      - alert: HighRateLimitHits
+        expr: rate(http_requests_total{status="429"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High rate limit hits"
+          description: "Rate limit is being hit {{ $value }} times/sec"
+      
+      # Database connection issues
+      - alert: DatabaseUnhealthy
+        expr: database_health_status == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection issues"
+          description: "Database health check failing for 2 minutes"
+      
+      # AI service issues
+      - alert: AIServiceUnhealthy
+        expr: ai_service_health_status == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI service issues"
+          description: "AI service health check failing"
+      
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 1e9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanize }}B"
+      
+      # Request queue building up
+      - alert: RequestQueueBuildup
+        expr: rate(http_requests_total[1m]) > 100
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High request rate"
+          description: "Request rate is {{ $value }} req/sec"

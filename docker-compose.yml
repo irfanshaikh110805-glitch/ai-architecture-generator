@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-arch-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=900
+      - ENVIRONMENT=production
+    volumes:
+      - ./backend:/app
+      - backend-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ai-arch-frontend
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-network
+
+volumes:
+  backend-data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

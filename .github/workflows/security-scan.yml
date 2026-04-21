@@ -1,0 +1,151 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+
+jobs:
+  sast-backend:
+    name: SAST - Backend (Python)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Bandit security scan
+      run: |
+        cd backend
+        pip install bandit
+        bandit -r . -f json -o bandit-report.json || true
+    
+    - name: Upload Bandit results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: backend/bandit-report.json
+        category: bandit
+  
+  sast-frontend:
+    name: SAST - Frontend (JavaScript)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install ESLint security plugin
+      run: |
+        cd frontend
+        npm install --save-dev eslint-plugin-security
+    
+    - name: Run ESLint security scan
+      run: |
+        cd frontend
+        npx eslint . --ext .js,.jsx --format json --output-file eslint-security.json || true
+    
+    - name: Upload ESLint results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: frontend/eslint-security.json
+        category: eslint-security
+  
+  dependency-scan-backend:
+    name: Dependency Scan - Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Safety check
+      run: |
+        cd backend
+        pip install safety
+        safety check --json --output safety-report.json || true
+    
+    - name: Run pip-audit
+      run: |
+        cd backend
+        pip install pip-audit
+        pip-audit --format json --output pip-audit-report.json || true
+  
+  dependency-scan-frontend:
+    name: Dependency Scan - Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Run npm audit
+      run: |
+        cd frontend
+        npm audit --json > npm-audit.json || true
+    
+    - name: Check for high severity vulnerabilities
+      run: |
+        cd frontend
+        npm audit --audit-level=high
+  
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy scan on backend
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: './backend'
+        format: 'sarif'
+        output: 'trivy-backend-results.sarif'
+    
+    - name: Upload Trivy results (backend)
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-backend-results.sarif'
+        category: trivy-backend
+    
+    - name: Run Trivy scan on frontend
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: './frontend'
+        format: 'sarif'
+        output: 'trivy-frontend-results.sarif'
+    
+    - name: Upload Trivy results (frontend)
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-frontend-results.sarif'
+        category: trivy-frontend
+  
+  secrets-scan:
+    name: Secrets Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

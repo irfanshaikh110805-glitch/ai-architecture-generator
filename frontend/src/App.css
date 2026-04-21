@@ -1,0 +1,17 @@
+/* App.css — minimal overrides, most styling in index.css */
+
+/* Ensure animations work correctly */
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
