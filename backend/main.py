@@ -98,9 +98,10 @@ app.add_middleware(
 
 # Trusted Host Middleware (prevents host header attacks) - disabled in development
 if os.getenv("ENVIRONMENT") == "production":
+    allowed_hosts = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "*").split(",")]
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"]
+        allowed_hosts=allowed_hosts
     )
 
 # Security Headers Middleware
