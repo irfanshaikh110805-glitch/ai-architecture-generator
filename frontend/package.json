@@ -13,12 +13,14 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.1",
     "axios": "^1.13.6",
     "dompurify": "^3.0.9",
     "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^3.8.4",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.577.0",
     "mermaid": "^10.9.5",
     "react": "^19.2.4",

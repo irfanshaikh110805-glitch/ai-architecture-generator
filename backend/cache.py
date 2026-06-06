@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Optional, Any
 import redis.asyncio as redis
-from config import settings
+import os
 from exceptions import CacheError
 
 logger = logging.getLogger(__name__)
@@ -16,15 +16,18 @@ class CacheService:
     
     def __init__(self):
         self._redis: Optional[redis.Redis] = None
+        self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        self.cache_ttl = int(os.getenv("CACHE_TTL", "86400"))
+        self.max_connections = int(os.getenv("REDIS_MAX_CONNECTIONS", "10"))
     
     async def connect(self):
         """Connect to Redis"""
         try:
             self._redis = await redis.from_url(
-                settings.REDIS_URL,
+                self.redis_url,
                 encoding="utf-8",
                 decode_responses=True,
-                max_connections=settings.REDIS_MAX_CONNECTIONS
+                max_connections=self.max_connections
             )
             # Test connection
             await self._redis.ping()
@@ -67,7 +70,7 @@ class CacheService:
             return False
         
         try:
-            ttl = ttl or settings.REDIS_CACHE_TTL
+            ttl = ttl or self.cache_ttl
             serialized = json.dumps(value)
             await self._redis.setex(key, ttl, serialized)
             logger.debug(f"Cache set: {key} (TTL: {ttl}s)")

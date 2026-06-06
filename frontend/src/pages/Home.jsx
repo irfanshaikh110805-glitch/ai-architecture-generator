@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { generateArchitecture } from '../services/api';
 import {
   Zap, Clock, Layers, GitMerge, Database, Globe, Code, BarChart,
-  ArrowRight, Sparkles, ChevronRight, Star, ChevronLeft
+  ArrowRight, Sparkles, ChevronRight, Star, ChevronLeft, TrendingUp, Rocket
 } from 'lucide-react';
 import TemplateSelector from '../components/TemplateSelector';
 import VersionHistory from '../components/VersionHistory';
@@ -12,13 +12,13 @@ import useAppStore from '../store/useAppStore';
 import toast from 'react-hot-toast';
 
 const FEATURES_LIST = [
-  { icon: Layers,   label: 'Architecture Design', color: 'from-blue-500 to-indigo-600' },
+  { icon: Layers,   label: 'Architecture Design', color: 'from-blue-500 to-blue-600' },
   { icon: Database, label: 'DB Schema',            color: 'from-emerald-500 to-teal-600' },
   { icon: Globe,    label: 'REST APIs',             color: 'from-orange-500 to-amber-600' },
   { icon: Code,     label: 'Code Generation',       color: 'from-brand-500 to-accent-500' },
   { icon: BarChart, label: 'Cost Estimation',       color: 'from-rose-500 to-pink-600' },
-  { icon: GitMerge, label: 'ER Diagrams',           color: 'from-violet-500 to-purple-600' },
-  { icon: Clock,    label: 'Roadmap',               color: 'from-cyan-500 to-sky-600' },
+  { icon: GitMerge, label: 'ER Diagrams',           color: 'from-cyan-500 to-sky-600' },
+  { icon: Clock,    label: 'Roadmap',               color: 'from-indigo-500 to-blue-600' },
   { icon: Zap,      label: 'Tech Recs',             color: 'from-amber-500 to-yellow-600' },
 ];
 
@@ -37,7 +37,10 @@ function Home() {
   const [showHistory, setShowHistory]     = useState(false);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [isFocused, setIsFocused]     = useState(false);
+  const [charCount, setCharCount]     = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const textareaRef                   = useRef(null);
+  const cardRef                       = useRef(null);
   const navigate                      = useNavigate();
   const { setCurrentResult, versions } = useAppStore();
 
@@ -54,6 +57,25 @@ function Home() {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  // Track mouse position for parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
+        const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
+        setMousePosition({ x, y });
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Update character count
+  useEffect(() => {
+    setCharCount(idea.length);
+  }, [idea]);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
@@ -96,29 +118,24 @@ function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-transparent">
 
-      {/* ── Decorative Orbs ── */}
+      {/* ── Decorative 3D Orbs & Grid ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="orb orb-brand"  style={{ width: 700, height: 700, top: '-200px', right: '-150px', opacity: 0.50 }} />
-        <div className="orb orb-accent" style={{ width: 600, height: 600, bottom: '-150px', left: '-100px', opacity: 0.40, animationDelay: '-5s' }} />
-        <div className="orb orb-sky"    style={{ width: 400, height: 400, top: '40%', left: '45%', opacity: 0.35, animationDelay: '-10s' }} />
-        <div className="orb orb-purple" style={{ width: 500, height: 500, top: '10%', left: '-10%', opacity: 0.30, animationDelay: '-15s' }} />
+        {/* Floating 3D Orbs */}
+        <div className="orb-3d orb-brand"  style={{ width: 700, height: 700, top: '-200px', right: '-150px' }} />
+        <div className="orb-3d orb-accent" style={{ width: 600, height: 600, bottom: '-150px', left: '-100px', animationDelay: '-5s' }} />
+        <div className="orb-3d orb-sky"    style={{ width: 400, height: 400, top: '40%', left: '45%', animationDelay: '-10s' }} />
+        <div className="orb-3d orb-emerald" style={{ width: 500, height: 500, top: '10%', left: '-10%', animationDelay: '-15s' }} />
 
-        {/* Animated Perspective Grid */}
-        <div className="absolute inset-0"
-             style={{
-               perspective: '1000px',
-               overflow: 'hidden'
-             }}>
-          <div className="absolute inset-x-0 bottom-[-20%] top-[10%]"
-               style={{
-                 backgroundImage: 'linear-gradient(rgba(37,99,235,0.05) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(37,99,235,0.05) 1.5px, transparent 1.5px)',
-                 backgroundSize: '60px 60px',
-                 transform: 'rotateX(75deg) translateY(0) translateZ(-200px)',
-                 transformOrigin: 'top center',
-                 animation: 'grid-scroll 3s linear infinite',
-                 maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 80%, transparent)',
-                 WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 80%, transparent)'
-               }} />
+        {/* 3D Perspective Grid */}
+        <div className="absolute inset-0 perspective-grid">
+          <div className="grid-3d" />
+        </div>
+
+        {/* Floating geometric shapes */}
+        <div className="floating-shapes">
+          <div className="shape-cube" style={{ top: '15%', left: '10%', animationDelay: '0s' }} />
+          <div className="shape-cube" style={{ top: '60%', right: '15%', animationDelay: '-3s' }} />
+          <div className="shape-sphere" style={{ top: '30%', right: '25%', animationDelay: '-6s' }} />
         </div>
       </div>
 
@@ -165,25 +182,25 @@ function Home() {
       <main className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-12">
         <div className="w-full max-w-2xl">
 
-          {/* Badge */}
+          {/* Badge with pulse animation */}
           <div className="flex justify-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-brand-200/60 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-brand-200/60 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 cursor-default">
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={11} className="text-amber-400 fill-amber-400" />
+                  <Star key={i} size={11} className="text-amber-400 fill-amber-400 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
                 ))}
               </div>
               <span className="text-sm font-semibold text-gray-700">AI-Powered Architecture Generator</span>
-              <span className="px-2 py-0.5 bg-brand-500 text-white text-xs font-bold rounded-full">v2.0</span>
+              <span className="px-2 py-0.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white text-xs font-bold rounded-full animate-pulse">v2.0</span>
             </div>
           </div>
 
-          {/* Headline */}
+          {/* Headline with gradient animation */}
           <div className="text-center mb-8" style={{ animationDelay: '0.1s' }}>
             <h1 className="font-display font-800 text-5xl md:text-6xl leading-[1.05] tracking-tight text-gray-900 mb-4">
               Build Better Software
               <br />
-              <span className="gradient-text">Faster with AI</span>
+              <span className="gradient-text-animated">Faster with AI</span>
             </h1>
             <p className="text-lg text-gray-500 leading-relaxed max-w-xl mx-auto font-medium">
               Describe your idea and get a complete, production-ready architecture —
@@ -191,62 +208,127 @@ function Home() {
             </p>
           </div>
 
-          {/* ── Main Card ── */}
+          {/* ── Main Card with 3D Effect & Parallax ── */}
           <div
-            className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-premium-lg border border-white/90 p-8"
+            ref={cardRef}
+            className="card-3d-enhanced bg-white/90 backdrop-blur-xl rounded-3xl shadow-3d border border-white/90 p-8 transform-gpu relative overflow-hidden"
             style={{
-              boxShadow: '0 8px 32px rgba(66,99,235,0.1), 0 2px 8px rgba(66,99,235,0.06), 0 0 0 1px rgba(66,99,235,0.06)',
               animationDelay: '0.2s',
+              transform: `perspective(1000px) rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)`,
+              transition: 'transform 0.1s ease-out',
             }}
           >
-            {/* Card header row */}
+            {/* Animated gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            
+            {/* Sparkle effects */}
+            <div className="sparkle-container">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="sparkle" style={{ 
+                  left: `${20 + i * 30}%`, 
+                  top: `${10 + i * 20}%`,
+                  animationDelay: `${i * 0.5}s` 
+                }} />
+              ))}
+            </div>
+            {/* Card header row with animated icons */}
             <div className="flex items-center justify-between mb-5">
-              <div>
-                <label htmlFor="idea" className="block text-sm font-semibold text-gray-700 mb-0.5">
-                  Describe Your Project Idea
-                </label>
-                <p className="text-xs text-gray-400">Be as detailed as possible for better results</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg animate-bounce-gentle">
+                  <Rocket size={20} className="text-white" />
+                </div>
+                <div>
+                  <label htmlFor="idea" className="block text-sm font-semibold text-gray-700 mb-0.5">
+                    Describe Your Project Idea
+                  </label>
+                  <p className="text-xs text-gray-400 flex items-center gap-1">
+                    <TrendingUp size={12} className="text-emerald-500" />
+                    Be as detailed as possible for better results
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setShowTemplates(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-sm font-semibold transition-all duration-200 border border-blue-200/60 hover:border-blue-300 hover:shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-600 hover:from-blue-100 hover:to-cyan-100 rounded-xl text-sm font-semibold transition-all duration-200 border border-blue-200/60 hover:border-blue-300 hover:shadow-md hover:scale-105"
               >
-                <Sparkles size={13} />
+                <Sparkles size={13} className="animate-pulse" />
                 Use Template
                 <ChevronRight size={13} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Textarea with gradient border on focus */}
-              <div className={`relative rounded-2xl transition-all duration-300 ${isFocused ? 'shadow-[0_0_0_3px_rgba(66,99,235,0.15)]' : ''}`}>
-                <textarea
-                  id="idea"
-                  ref={textareaRef}
-                  value={idea}
-                  onChange={(e) => setIdea(e.target.value)}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                  placeholder={PLACEHOLDER_IDEAS[placeholderIdx]}
-                  className="w-full h-44 px-5 py-4 rounded-2xl border-2 resize-none text-sm leading-relaxed bg-white text-gray-800 placeholder-gray-300 transition-all duration-300 focus:outline-none"
-                  style={{
-                    borderColor: isFocused ? '#6b8eff' : '#e8ecf5',
-                  }}
-                  disabled={loading}
-                />
-                {/* Character count */}
-                <div className="absolute bottom-3 right-4 flex items-center gap-2">
-                  <span className={`text-xs font-medium transition-colors ${idea.length >= 10 ? 'text-emerald-500' : 'text-gray-300'}`}>
-                    {idea.length} / min 10
-                  </span>
-                  {idea.length >= 10 && (
-                    <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                        <path d="M1.5 4L3.5 6L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              {/* Textarea with 3D depth effect and progress bar */}
+              <div className="relative">
+                <div className={`relative rounded-2xl transition-all duration-300 input-3d ${isFocused ? 'input-3d-focused' : ''}`}>
+                  <textarea
+                    id="idea"
+                    ref={textareaRef}
+                    value={idea}
+                    onChange={(e) => setIdea(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder={PLACEHOLDER_IDEAS[placeholderIdx]}
+                    className="w-full h-44 px-5 py-4 rounded-2xl border-2 resize-none text-sm leading-relaxed bg-white text-gray-800 placeholder-gray-300 transition-all duration-300 focus:outline-none"
+                    style={{
+                      borderColor: isFocused ? '#6b8eff' : '#e8ecf5',
+                    }}
+                    disabled={loading}
+                  />
+                  {/* Character count with progress indicator */}
+                  <div className="absolute bottom-3 right-4 flex items-center gap-3">
+                    {/* Progress circle */}
+                    <div className="relative w-12 h-12">
+                      <svg className="transform -rotate-90" width="48" height="48">
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          stroke="#e5e7eb"
+                          strokeWidth="3"
+                          fill="none"
+                        />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          stroke={charCount >= 10 ? '#10b981' : '#3b82f6'}
+                          strokeWidth="3"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 20}`}
+                          strokeDashoffset={`${2 * Math.PI * 20 * (1 - Math.min(charCount / 100, 1))}`}
+                          className="transition-all duration-300"
+                        />
                       </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`text-xs font-bold transition-colors ${charCount >= 10 ? 'text-emerald-500' : 'text-gray-400'}`}>
+                          {charCount}
+                        </span>
+                      </div>
                     </div>
-                  )}
+                    {charCount >= 10 && (
+                      <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-lg animate-scale-in">
+                        <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                            <path d="M1.5 4L3.5 6L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span className="text-xs font-semibold text-emerald-600">Ready!</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {/* Typing indicator */}
+                {isFocused && charCount > 0 && (
+                  <div className="absolute -bottom-6 left-0 flex items-center gap-2 text-xs text-gray-400 animate-fade-in">
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    </div>
+                    <span>AI is ready to analyze...</span>
+                  </div>
+                )}
               </div>
 
               {error && (
@@ -258,37 +340,55 @@ function Home() {
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Submit Button with 3D effect and loading animation */}
               <button
                 id="generate-btn"
                 type="submit"
                 disabled={loading || idea.trim().length < 10}
-                className="w-full relative flex items-center justify-center gap-3 py-4 px-6 rounded-2xl text-white font-semibold text-base transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
-                style={{
-                  background: 'linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)',
-                  boxShadow: idea.trim().length >= 10 && !loading
-                    ? '0 4px 6px rgba(37,99,235,0.25), 0 12px 28px rgba(37,99,235,0.3), 0 0 0 1px rgba(255,255,255,0.15) inset'
-                    : 'none',
-                }}
+                className="btn-3d-enhanced w-full relative flex items-center justify-center gap-3 py-4 px-6 rounded-2xl text-white font-semibold text-base transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
               >
+                {/* Animated background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-accent-500 to-brand-600 bg-[length:200%_100%] animate-gradient-x" />
+                
                 {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    <span>Analyzing & Generating Architecture...</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-                    <span>Generate Architecture</span>
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
-                  </>
-                )}
+                {/* Particle effects on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="particle"
+                      style={{
+                        left: `${20 * i}%`,
+                        animationDelay: `${i * 0.1}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <div className="relative z-10 flex items-center gap-3">
+                  {loading ? (
+                    <>
+                      <div className="relative w-5 h-5">
+                        <div className="absolute inset-0 border-2 border-white/30 rounded-full" />
+                        <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      </div>
+                      <span>Analyzing & Generating Architecture...</span>
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={18} className="group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
+                      <span>Generate Architecture</span>
+                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                    </>
+                  )}
+                </div>
               </button>
             </form>
 
@@ -302,9 +402,9 @@ function Home() {
                 {FEATURES_LIST.map(({ icon: FeatureIcon, label, color }) => (
                   <div
                     key={label}
-                    className="flex flex-col items-center gap-2 p-2.5 rounded-xl text-center group cursor-default transition-all duration-200 hover:bg-surface-50 hover:-translate-y-0.5 fade-in"
+                    className="feature-card-3d flex flex-col items-center gap-2 p-2.5 rounded-xl text-center group cursor-default transition-all duration-300 fade-in"
                   >
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
+                    <div className={`icon-3d w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300`}>
                       <FeatureIcon size={14} className="text-white" />
                     </div>
                     <span className="text-xs leading-tight text-gray-500 group-hover:text-gray-700 font-medium transition-colors">{label}</span>

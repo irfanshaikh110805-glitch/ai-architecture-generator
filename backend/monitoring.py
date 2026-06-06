@@ -81,11 +81,22 @@ async def check_database_health() -> Dict[str, Any]:
     """Check database connectivity"""
     try:
         from database import engine
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
         return {"status": "healthy", "message": "Database connection successful"}
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
+        return {"status": "unhealthy", "message": str(e)}
+
+async def check_redis_health() -> Dict[str, Any]:
+    """Check Redis connectivity"""
+    try:
+        from cache import get_redis_client
+        redis_client = await get_redis_client()
+        await redis_client.ping()
+        return {"status": "healthy", "message": "Redis connection successful"}
+    except Exception as e:
+        logger.error(f"Redis health check failed: {e}")
         return {"status": "unhealthy", "message": str(e)}
 
 async def check_ai_service_health() -> Dict[str, Any]:
@@ -103,10 +114,13 @@ async def check_ai_service_health() -> Dict[str, Any]:
 async def get_detailed_health() -> Dict[str, Any]:
     """Get detailed health status of all components"""
     db_health = await check_database_health()
+    redis_health = await check_redis_health()
     ai_health = await check_ai_service_health()
     
     overall_status = "healthy"
-    if db_health["status"] == "unhealthy" or ai_health["status"] == "unhealthy":
+    if (db_health["status"] == "unhealthy" or 
+        redis_health["status"] == "unhealthy" or 
+        ai_health["status"] == "unhealthy"):
         overall_status = "degraded"
     
     return {
@@ -114,6 +128,7 @@ async def get_detailed_health() -> Dict[str, Any]:
         "timestamp": time.time(),
         "components": {
             "database": db_health,
+            "redis": redis_health,
             "ai_service": ai_health
         }
     }

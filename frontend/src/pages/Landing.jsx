@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   Zap, Layers, Database, Globe, Code, BarChart, GitMerge, Clock,
-  ArrowRight, CheckCircle, Star, ChevronRight, Sparkles, Cpu, Rocket, Shield, Menu, X,
+  ArrowRight, CheckCircle, Star, ChevronRight, Sparkles, Cpu, Rocket, Menu, X,
 } from 'lucide-react';
 import Mascot from '../components/Mascot';
 
@@ -25,13 +25,6 @@ const STEPS = [
   { num: '03', icon: Rocket,   title: 'Export & Start Building',   desc: 'Download or copy your architecture specs and start building immediately — no guesswork needed.'    },
 ];
 
-const STATS = [
-  { value: '10,000+', label: 'Projects Generated' },
-  { value: '50+',     label: 'Tech Stacks Covered' },
-  { value: '99.9%',   label: 'Uptime Guaranteed'  },
-  { value: '< 10s',   label: 'Generation Time'    },
-];
-
 const TESTIMONIALS = [
   {
     quote: "ArchitechAI saved my team weeks of planning. We described our SaaS idea and had a complete architecture in under a minute. Absolutely mind-blowing.",
@@ -50,6 +43,7 @@ const TESTIMONIALS = [
 /* ─── NavBar ─────────────────────────────────────────────── */
 function NavBar({ onCTA }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav style={{
@@ -77,8 +71,51 @@ function NavBar({ onCTA }) {
           ))}
         </div>
 
-        {/* Right Side: Badge + CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        {/* Right Side: Login + Signup + CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Login Button */}
+          <button 
+            onClick={() => navigate('/login')} 
+            className="nav-login-desktop" 
+            style={{ 
+              background: 'transparent', 
+              color: '#64748b', 
+              border: 'none', 
+              borderRadius: '10px', 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.9rem', 
+              fontWeight: 600, 
+              cursor: 'pointer', 
+              transition: 'all 0.2s' 
+            }}
+            onMouseOver={e => { e.currentTarget.style.color = '#2563eb'; e.currentTarget.style.background = '#eff6ff'; }}
+            onMouseOut={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = 'transparent'; }}
+          >
+            Log In
+          </button>
+
+          {/* Signup Button */}
+          <button 
+            onClick={() => navigate('/signup')} 
+            className="nav-signup-desktop" 
+            style={{ 
+              background: 'white', 
+              color: '#2563eb', 
+              border: '2px solid #2563eb', 
+              borderRadius: '11px', 
+              padding: '0.5rem 1.2rem', 
+              fontSize: '0.9rem', 
+              fontWeight: 700, 
+              cursor: 'pointer', 
+              transition: 'all 0.2s',
+              boxShadow: '0 2px 8px rgba(37,99,235,0.15)'
+            }}
+            onMouseOver={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            Sign Up
+          </button>
+
           {/* Desktop CTA */}
           <button onClick={onCTA} className="nav-cta-desktop" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)', color: 'white', border: 'none', borderRadius: '11px', padding: '0.55rem 1.3rem', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 14px rgba(37,99,235,0.28)', transition: 'all 0.2s' }}
             onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(37,99,235,0.38)'; }}
@@ -112,7 +149,13 @@ function NavBar({ onCTA }) {
               onMouseOut={e => e.currentTarget.style.background = 'transparent'}
             >{l}</a>
           ))}
-          <button onClick={() => { setMenuOpen(false); onCTA(); }} style={{ marginTop: '0.5rem', background: 'linear-gradient(135deg,#2563eb,#06b6d4)', color: 'white', border: 'none', borderRadius: '12px', padding: '0.75rem 1.25rem', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
+          <button onClick={() => { setMenuOpen(false); navigate('/login'); }} style={{ marginTop: '0.5rem', background: 'white', color: '#2563eb', border: '2px solid #2563eb', borderRadius: '12px', padding: '0.75rem 1.25rem', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
+            Log In
+          </button>
+          <button onClick={() => { setMenuOpen(false); navigate('/signup'); }} style={{ background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: '12px', padding: '0.75rem 1.25rem', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
+            Sign Up
+          </button>
+          <button onClick={() => { setMenuOpen(false); onCTA(); }} style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)', color: 'white', border: 'none', borderRadius: '12px', padding: '0.75rem 1.25rem', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
             Start Free <ArrowRight size={16} />
           </button>
         </div>
@@ -172,14 +215,14 @@ export default function Landing() {
 
           {/* Headline */}
           <h1 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-            <span className="hero-headline" style={{ fontSize: 'clamp(2rem,7vw,4.8rem)', fontWeight: 900, color: 'white', textShadow: '0 8px 32px rgba(0,0,0,0.4)', letterSpacing: '-0.04em', lineHeight: 1.15 }}>
+            <span className="hero-headline" style={{ fontSize: 'clamp(2rem,7vw,4.8rem)', fontWeight: 900, color: 'white', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 8px 32px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)', letterSpacing: '-0.04em', lineHeight: 1.15 }}>
               Build Better Software,
             </span>
             <span className="hero-headline" style={{
               fontSize: 'clamp(2rem,7vw,4.8rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.15,
               background: 'linear-gradient(135deg,#60a5fa 0%,#22d3ee 100%)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              filter: 'drop-shadow(0 0 15px rgba(34,211,238,0.3))',
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.8)) drop-shadow(0 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 20px rgba(34,211,238,0.4))',
             }}>
               Faster with AI
             </span>
@@ -195,7 +238,7 @@ export default function Landing() {
               <Zap size={17} /> Start Generating Free <ArrowRight size={17} />
             </button>
             <a href="#how-it-works"
-              style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'white', fontSize: '0.95rem', fontWeight: 700, textDecoration: 'none', padding: '0.9rem 1.5rem', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: '14px', transition: 'all 0.2s', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', whiteSpace: 'nowrap' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'white', fontSize: '0.95rem', fontWeight: 700, textDecoration: 'none', padding: '0.9rem 1.5rem', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: '14px', transition: 'all 0.2s', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', whiteSpace: 'nowrap', textShadow: '0 2px 6px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9)' }}
               onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; e.currentTarget.style.background = 'rgba(255,255,255,0.22)'; }}
               onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
             >
@@ -204,26 +247,10 @@ export default function Landing() {
           </div>
 
           {/* Subtitle */}
-          <p style={{ fontSize: 'clamp(0.875rem,2.5vw,1.05rem)', color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, maxWidth: '520px', margin: '0 auto', fontWeight: 500, textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
-            Describe your idea and get a <strong style={{ color: 'white' }}>complete architecture</strong> —
+          <p style={{ fontSize: 'clamp(0.875rem,2.5vw,1.05rem)', color: 'rgba(255,255,255,0.95)', lineHeight: 1.6, maxWidth: '520px', margin: '0 auto', fontWeight: 500, textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 4px 16px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.9)' }}>
+            Describe your idea and get a <strong style={{ color: 'white', textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,1)' }}>complete architecture</strong> —
             DB schema, APIs, cost estimate, and roadmap.
           </p>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════
-          STATS BAR
-         ═══════════════════════════ */}
-      <section style={{ background: 'linear-gradient(135deg, #020818 0%, #0a1628 50%, #04101f 100%)', borderTop: '1px solid rgba(96,165,250,0.15)', borderBottom: '1px solid rgba(96,165,250,0.15)', padding: '2.5rem 1.25rem' }}>
-        <div className="stats-grid" style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem', textAlign: 'center' }}>
-          {STATS.map(s => (
-            <div key={s.label} style={{ padding: '0.75rem 0.25rem' }}>
-              <div style={{ fontSize: 'clamp(1.5rem,5vw,2.4rem)', fontWeight: 800, background: 'linear-gradient(135deg,#60a5fa,#22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em', marginBottom: '4px' }}>
-                {s.value}
-              </div>
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 500 }}>{s.label}</div>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -234,10 +261,10 @@ export default function Landing() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <span style={{ display: 'inline-block', background: 'rgba(37,99,235,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(96,165,250,0.5)', borderRadius: '99px', padding: '5px 18px', fontSize: '0.75rem', fontWeight: 800, color: '#bfdbfe', letterSpacing: '0.1em', marginBottom: '1.2rem', textTransform: 'uppercase' }}>Features</span>
-            <h2 style={{ fontSize: 'clamp(1.75rem,5vw,3rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 1rem', color: '#ffffff', lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+            <h2 style={{ fontSize: 'clamp(1.75rem,5vw,3rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 1rem', color: '#ffffff', lineHeight: 1.1, textShadow: '0 3px 10px rgba(0,0,0,0.8), 0 6px 20px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>
               Everything You Need to Ship
             </h2>
-            <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', maxWidth: '520px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7 }}>
+            <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', maxWidth: '520px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7, textShadow: '0 2px 6px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.8)' }}>
               From idea to a fully specced, production-ready architecture in seconds.
             </p>
           </div>
@@ -280,10 +307,10 @@ export default function Landing() {
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <span style={{ display: 'inline-block', background: 'rgba(6,182,212,0.35)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,211,238,0.4)', borderRadius: '99px', padding: '5px 18px', fontSize: '0.75rem', fontWeight: 800, color: '#67e8f9', letterSpacing: '0.1em', marginBottom: '1.2rem', textTransform: 'uppercase' }}>How It Works</span>
-            <h2 style={{ fontSize: 'clamp(1.75rem,5vw,3rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 1rem', color: '#ffffff', lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>
+            <h2 style={{ fontSize: 'clamp(1.75rem,5vw,3rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 1rem', color: '#ffffff', lineHeight: 1.1, textShadow: '0 3px 10px rgba(0,0,0,0.8), 0 6px 20px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>
               Three Steps to Production-Ready
             </h2>
-            <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', maxWidth: '460px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7 }}>
+            <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', maxWidth: '460px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7, textShadow: '0 2px 6px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.8)' }}>
               No complex setup. Describe, generate, and start building — that's it.
             </p>
           </div>
@@ -319,10 +346,10 @@ export default function Landing() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <span style={{ display: 'inline-block', background: 'rgba(109,40,217,0.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(196,181,253,0.4)', borderRadius: '99px', padding: '5px 18px', fontSize: '0.75rem', fontWeight: 800, color: '#d8b4fe', letterSpacing: '0.1em', marginBottom: '1.2rem', textTransform: 'uppercase' }}>Testimonials</span>
-            <h2 style={{ fontSize: 'clamp(1.75rem,5vw,3rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 0.75rem', color: '#ffffff', lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+            <h2 style={{ fontSize: 'clamp(1.75rem,5vw,3rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 0.75rem', color: '#ffffff', lineHeight: 1.1, textShadow: '0 3px 10px rgba(0,0,0,0.8), 0 6px 20px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>
               Loved by Developers
             </h2>
-            <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.05rem)', margin: 0, fontWeight: 500 }}>Join thousands who ship faster with AI-generated architecture.</p>
+            <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.05rem)', margin: 0, fontWeight: 500, textShadow: '0 2px 6px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.8)' }}>Join thousands who ship faster with AI-generated architecture.</p>
           </div>
 
           <div className="testimonials-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1.25rem' }}>
@@ -361,11 +388,11 @@ export default function Landing() {
           <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'linear-gradient(135deg,#2563eb,#06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem', boxShadow: '0 8px 24px rgba(37,99,235,0.5)' }}>
             <Rocket size={26} color="white" />
           </div>
-          <h2 style={{ fontSize: 'clamp(1.75rem,6vw,3.2rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 1.1rem', color: '#ffffff', lineHeight: 1.15, textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
+          <h2 style={{ fontSize: 'clamp(1.75rem,6vw,3.2rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 1.1rem', color: '#ffffff', lineHeight: 1.15, textShadow: '0 3px 12px rgba(0,0,0,0.8), 0 6px 24px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>
             Ready to Build Something{' '}
-            <span style={{ background: 'linear-gradient(135deg,#60a5fa,#22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Amazing?</span>
+            <span style={{ color: '#60a5fa', textShadow: '0 3px 12px rgba(0,0,0,0.8), 0 6px 24px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9), 0 0 30px rgba(96,165,250,0.3)' }}>Amazing?</span>
           </h2>
-          <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', margin: '0 0 2.25rem', lineHeight: 1.75, fontWeight: 500 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', margin: '0 0 2.25rem', lineHeight: 1.75, fontWeight: 500, textShadow: '0 2px 6px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.8)' }}>
             Join thousands of engineers who use ArchitechAI to ship faster, smarter, and with full confidence.
           </p>
 
@@ -392,13 +419,50 @@ export default function Landing() {
       {/* ═══════════════════════════
           FOOTER
          ═══════════════════════════ */}
-      <footer style={{ padding: '1.75rem 1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(5,10,20,0.95)', backdropFilter: 'blur(20px)', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-          <img src="/logo.jpg" alt="ArchitechAI" style={{ width: '28px', height: '28px', borderRadius: '7px', objectFit: 'contain', padding: '2px', background: 'rgba(255,255,255,0.1)' }} />
-          <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.9rem' }}>ArchitechAI</span>
+      <footer style={{ padding: '2.5rem 1.25rem 1.75rem', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(5,10,20,0.95)', backdropFilter: 'blur(20px)', color: '#64748b', fontSize: '0.875rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {/* Logo & Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '1.5rem' }}>
+            <img src="/logo.jpg" alt="ArchitechAI" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'contain', padding: '2px', background: 'rgba(255,255,255,0.1)' }} />
+            <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '1rem' }}>ArchitechAI</span>
+          </div>
+
+          {/* Developer Info */}
+          <div style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(96,165,250,0.15)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', maxWidth: '500px', margin: '0 auto 1.5rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#60a5fa', letterSpacing: '0.05em', marginBottom: '0.75rem', textTransform: 'uppercase', textAlign: 'center' }}>
+              Developed By
+            </div>
+            <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '0.5rem' }}>
+                Irfan Shekh
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+              <a href="mailto:irfanshaikh110805@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s' }}
+                onMouseOver={e => e.currentTarget.style.color = '#60a5fa'}
+                onMouseOut={e => e.currentTarget.style.color = '#94a3b8'}
+              >
+                <span style={{ fontSize: '1rem' }}>📧</span>
+                irfanshaikh110805@gmail.com
+              </a>
+              <a href="tel:+919964264412" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s' }}
+                onMouseOver={e => e.currentTarget.style.color = '#60a5fa'}
+                onMouseOut={e => e.currentTarget.style.color = '#94a3b8'}
+              >
+                <span style={{ fontSize: '1rem' }}>📱</span>
+                +91 99642 64412
+              </a>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+              © 2026 ArchitechAI · Built with ❤️ for developers
+            </p>
+          </div>
         </div>
-        <p style={{ margin: 0, color: '#64748b' }}>© 2026 ArchitechAI · Built with ❤️ for developers</p>
-      </footer>
+      </footer>hi
 
       {/* ─── Keyframes + Responsive CSS ────────────────────── */}
       <style>{`

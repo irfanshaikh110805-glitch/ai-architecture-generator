@@ -1,21 +1,55 @@
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
 from models import Base
 from alembic.config import Config
 from alembic import command
 import logging
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-DATABASE_URL = "sqlite:///./architecture_generator.db"
+# Get database URL from environment or use SQLite as fallback
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./architecture_generator.db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Convert postgresql:// to postgresql+asyncpg:// for async support
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-def init_db():
+# Create async engine with appropriate settings based on database type
+if "postgresql" in DATABASE_URL:
+    engine = create_async_engine(
+        DATABASE_URL,
+        pool_size=10,
+        max_overflow=20,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        echo=False
+    )
+else:
+    # SQLite async settings
+    engine = create_async_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=False
+    )
+
+# Create async session maker
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False
+)
+
+async def init_db():
     """Initialize database with tables"""
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 def run_migrations():
     """Run Alembic migrations automatically on startup"""
@@ -30,36 +64,33 @@ def run_migrations():
         
         alembic_cfg = Config(alembic_ini_path)
         
-        from sqlalchemy import inspect, text
-        inspector = inspect(engine)
-        tables = inspector.get_table_names()
+        # Override sqlalchemy.url with environment variable
+        # IMPORTANT: Use synchronous database URL for Alembic
+        if DATABASE_URL:
+            # Convert async URL to sync for Alembic
+            sync_url = DATABASE_URL.replace("+asyncpg", "").replace("+aiosqlite", "")
+            # For SQLite, use standard sqlite:/// instead of aiosqlite
+            if "sqlite" in sync_url:
+                sync_url = sync_url.replace("sqlite+aiosqlite", "sqlite")
+            alembic_cfg.set_main_option("sqlalchemy.url", sync_url)
         
-        # Check if we need to stamp (table exists but no alembic tracking or tracking is empty)
-        needs_stamp = False
-        if "generated_architectures" in tables:
-            if "alembic_version" not in tables:
-                needs_stamp = True
-            else:
-                with engine.connect() as conn:
-                    version = conn.execute(text("SELECT version_num FROM alembic_version")).fetchone()
-                    if not version:
-                        needs_stamp = True
-        
-        if needs_stamp:
-            logger.info("Existing database detected without Alembic tracking. Stamping to head...")
-            command.stamp(alembic_cfg, "head")
-        else:
-            command.upgrade(alembic_cfg, "head")
+        # Run migrations in a way that doesn't trigger async context
+        # This needs to be completely synchronous
+        command.upgrade(alembic_cfg, "head")
 
         logger.info("Database migrations applied successfully")
     except Exception as e:
         logger.error(f"Failed to run migrations: {e}")
+        # Don't raise in development to allow app to start
         if os.getenv("ENVIRONMENT") == "production":
             raise
+        else:
+            logger.warning("Continuing without migrations in development mode")
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db() -> AsyncSession:
+    """Async database session dependency"""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()

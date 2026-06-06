@@ -1,15 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FeaturesSection from '../components/FeaturesSection';
-import DatabaseSection from '../components/DatabaseSection';
-import APIsSection from '../components/APIsSection';
-import ArchitectureSection from '../components/ArchitectureSection';
-import DiagramSection from '../components/DiagramSection';
-import RoadmapSection from '../components/RoadmapSection';
+
+// Lazy load heavy components for better performance
+const FeaturesSection = lazy(() => import('../components/FeaturesSection'));
+const DatabaseSection = lazy(() => import('../components/DatabaseSection'));
+const APIsSection = lazy(() => import('../components/APIsSection'));
+const ArchitectureSection = lazy(() => import('../components/ArchitectureSection'));
+const DiagramSection = lazy(() => import('../components/DiagramSection'));
+const RoadmapSection = lazy(() => import('../components/RoadmapSection'));
+const CostEnhancement = lazy(() => import('../components/CostEnhancement'));
+const TechRecommendations = lazy(() => import('../components/TechRecommendations'));
+const CodeGenerator = lazy(() => import('../components/CodeGenerator'));
+
+// Import lightweight components normally
 import ExportMenu from '../components/ExportMenu';
-import CostEnhancement from '../components/CostEnhancement';
-import TechRecommendations from '../components/TechRecommendations';
-import CodeGenerator from '../components/CodeGenerator';
 import ShareModal from '../components/ShareModal';
 import VersionHistory from '../components/VersionHistory';
 import ComparisonView from '../components/ComparisonView';
@@ -33,6 +37,18 @@ const NAV_SECTIONS = [
   { id: 'tech',          label: 'Tech',       icon: Cpu },
   { id: 'code',          label: 'Code',       icon: Code2 },
 ];
+
+// Loading component for lazy-loaded sections
+const SectionLoader = () => (
+  <div className="bg-white rounded-2xl p-8 shadow-sm border border-surface-200 animate-pulse">
+    <div className="h-6 bg-surface-100 rounded w-1/4 mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-4 bg-surface-100 rounded w-full"></div>
+      <div className="h-4 bg-surface-100 rounded w-5/6"></div>
+      <div className="h-4 bg-surface-100 rounded w-4/6"></div>
+    </div>
+  </div>
+);
 
 function Result() {
   const [result, setResult]           = useState(null);
@@ -228,17 +244,35 @@ function Result() {
         </div>
       </div>
 
-      {/* ── Main Content ── */}
+      {/* ── Main Content with Lazy Loading ── */}
       <main className="max-w-7xl mx-auto px-4 py-5 space-y-5">
-        <div id="features">   <FeaturesSection features={result.features} /> </div>
-        <div id="database">   <DatabaseSection database={result.database} /> </div>
-        <div id="apis">       <APIsSection apis={result.apis} /> </div>
-        <div id="architecture"><ArchitectureSection architecture={result.architecture} /> </div>
-        <div id="diagrams">   <DiagramSection erDiagram={result.erDiagram} architectureDiagram={result.architectureDiagram} /> </div>
-        <div id="roadmap">    <RoadmapSection roadmap={result.roadmap} /> </div>
-        <div id="cost">       <CostEnhancement estimation={result.estimation} /> </div>
-        <div id="tech">       <TechRecommendations architecture={result.architecture} /> </div>
-        <div id="code">       <CodeGenerator result={result} /> </div>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="features">   <FeaturesSection features={result.features} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="database">   <DatabaseSection database={result.database} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="apis">       <APIsSection apis={result.apis} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="architecture"><ArchitectureSection architecture={result.architecture} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="diagrams">   <DiagramSection erDiagram={result.erDiagram} architectureDiagram={result.architectureDiagram} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="roadmap">    <RoadmapSection roadmap={result.roadmap} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="cost">       <CostEnhancement estimation={result.estimation} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="tech">       <TechRecommendations architecture={result.architecture} /> </div>
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <div id="code">       <CodeGenerator result={result} /> </div>
+        </Suspense>
       </main>
 
       {/* ── Modals ── */}

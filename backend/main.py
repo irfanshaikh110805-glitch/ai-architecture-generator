@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException, Request, Response, APIRouter
+from fastapi import FastAPI, HTTPException, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.ext.asyncio import AsyncSession
 from schemas import ProjectIdeaRequest, ArchitectureResponse
 from ai_service import generate_architecture
 from security import SecurityConfig
@@ -19,6 +20,7 @@ from sentry_config import init_sentry
 from env_validator import EnvironmentValidator
 from database import init_db, run_migrations
 from middleware import RequestValidationMiddleware, RequestLoggingMiddleware
+from models import User
 from dotenv import load_dotenv
 import logging
 import time
@@ -47,15 +49,7 @@ init_sentry()
 # Validate security configuration
 SecurityConfig.validate_secret_key()
 
-# Initialize database and run migrations
-try:
-    logger.info("Running database migrations...")
-    run_migrations()
-    logger.info("Database initialization complete")
-except Exception as e:
-    logger.error(f"Database initialization failed: {e}")
-    if os.getenv("ENVIRONMENT") == "production":
-        raise
+# Note: Database migrations will be run on startup event (see @app.on_event("startup") below)
 
 app = FastAPI(
     title="AI Architecture Generator API",
@@ -65,7 +59,18 @@ app = FastAPI(
     redoc_url="/redoc" if os.getenv("ENVIRONMENT", "development") == "development" else None,
 )
 
+# Startup event - run migrations in proper context
+@app.on_event("startup")
+async def startup_event():
+    """Run database migrations and initialization on startup"""
+    # Skip Alembic migrations for Supabase projects
+    # Run migrations manually in Supabase SQL Editor instead
+    logger.info("Skipping Alembic migrations (use Supabase SQL Editor)")
+    logger.info("To set up database: Run backend/supabase_migration.sql in Supabase SQL Editor")
+    logger.info("See SUPABASE_QUICK_START.md for instructions")
+
 # Create API v1 router
+from fastapi import APIRouter
 api_v1_router = APIRouter(prefix="/api/v1")
 
 # Add rate limiter to app state
@@ -84,8 +89,8 @@ logger.info(f"Configuring CORS with origins: {SecurityConfig.ALLOWED_ORIGINS}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=SecurityConfig.ALLOWED_ORIGINS,
-    allow_credentials=False,
-    allow_methods=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],
     expose_headers=["X-Process-Time", "X-Deprecated", "X-Deprecation-Message"],
     max_age=3600,
@@ -108,7 +113,18 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    # Improved CSP - allow necessary sources for modern web apps
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https: blob:; "
+        "font-src 'self' data:; "
+        "connect-src 'self' https:; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     
@@ -176,10 +192,111 @@ async def generate_system_architecture_v1(request: Request, response: Response, 
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate architecture. Please try again.")
 
+# Authentication endpoints
+from auth_service import AuthService, get_current_user
+from schemas import UserCreate, UserLogin, TokenResponse, UserResponse
+from database import get_db
+
+@api_v1_router.post("/auth/register", response_model=TokenResponse)
+@limiter.limit("10/hour")  # Stricter rate limit for auth
+async def register(
+    request: Request,
+    user_data: UserCreate,
+    session: AsyncSession = Depends(get_db)
+):
+    """Register a new user"""
+    try:
+        user = await AuthService.register_user(user_data, session)
+        
+        # Create access token
+        access_token = AuthService.create_access_token(
+            data={"sub": user.id, "email": user.email}
+        )
+        
+        return TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user=UserResponse(
+                id=user.id,
+                email=user.email,
+                full_name=user.full_name,
+                tier=user.tier,
+                is_active=user.is_active
+            )
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Registration error: {e}")
+        raise HTTPException(status_code=500, detail="Registration failed")
+
+@api_v1_router.post("/auth/login", response_model=TokenResponse)
+@limiter.limit("20/hour")  # Stricter rate limit for auth
+async def login(
+    request: Request,
+    credentials: UserLogin,
+    session: AsyncSession = Depends(get_db)
+):
+    """Login with email and password"""
+    try:
+        user = await AuthService.authenticate_user(credentials, session)
+        
+        # Create access token
+        access_token = AuthService.create_access_token(
+            data={"sub": user.id, "email": user.email}
+        )
+        
+        return TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user=UserResponse(
+                id=user.id,
+                email=user.email,
+                full_name=user.full_name,
+                tier=user.tier,
+                is_active=user.is_active
+            )
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+@api_v1_router.get("/auth/me", response_model=UserResponse)
+async def get_me(
+    current_user: User = Depends(get_current_user)
+):
+    """Get current user information"""
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        tier=current_user.tier,
+        is_active=current_user.is_active
+    )
+
+@api_v1_router.post("/auth/api-key")
+async def regenerate_api_key(
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db)
+):
+    """Regenerate API key for current user"""
+    try:
+        current_user.api_key = AuthService.generate_api_key()
+        await session.commit()
+        await session.refresh(current_user)
+        
+        return {"api_key": current_user.api_key}
+    except Exception as e:
+        logger.error(f"API key regeneration error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to regenerate API key")
+
 @api_v1_router.get("/health")
 @limiter.limit(f"{SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}seconds")
 async def health_check_v1(request: Request, response: Response):
     return {"status": "healthy", "model": "gemini-2.0-flash", "version": "v1"}
+
 
 # Include v1 router
 app.include_router(api_v1_router)

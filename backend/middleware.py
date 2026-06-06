@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 MAX_REQUEST_SIZE = 10 * 1024 * 1024  # 10 MB
-REQUEST_TIMEOUT = 60  # 60 seconds
+REQUEST_TIMEOUT = 90  # 90 seconds (increased from 60 to handle AI generation)
 
 
 class RequestValidationMiddleware(BaseHTTPMiddleware):

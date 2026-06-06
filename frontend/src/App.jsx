@@ -1,14 +1,18 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import ErrorBoundary from './components/ErrorBoundary'
 import PerformanceMonitor from './components/PerformanceMonitor'
+import ProtectedRoute from './components/ProtectedRoute'
+import useAuthStore from './store/useAuthStore'
 import './App.css'
 
 // Lazy load pages for code splitting
 const Landing = lazy(() => import('./pages/Landing'))
 const Home = lazy(() => import('./pages/Home'))
 const Result = lazy(() => import('./pages/Result'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
 
 // Loading component with better UX
 const PageLoader = () => (
@@ -37,6 +41,13 @@ const PageLoader = () => (
 )
 
 function App() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  // Initialize auth state on app load
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <ErrorBoundary>
       {/* Performance monitoring in production */}
@@ -66,9 +77,25 @@ function App() {
       />
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/"         element={<Landing />} />
-          <Route path="/generate" element={<Home />} />
-          <Route path="/result"   element={<Result />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route 
+            path="/generate" 
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/result" 
+            element={
+              <ProtectedRoute>
+                <Result />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Suspense>
     </ErrorBoundary>

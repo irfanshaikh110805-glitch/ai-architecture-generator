@@ -49,8 +49,8 @@ class TestE2EWorkflows:
         # Step 4: Check metrics were recorded
         metrics_response = client.get("/metrics")
         assert metrics_response.status_code == 200
-        metrics = metrics_response.json()
-        assert "architecture_generation_total" in metrics
+        metrics_text = metrics_response.text
+        assert "architecture_generation_total" in metrics_text
     
     def test_error_recovery_workflow(self):
         """Test error handling and recovery"""

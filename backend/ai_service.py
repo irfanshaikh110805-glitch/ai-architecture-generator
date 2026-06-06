@@ -126,8 +126,8 @@ OUTPUT FORMAT (return ONLY valid JSON, no markdown, no code fences):
       "database": "Technology + justification"
     }
   },
-  "erDiagram": "Valid Mermaid erDiagram syntax",
-  "architectureDiagram": "Valid Mermaid graph TD syntax showing actual system flow",
+  "erDiagram": "Valid Mermaid erDiagram syntax - see example below",
+  "architectureDiagram": "Valid Mermaid graph TD syntax - see example below",
   "roadmap": [{ "phase": "Phase name with timeline", "tasks": ["Specific task 1", "Specific task 2"] }],
   "estimation": {
     "hours": "Range based on complexity",
@@ -136,20 +136,63 @@ OUTPUT FORMAT (return ONLY valid JSON, no markdown, no code fences):
   }
 }
 
+MERMAID DIAGRAM EXAMPLES:
+
+erDiagram Example (CORRECT):
+erDiagram
+  USERS ||--o{ ORDERS : places
+  USERS ||--o{ REVIEWS : writes
+  ORDERS ||--|{ ORDER_ITEMS : contains
+  PRODUCTS ||--o{ ORDER_ITEMS : includes
+  PRODUCTS ||--o{ REVIEWS : receives
+  
+  USERS {
+    string user_id
+    string email
+    string name
+  }
+  ORDERS {
+    string order_id
+    string user_id
+    date order_date
+  }
+
+architectureDiagram Example (CORRECT):
+graph TD
+  A[Web App] --> B[API Gateway]
+  B --> C[Auth Service]
+  B --> D[User Service]
+  B --> E[Order Service]
+  C --> F[User DB]
+  D --> F
+  E --> G[Order DB]
+  E --> H[Message Queue]
+  H --> I[Email Service]
+  
+  style A fill:#f9f,stroke:#333
+  style B fill:#bbf,stroke:#333
+  style C fill:#bfb,stroke:#333
+
 STRICT REQUIREMENTS:
 - Output must be directly parsable with json.loads()
 - NO markdown, NO backtick code fences, NO explanatory text outside JSON
+- NO control characters (tabs, newlines within string values, etc.) - use spaces instead
+- NO trailing commas in arrays or objects
+- Ensure all strings are properly escaped
 - Include 10-15 domain-specific features (not generic CRUD)
 - Include 8-15 API endpoints that match the domain
 - Include 4-10 database tables with proper normalization
 - Architecture components must be specific to the project domain
 - Tech stack must include justification in the string
-- erDiagram must use valid Mermaid syntax
+- erDiagram must use valid Mermaid syntax (NO PK/FK/UK annotations - just field names)
+- erDiagram MUST NOT include attribute keys like PK, FK, UK in field definitions
 - architectureDiagram must show actual system components and data flow
+- architectureDiagram node labels MUST NOT contain parentheses - use underscores instead
 - Estimation must be realistic for the described complexity
 - If two different project ideas are given, architectures MUST be different
 - erDiagram relationship labels MUST NOT use single quotes — use plain unquoted words only (e.g., 'has' not \'has author\')
-- erDiagram MUST use this exact format: ENTITY1 ||--o{ ENTITY2 : has"""
+- erDiagram MUST use this exact format: ENTITY1 ||--o{ ENTITY2 : has
+- erDiagram example: PATIENTS ||--o{ APPOINTMENTS : schedules (NOT: patient_id PK)"""
 
 
 def _strip_markdown_fences(content: str) -> str:
@@ -164,15 +207,43 @@ def _strip_markdown_fences(content: str) -> str:
     return content.strip()
 
 
+def _sanitize_json_string(content: str) -> str:
+    """
+    Sanitize JSON string by removing invalid control characters.
+    Control characters (0x00-0x1F except tab, newline, carriage return) are invalid in JSON strings.
+    """
+    import re
+    
+    # Remove control characters except \t (0x09), \n (0x0A), \r (0x0D)
+    # This fixes "Invalid control character" errors
+    sanitized = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F]', '', content)
+    
+    # Fix common JSON issues:
+    # 1. Remove any trailing commas before closing braces/brackets
+    sanitized = re.sub(r',(\s*[}\]])', r'\1', sanitized)
+    
+    # 2. Ensure proper string escaping for quotes within strings
+    # This is complex and may need more sophisticated handling
+    
+    # 3. Remove any BOM (Byte Order Mark) characters
+    sanitized = sanitized.replace('\ufeff', '')
+    
+    return sanitized
+
+
 import re
 
 def _sanitize_mermaid(diagram: str) -> str:
     """
-    Fix common Mermaid 10.x erDiagram rendering failures:
-      1. Quoted relationship labels  ─ : 'has author'  →  : has_author
-      2. Slashes in labels           ─ : sends/receives →  : sends_receives
-      3. Multi-word unquoted labels  ─ : associated with → : associated_with
-      4. Invalid cardinality tokens  ─ }|--||{  →  }|--|{   ||--||{  →  ||--|{
+    Fix common Mermaid 10.x rendering failures:
+      1. Quoted relationship labels
+      2. Slashes in labels
+      3. Multi-word unquoted labels
+      4. Invalid cardinality tokens
+      5. Attribute keys (PK, FK, UK)
+      6. Parentheses in node labels
+      7. Invalid node ID formats
+      8. Subgraph syntax issues
     """
     if not diagram:
         return diagram
@@ -189,7 +260,7 @@ def _sanitize_mermaid(diagram: str) -> str:
     # double-quoted
     diagram = re.sub(r':\s*"([^"]*)"\s*$', _clean_label, diagram, flags=re.MULTILINE)
 
-    # ── 3: fix unquoted multi-word / slash labels e.g. : sends/receives  : associated with ──
+    # ── 3: fix unquoted multi-word / slash labels ──
     def _fix_unquoted_label(m: re.Match) -> str:
         label = m.group(1)
         label = label.replace("/", "_").replace("\\", "_")
@@ -204,12 +275,44 @@ def _sanitize_mermaid(diagram: str) -> str:
     )
 
     # ── 4: fix invalid Mermaid 10 cardinality tokens ─────────────────────────
-    # Valid right-side endings:  o|  ||  |{  o{
-    # Gemini commonly outputs wrong combos like ||--||{  }|--||{
-    diagram = re.sub(r"\|\|--\|\|\{", "||--|{", diagram)   # ||--||{  → ||--|{
-    diagram = re.sub(r"\}\|--\|\|\{", "}|--|{", diagram)   # }|--||{  → }|--|{
-    diagram = re.sub(r"\|\|--o\|\{",  "||--o{", diagram)   # ||--o|{  → ||--o{
-    diagram = re.sub(r"\}\|--o\|\{",  "}|--o{", diagram)   # }|--o|{  → }|--o{
+    diagram = re.sub(r"\|\|--\|\|\{", "||--|{", diagram)
+    diagram = re.sub(r"\}\|--\|\|\{", "}|--|{", diagram)
+    diagram = re.sub(r"\|\|--o\|\{",  "||--o{", diagram)
+    diagram = re.sub(r"\}\|--o\|\{",  "}|--o{", diagram)
+
+    # ── 5: Remove attribute keys (PK, FK, UK) from erDiagram ─────────────────
+    diagram = re.sub(r'\s+(PK|FK|UK|NN|AI|UNIQUE|NOT NULL|AUTO_INCREMENT)\s*', ' ', diagram, flags=re.IGNORECASE)
+    
+    # ── 6: Fix parentheses in node labels (graph diagrams) ───────────────────
+    def _fix_node_label(m: re.Match) -> str:
+        node_id = m.group(1)
+        label = m.group(2)
+        # Remove parentheses and their content
+        label = re.sub(r'\([^)]*\)', '', label)
+        label = label.strip()
+        if not label:  # If label becomes empty, use node_id
+            label = node_id
+        return f'{node_id}[{label}]'
+    
+    # Fix node labels with parentheses: A[Label (Text)] → A[Label Text]
+    diagram = re.sub(r'([A-Z][A-Z0-9]*)\[([^\]]*\([^\)]*\)[^\]]*)\]', _fix_node_label, diagram)
+    
+    # ── 7: Fix invalid node IDs (must start with letter) ─────────────────────
+    # Replace node IDs that start with numbers or special chars
+    def _fix_node_id(m: re.Match) -> str:
+        prefix = m.group(1) if m.group(1) else ''
+        node_id = m.group(2)
+        # If node_id starts with number, prefix with 'N'
+        if node_id and node_id[0].isdigit():
+            node_id = 'N' + node_id
+        return prefix + node_id
+    
+    # Fix node definitions: 1[Label] → N1[Label]
+    diagram = re.sub(r'(\s+|^)(\d+)(\[)', _fix_node_id, diagram, flags=re.MULTILINE)
+    
+    # ── 8: Fix subgraph syntax ───────────────────────────────────────────────
+    # Ensure subgraph has proper format: subgraph Title
+    diagram = re.sub(r'subgraph\s+([^\n]+)\s*\n', r'subgraph \1\n', diagram)
 
     return diagram.strip()
 
@@ -219,7 +322,7 @@ async def generate_architecture(idea: str) -> ArchitectureResponse:
     Generate architecture using Gemini API.
     Raises typed exceptions on failure. No mock fallbacks.
     """
-    max_retries = 2
+    max_retries = 3  # Increased from 2 to 3 for better reliability
     base_delay = 2  # seconds
 
     for attempt in range(max_retries + 1):
@@ -245,9 +348,28 @@ async def generate_architecture(idea: str) -> ArchitectureResponse:
             )
 
             content = _strip_markdown_fences(response.text)
+            # Sanitize JSON to remove invalid control characters
+            content = _sanitize_json_string(content)
             logger.info(f"Gemini response received successfully: {content[:100]}...")
 
-            data = json.loads(content)
+            try:
+                data = json.loads(content)
+            except json.JSONDecodeError as json_err:
+                logger.error(f"JSON parse error on attempt {attempt + 1}: {json_err}")
+                logger.error(f"Problematic content around error: {content[max(0, json_err.pos - 100):json_err.pos + 100]}")
+                
+                # Try to fix common JSON issues
+                if attempt < max_retries:
+                    # On JSON errors, retry with a fresh request
+                    logger.info(f"Retrying due to JSON parse error...")
+                    await asyncio.sleep(base_delay)
+                    continue
+                else:
+                    raise AIServiceError(
+                        "Failed to parse AI response after multiple attempts. "
+                        "The AI service may be experiencing issues. Please try again later."
+                    )
+            
             # Sanitize Mermaid diagrams to fix render issues in Mermaid 10.x
             if "erDiagram" in data:
                 data["erDiagram"] = _sanitize_mermaid(data["erDiagram"])
@@ -256,6 +378,7 @@ async def generate_architecture(idea: str) -> ArchitectureResponse:
             return ArchitectureResponse(**data)
 
         except json.JSONDecodeError as e:
+            # This should not be reached due to inner try-catch, but kept for safety
             logger.error(f"JSON parse error on attempt {attempt + 1}: {e}")
             if attempt == max_retries:
                 raise AIServiceError(

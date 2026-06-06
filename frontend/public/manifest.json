@@ -1,33 +1,75 @@
 {
-  "name": "AI Architecture Generator",
-  "short_name": "AI Architect",
-  "description": "Generate production-ready system architectures using AI",
+  "name": "ArchitechAI - AI Architecture Generator",
+  "short_name": "ArchitechAI",
+  "description": "Transform project ideas into complete system architectures with AI",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "theme_color": "#2563eb",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
       "src": "/logo.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "development", "utilities"],
+  "categories": ["productivity", "developer tools", "business"],
   "screenshots": [
     {
-      "src": "/Image_Animation_and_VFX_Generation.gif",
+      "src": "/screenshot-wide.png",
       "sizes": "1280x720",
-      "type": "image/gif",
+      "type": "image/png",
       "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Generate Architecture",
+      "short_name": "Generate",
+      "description": "Start generating a new architecture",
+      "url": "/generate",
+      "icons": [
+        {
+          "src": "/logo.jpg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "View History",
+      "short_name": "History",
+      "description": "View your architecture history",
+      "url": "/generate?history=true",
+      "icons": [
+        {
+          "src": "/logo.jpg",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/generate",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

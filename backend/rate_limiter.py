@@ -6,12 +6,16 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi import Request
 from security import SecurityConfig
+import os
 
-# Initialize rate limiter
+# Get Redis URL for distributed rate limiting
+REDIS_URL = os.getenv("REDIS_URL", "memory://")
+
+# Initialize rate limiter with Redis for production
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[f"{SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}seconds"],
-    storage_uri="memory://",
+    storage_uri=REDIS_URL,  # Use Redis instead of memory
     headers_enabled=True,
 )
 

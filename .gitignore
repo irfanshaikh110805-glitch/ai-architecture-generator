@@ -27,7 +27,9 @@ frontend/.env
 # Node
 node_modules/
 dist/
+build/
 .cache/
+coverage/
 
 # IDE
 .vscode/
@@ -51,11 +53,31 @@ coverage/
 .nyc_output/
 
 # Backups
-backups/*.db
-backups/*.db.gz
+backups/
+*.backup
+*.bak
+*.db.gz
+*.sql.gz
 
 # Docker
 *.pid
 *.seed
 *.pid.lock
 
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Build artifacts
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+
+# Agent-related
+.agents/
+skills-lock.json

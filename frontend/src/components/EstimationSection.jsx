@@ -30,9 +30,9 @@ function EstimationSection({ estimation }) {
           <p className="text-sm font-semibold text-green-800 mb-2">Team Size</p>
           <p className="text-2xl font-bold text-green-900">{estimation.team_size}</p>
         </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg text-center">
-          <p className="text-sm font-semibold text-purple-800 mb-2">Estimated Cost</p>
-          <p className="text-2xl font-bold text-purple-900">{estimation.cost}</p>
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-6 rounded-lg text-center">
+          <p className="text-sm font-semibold text-blue-800 mb-2">Estimated Cost</p>
+          <p className="text-2xl font-bold text-blue-900">{estimation.cost}</p>
         </div>
       </div>
     </div>

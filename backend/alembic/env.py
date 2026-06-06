@@ -4,12 +4,27 @@ from sqlalchemy import pool
 from alembic import context
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from models import Base
-from database import DATABASE_URL
+
+# Get database URL directly from environment (avoid importing from database.py)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./architecture_generator.db")
+
+# Convert async URLs to sync for Alembic
+if DATABASE_URL.startswith("postgresql://"):
+    # Keep as is for sync postgresql
+    pass
+elif "postgresql+asyncpg" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("+asyncpg", "")
+elif "sqlite+aiosqlite" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("sqlite+aiosqlite", "sqlite")
 
 # this is the Alembic Config object
 config = context.config

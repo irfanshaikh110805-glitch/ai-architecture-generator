@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { FileDown, FileText, Code2, Clipboard, Check, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { FileDown, FileText, Clipboard, Check, ChevronDown, FileJson, FileCode, Download, Loader2, Image, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -9,7 +9,22 @@ import mermaid from 'mermaid';
 function ExportMenu({ result, idea }) {
   const [open, setOpen] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [exportingPDF, setExportingPDF] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
   const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [open]);
 
   const buildMarkdown = () => {
     let md = `# System Architecture: ${idea}\n\n`;
@@ -79,10 +94,143 @@ function ExportMenu({ result, idea }) {
     setOpen(false);
   };
 
+  const buildYAML = () => {
+    let yaml = `# System Architecture\n`;
+    yaml += `title: "${idea}"\n`;
+    yaml += `generated: ${new Date().toISOString()}\n\n`;
+    yaml += `architecture:\n`;
+    yaml += `  type: ${result.architecture?.type}\n`;
+    yaml += `  components:\n`;
+    result.architecture?.components?.forEach(c => { yaml += `    - ${c}\n`; });
+    yaml += `  tech_stack:\n`;
+    yaml += `    frontend: ${result.architecture?.tech_stack?.frontend}\n`;
+    yaml += `    backend: ${result.architecture?.tech_stack?.backend}\n`;
+    yaml += `    database: ${result.architecture?.tech_stack?.database}\n\n`;
+    yaml += `features:\n`;
+    result.features?.forEach(f => {
+      yaml += `  - name: ${f.name}\n`;
+      yaml += `    priority: ${f.priority}\n`;
+    });
+    yaml += `\napis:\n`;
+    result.apis?.forEach(api => {
+      yaml += `  - method: ${api.method}\n`;
+      yaml += `    endpoint: ${api.endpoint}\n`;
+      yaml += `    description: ${api.description}\n`;
+    });
+    yaml += `\ndatabase:\n`;
+    result.database?.forEach(table => {
+      yaml += `  - table: ${table.table}\n`;
+      yaml += `    fields: [${table.fields.join(', ')}]\n`;
+      if (table.relationships?.length) {
+        yaml += `    relationships: [${table.relationships.join(', ')}]\n`;
+      }
+    });
+    return yaml;
+  };
+
+  const handleDownloadYAML = () => {
+    const blob = new Blob([buildYAML()], { type: 'text/yaml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'architecture.yaml'; a.click();
+    URL.revokeObjectURL(url);
+    toast.success('YAML exported!');
+    setOpen(false);
+  };
+
+  const handleDownloadDiagrams = async () => {
+    const loadingToast = toast.loading('Exporting diagrams as images...');
+    try {
+      const zip = await import('jszip').then(m => m.default);
+      const zipFile = new zip();
+
+      // Initialize mermaid with proper configuration
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        fontFamily: 'Arial, sans-serif'
+      });
+
+      // Render ER Diagram
+      if (result.erDiagram) {
+        try {
+          const erContainer = document.createElement('div');
+          erContainer.style.position = 'absolute';
+          erContainer.style.left = '-9999px';
+          erContainer.style.background = 'white';
+          erContainer.style.padding = '40px';
+          erContainer.style.width = '1200px';
+          erContainer.innerHTML = `<div class="mermaid">${result.erDiagram}</div>`;
+          document.body.appendChild(erContainer);
+          
+          await mermaid.run({ nodes: erContainer.querySelectorAll('.mermaid') });
+          const erCanvas = await html2canvas(erContainer, { backgroundColor: '#ffffff', scale: 2 });
+          const erImage = erCanvas.toDataURL('image/png');
+          zipFile.file('er-diagram.png', erImage.split(',')[1], { base64: true });
+          
+          document.body.removeChild(erContainer);
+        } catch (erError) {
+          console.error('ER Diagram rendering error:', erError);
+          // Continue with architecture diagram even if ER fails
+        }
+      }
+
+      // Render Architecture Diagram
+      if (result.architectureDiagram) {
+        try {
+          const archContainer = document.createElement('div');
+          archContainer.style.position = 'absolute';
+          archContainer.style.left = '-9999px';
+          archContainer.style.background = 'white';
+          archContainer.style.padding = '40px';
+          archContainer.style.width = '1200px';
+          archContainer.innerHTML = `<div class="mermaid">${result.architectureDiagram}</div>`;
+          document.body.appendChild(archContainer);
+          
+          await mermaid.run({ nodes: archContainer.querySelectorAll('.mermaid') });
+          const archCanvas = await html2canvas(archContainer, { backgroundColor: '#ffffff', scale: 2 });
+          const archImage = archCanvas.toDataURL('image/png');
+          zipFile.file('architecture-diagram.png', archImage.split(',')[1], { base64: true });
+          
+          document.body.removeChild(archContainer);
+        } catch (archError) {
+          console.error('Architecture Diagram rendering error:', archError);
+          // Continue even if architecture diagram fails
+        }
+      }
+
+      // Check if we have any diagrams to export
+      const files = Object.keys(zipFile.files);
+      if (files.length === 0) {
+        toast.error('No diagrams could be rendered', { id: loadingToast });
+        return;
+      }
+
+      // Generate ZIP
+      const content = await zipFile.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'architecture-diagrams.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${files.length} diagram(s)!`, { id: loadingToast });
+      setOpen(false);
+    } catch (error) {
+      console.error('Diagram export error:', error);
+      toast.error('Failed to export diagrams. Please try again.', { id: loadingToast });
+    }
+  };
+
   const handleDownloadPDF = async () => {
-    const loadingToast = toast.loading('Generating PDF with diagrams...');
+    setExportingPDF(true);
+    setExportProgress(0);
+    const loadingToast = toast.loading('Generating comprehensive PDF...');
     
     try {
+      setExportProgress(10);
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -109,6 +257,8 @@ function ExportMenu({ result, idea }) {
         doc.addPage();
       };
 
+      setExportProgress(20);
+
       // Cover Page
       doc.setFillColor(37, 99, 235);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
@@ -129,6 +279,8 @@ function ExportMenu({ result, idea }) {
       doc.setFontSize(10);
       doc.setTextColor(200, 200, 200);
       doc.text('Powered by AI Architecture Generator', pageWidth / 2, pageHeight - 40, { align: 'center' });
+
+      setExportProgress(30);
 
       // Table of Contents
       addNewPage();
@@ -157,6 +309,8 @@ function ExportMenu({ result, idea }) {
         doc.text(item, margin + 5, tocY);
         tocY += 8;
       });
+
+      setExportProgress(40);
 
       // 1. Features Section
       addNewPage();
@@ -236,6 +390,8 @@ function ExportMenu({ result, idea }) {
       const components = result.architecture?.components?.join(', ') || 'N/A';
       const componentLines = doc.splitTextToSize(components, contentWidth - 50);
       doc.text(componentLines, margin + 50, 60);
+
+      setExportProgress(60);
 
       // 4. Database Schema
       addNewPage();
@@ -348,6 +504,8 @@ function ExportMenu({ result, idea }) {
         });
       }
 
+      setExportProgress(80);
+
       // 7. Project Estimation
       addNewPage();
       doc.setFontSize(20);
@@ -383,11 +541,20 @@ function ExportMenu({ result, idea }) {
         doc.text('8. ER Diagram', margin, 30);
         
         try {
+          // Initialize mermaid with proper configuration
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: 'Arial, sans-serif'
+          });
+
           const erContainer = document.createElement('div');
           erContainer.style.position = 'absolute';
           erContainer.style.left = '-9999px';
           erContainer.style.background = 'white';
           erContainer.style.padding = '20px';
+          erContainer.style.width = '1200px';
           erContainer.innerHTML = `<div class="mermaid">${result.erDiagram}</div>`;
           document.body.appendChild(erContainer);
           
@@ -395,7 +562,9 @@ function ExportMenu({ result, idea }) {
           
           const canvas = await html2canvas(erContainer, { 
             backgroundColor: '#ffffff',
-            scale: 2 
+            scale: 2,
+            logging: false,
+            useCORS: true
           });
           const imgData = canvas.toDataURL('image/png');
           
@@ -409,7 +578,13 @@ function ExportMenu({ result, idea }) {
           console.error('Error rendering ER diagram:', error);
           doc.setFontSize(10);
           doc.setTextColor(128, 128, 128);
-          doc.text('ER Diagram could not be rendered', margin, 50);
+          doc.text('ER Diagram could not be rendered. Please check the diagram syntax.', margin, 50);
+          
+          // Add the raw mermaid code as fallback
+          doc.setFontSize(8);
+          doc.setFont('courier', 'normal');
+          const diagramLines = doc.splitTextToSize(result.erDiagram, contentWidth);
+          doc.text(diagramLines, margin, 60);
         }
       }
 
@@ -427,6 +602,7 @@ function ExportMenu({ result, idea }) {
           archContainer.style.left = '-9999px';
           archContainer.style.background = 'white';
           archContainer.style.padding = '20px';
+          archContainer.style.width = '1200px';
           archContainer.innerHTML = `<div class="mermaid">${result.architectureDiagram}</div>`;
           document.body.appendChild(archContainer);
           
@@ -434,7 +610,9 @@ function ExportMenu({ result, idea }) {
           
           const canvas = await html2canvas(archContainer, { 
             backgroundColor: '#ffffff',
-            scale: 2 
+            scale: 2,
+            logging: false,
+            useCORS: true
           });
           const imgData = canvas.toDataURL('image/png');
           
@@ -448,54 +626,209 @@ function ExportMenu({ result, idea }) {
           console.error('Error rendering architecture diagram:', error);
           doc.setFontSize(10);
           doc.setTextColor(128, 128, 128);
-          doc.text('Architecture Diagram could not be rendered', margin, 50);
+          doc.text('Architecture Diagram could not be rendered. Please check the diagram syntax.', margin, 50);
+          
+          // Add the raw mermaid code as fallback
+          doc.setFontSize(8);
+          doc.setFont('courier', 'normal');
+          const diagramLines = doc.splitTextToSize(result.architectureDiagram, contentWidth);
+          doc.text(diagramLines, margin, 60);
         }
       }
 
       // Add footer to last page
       addFooter();
 
+      setExportProgress(95);
+
       // Save PDF
       const fileName = `architecture_${idea.substring(0, 30).replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.pdf`;
       doc.save(fileName);
       
+      setExportProgress(100);
       toast.success('PDF exported successfully!', { id: loadingToast });
       setOpen(false);
     } catch (error) {
       console.error('PDF generation error:', error);
       toast.error('Failed to generate PDF. Please try again.', { id: loadingToast });
+    } finally {
+      setExportingPDF(false);
+      setExportProgress(0);
     }
   };
+
+  const exportOptions = [
+    {
+      id: 'pdf',
+      label: 'Export as PDF',
+      description: 'Complete document with diagrams',
+      icon: FileDown,
+      color: 'red',
+      bgHover: 'hover:bg-red-50',
+      textColor: 'text-red-600',
+      handler: handleDownloadPDF,
+      badge: 'Premium',
+    },
+    {
+      id: 'markdown',
+      label: 'Export as Markdown',
+      description: 'Developer-friendly format',
+      icon: FileText,
+      color: 'green',
+      bgHover: 'hover:bg-green-50',
+      textColor: 'text-green-600',
+      handler: handleDownloadMarkdown,
+    },
+    {
+      id: 'json',
+      label: 'Export as JSON',
+      description: 'Raw structured data',
+      icon: FileJson,
+      color: 'blue',
+      bgHover: 'hover:bg-blue-50',
+      textColor: 'text-blue-600',
+      handler: handleDownloadJSON,
+    },
+    {
+      id: 'yaml',
+      label: 'Export as YAML',
+      description: 'Configuration format',
+      icon: FileCode,
+      color: 'purple',
+      bgHover: 'hover:bg-purple-50',
+      textColor: 'text-purple-600',
+      handler: handleDownloadYAML,
+    },
+    {
+      id: 'diagrams',
+      label: 'Export Diagrams',
+      description: 'PNG images in ZIP',
+      icon: Image,
+      color: 'orange',
+      bgHover: 'hover:bg-orange-50',
+      textColor: 'text-orange-600',
+      handler: handleDownloadDiagrams,
+      badge: 'New',
+    },
+  ];
 
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-all shadow-md"
+        disabled={exportingPDF}
+        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl hover:from-blue-700 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed group"
       >
-        <FileDown size={16} />
-        Export
-        <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        {exportingPDF ? (
+          <>
+            <Loader2 size={16} className="animate-spin" />
+            <span className="text-sm font-semibold">Exporting... {exportProgress}%</span>
+          </>
+        ) : (
+          <>
+            <Download size={16} className="group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-semibold">Export</span>
+            <ChevronDown size={14} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+          </>
+        )}
       </button>
 
-      {open && (
+      {/* Progress Bar */}
+      {exportingPDF && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 p-3 z-30">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-gray-700">Generating PDF...</span>
+            <span className="text-xs font-bold text-blue-600">{exportProgress}%</span>
+          </div>
+          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 rounded-full"
+              style={{ width: `${exportProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {open && !exportingPDF && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-20 overflow-hidden">
-            <button onClick={handleDownloadPDF} className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-              <FileDown size={16} className="text-red-500" /> Export as PDF
-            </button>
-            <button onClick={handleDownloadMarkdown} className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/20 transition">
-              <FileText size={16} className="text-green-500" /> Export as Markdown
-            </button>
-            <button onClick={handleDownloadJSON} className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-              <Code2 size={16} className="text-blue-500" /> Export as JSON
-            </button>
-            <div className="border-t border-gray-100 dark:border-gray-700" />
-            <button onClick={handleCopyAll} className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition">
-              {copiedAll ? <Check size={16} className="text-purple-500" /> : <Clipboard size={16} className="text-purple-500" />}
-              Copy All (Markdown)
-            </button>
+          <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 overflow-hidden animate-scale-in">
+            {/* Header */}
+            <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <Package size={16} className="text-blue-600" />
+                <h3 className="text-sm font-bold text-gray-800">Export Options</h3>
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">Choose your preferred format</p>
+            </div>
+
+            {/* Export Options */}
+            <div className="p-2">
+              {exportOptions.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={option.handler}
+                    className={`flex items-start gap-3 w-full px-3 py-3 rounded-xl text-left transition-all duration-200 group ${option.bgHover} hover:shadow-sm`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl ${option.bgHover.replace('hover:', '')} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                      <Icon size={18} className={option.textColor} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-800 group-hover:text-gray-900">
+                          {option.label}
+                        </span>
+                        {option.badge && (
+                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                            option.badge === 'Premium' 
+                              ? 'bg-amber-100 text-amber-700' 
+                              : 'bg-emerald-100 text-emerald-700'
+                          }`}>
+                            {option.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">{option.description}</p>
+                    </div>
+                    <ChevronDown size={14} className="text-gray-400 -rotate-90 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-100 mx-2" />
+
+            {/* Quick Actions */}
+            <div className="p-2">
+              <button
+                onClick={handleCopyAll}
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-all duration-200 hover:bg-gray-50 group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  {copiedAll ? (
+                    <Check size={18} className="text-emerald-600" />
+                  ) : (
+                    <Clipboard size={18} className="text-gray-600" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <span className="text-sm font-bold text-gray-800 group-hover:text-gray-900">
+                    {copiedAll ? 'Copied to Clipboard!' : 'Copy All (Markdown)'}
+                  </span>
+                  <p className="text-xs text-gray-500 mt-0.5">Quick clipboard access</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+              <p className="text-[10px] text-gray-400 text-center font-medium">
+                💡 Tip: PDF includes diagrams and full formatting
+              </p>
+            </div>
           </div>
         </>
       )}

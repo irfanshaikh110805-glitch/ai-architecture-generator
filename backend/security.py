@@ -47,29 +47,14 @@ def sanitize_html(text: str) -> str:
     return bleach.clean(text, tags=[], strip=True)
 
 
-def sanitize_sql_input(text: str) -> str:
-    """Basic SQL injection prevention - remove dangerous SQL keywords"""
-    dangerous_patterns = [
-        r"(\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bEXEC\b|\bEXECUTE\b)",
-        r"(--|;|\/\*|\*\/)",
-        r"(\bUNION\b.*\bSELECT\b)",
-        r"(\bINSERT\b.*\bINTO\b)",
-        r"(\bUPDATE\b.*\bSET\b)"
-    ]
-    
-    cleaned = text
-    for pattern in dangerous_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-    
-    return cleaned.strip()
-
-
 def sanitize_input(text: str, allow_html: bool = False) -> str:
     """
     Comprehensive input sanitization
     - Remove XSS vectors
-    - Remove SQL injection attempts
     - Trim whitespace
+    
+    Note: SQL injection protection is handled by SQLAlchemy's parameterized queries.
+    Do not use raw SQL queries without proper parameterization.
     """
     if not text:
         return ""
@@ -77,9 +62,6 @@ def sanitize_input(text: str, allow_html: bool = False) -> str:
     # Remove HTML if not allowed
     if not allow_html:
         text = sanitize_html(text)
-    
-    # Remove SQL injection patterns
-    text = sanitize_sql_input(text)
     
     # Remove null bytes
     text = text.replace("\x00", "")

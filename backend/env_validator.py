@@ -41,7 +41,9 @@ class EnvironmentValidator:
             
             if not value:
                 errors.append(f"❌ {var_name} is not set ({description})")
-            elif value in ["your_gemini_api_key_here", "your-secret-key-here-min-32-chars"]:
+            elif var_name == "GEMINI_API_KEY" and value in ["your_gemini_api_key_here", "your_api_key_here"]:
+                errors.append(f"❌ {var_name} is using default/placeholder value")
+            elif var_name == "SECRET_KEY" and value in ["your-secret-key-here-min-32-chars", "your-secret-key-here-min-32-chars-CHANGE-IN-PRODUCTION"]:
                 errors.append(f"❌ {var_name} is using default/placeholder value")
             elif var_name == "SECRET_KEY" and len(value) < 32:
                 errors.append(f"❌ {var_name} must be at least 32 characters long")

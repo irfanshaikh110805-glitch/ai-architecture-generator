@@ -6,6 +6,21 @@
     <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="/logo.jpg" />
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/logo.jpg" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/logo.jpg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.jpg" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/logo.jpg" />
+    
+    <!-- Apple Mobile Web App -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ArchitechAI" />
+    
     <!-- Viewport for responsive design -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
@@ -19,6 +34,7 @@
     <!-- Theme Color for Mobile Browsers -->
     <meta name="theme-color" content="#2563eb" />
     <meta name="msapplication-TileColor" content="#2563eb" />
+    <meta name="msapplication-TileImage" content="/logo.jpg" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -110,17 +126,5 @@
     
     <!-- Main application script -->
     <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- Service Worker for PWA (optional) -->
-    <script type="module">
-      // Register service worker for offline support (production only)
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {
-            // Service worker registration failed, continue without it
-          });
-        });
-      }
-    </script>
   </body>
 </html>

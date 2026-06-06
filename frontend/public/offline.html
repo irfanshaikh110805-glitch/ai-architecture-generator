@@ -3,62 +3,203 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline - AI Architecture Generator</title>
+  <title>Offline - ArchitechAI</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
       padding: 20px;
+      color: white;
     }
-    .container {
+
+    .offline-container {
       text-align: center;
       max-width: 500px;
+      animation: fadeIn 0.5s ease-in;
     }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .offline-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .offline-icon svg {
+      width: 60px;
+      height: 60px;
+      stroke: white;
+      stroke-width: 2;
+      fill: none;
+    }
+
     h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
+
     p {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
       opacity: 0.9;
     }
-    .icon {
-      font-size: 5rem;
-      margin-bottom: 2rem;
-    }
-    button {
+
+    .retry-button {
+      display: inline-block;
+      padding: 15px 40px;
       background: white;
       color: #667eea;
-      border: none;
-      padding: 12px 32px;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
+      text-decoration: none;
+      border-radius: 12px;
       font-weight: 600;
-      transition: transform 0.2s;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      border: none;
     }
-    button:hover {
-      transform: scale(1.05);
+
+    .retry-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .retry-button:active {
+      transform: translateY(0);
+    }
+
+    .tips {
+      margin-top: 40px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .tips h3 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .tips ul {
+      list-style: none;
+      text-align: left;
+    }
+
+    .tips li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .tips li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      .offline-icon {
+        width: 100px;
+        height: 100px;
+      }
+
+      .offline-icon svg {
+        width: 50px;
+        height: 50px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="icon">📡</div>
+  <div class="offline-container">
+    <div class="offline-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9z"/>
+        <path d="M9 17l3 3 3-3c-1.65-1.66-4.34-1.66-6 0z"/>
+        <path d="M5 13l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+        <line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/>
+      </svg>
+    </div>
+
     <h1>You're Offline</h1>
-    <p>It looks like you've lost your internet connection. Please check your network and try again.</p>
-    <button onclick="window.location.reload()">Try Again</button>
+    <p>
+      It looks like you've lost your internet connection. 
+      Don't worry, we'll get you back online in no time!
+    </p>
+
+    <button class="retry-button" onclick="window.location.reload()">
+      Try Again
+    </button>
+
+    <div class="tips">
+      <h3>Quick Tips</h3>
+      <ul>
+        <li>Check your WiFi or mobile data connection</li>
+        <li>Make sure airplane mode is turned off</li>
+        <li>Try moving to an area with better signal</li>
+        <li>Restart your router if you're on WiFi</li>
+      </ul>
+    </div>
   </div>
+
+  <script>
+    // Auto-retry when connection is restored
+    window.addEventListener('online', () => {
+      console.log('Connection restored, reloading...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    });
+
+    // Show connection status
+    if (navigator.onLine) {
+      console.log('Actually online, redirecting...');
+      window.location.href = '/';
+    }
+  </script>
 </body>
 </html>

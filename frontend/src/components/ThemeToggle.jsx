@@ -2,10 +2,10 @@ import { Palette } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
 
 const THEMES = [
-  { id: 'purple',  label: 'Ocean Blue', from: '#2563eb', to: '#06b6d4' },
-  { id: 'blue',    label: 'Sky',        from: '#0ea5e9', to: '#38bdf8' },
+  { id: 'blue',    label: 'Ocean Blue', from: '#2563eb', to: '#06b6d4' },
+  { id: 'sky',     label: 'Sky',        from: '#0ea5e9', to: '#38bdf8' },
   { id: 'emerald', label: 'Forest',     from: '#10b981', to: '#0ea5e9' },
-  { id: 'rose',    label: 'Sunset',     from: '#f43f5e', to: '#f97316' },
+  { id: 'amber',   label: 'Sunset',     from: '#f59e0b', to: '#f97316' },
 ];
 
 function ThemeToggle() {

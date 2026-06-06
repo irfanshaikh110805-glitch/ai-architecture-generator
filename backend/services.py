@@ -21,12 +21,10 @@ class ArchitectureService:
     def __init__(
         self,
         session: AsyncSession,
-        cache: CacheService,
-        ai_service: AIService
+        cache: CacheService
     ):
         self.session = session
         self.cache = cache
-        self.ai_service = ai_service
         self.repository = ArchitectureRepository(session)
     
     def _get_cache_key(self, idea: str, user_id: int) -> str:
@@ -70,9 +68,9 @@ class ArchitectureService:
                 await self.cache.set(cache_key, response.model_dump())
                 return response
         
-        # Generate new architecture
+        # Generate new architecture using AI service
         logger.info(f"Generating new architecture for user {user_id}")
-        result = await self.ai_service.generate_architecture(idea)
+        result = await generate_architecture(idea)
         
         # Save to database
         architecture_data = result.model_dump()
