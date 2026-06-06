@@ -1,4 +1,28 @@
 services:
+  # Backend Web Service
+  - type: web
+    name: ai-architecture-generator
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: GEMINI_API_KEY
+        sync: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: true
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: ALLOWED_HOSTS
+        value: "*"
+
   # Frontend Static Site
   - type: static
     name: ai-architecture-generator-frontend
@@ -14,7 +38,3 @@ services:
         value: https://ai-architecture-generator.onrender.com
       - key: VITE_ENVIRONMENT
         value: production
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false
