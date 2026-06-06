@@ -144,6 +144,7 @@ const NotificationCenter = () => {
       {/* Notification Bell */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle notifications panel"
         className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
       >
         <Bell className="w-6 h-6" />
@@ -184,6 +185,7 @@ const NotificationCenter = () => {
                   )}
                   <button
                     onClick={() => setIsOpen(false)}
+                    aria-label="Close notifications panel"
                     className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
                   >
                     <X className="w-5 h-5" />

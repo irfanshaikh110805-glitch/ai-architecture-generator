@@ -129,6 +129,7 @@ function NavBar({ onCTA }) {
         <button
           className="nav-hamburger"
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
           style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '8px', color: '#334155' }}
         >
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -168,11 +169,19 @@ function NavBar({ onCTA }) {
 export default function Landing() {
   const navigate = useNavigate();
   const goGenerate = () => navigate('/generate');
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     document.body.classList.add('bg-premium-animated');
-    return () => { document.body.classList.remove('bg-premium-animated'); };
+    
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      document.body.classList.remove('bg-premium-animated');
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const cardHover = (e, on) => {
@@ -198,14 +207,16 @@ export default function Landing() {
       {/* ═══════════════════════════
           HERO
          ═══════════════════════════ */}
-      <section id="hero" style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        {/* GIF Background */}
-        <img
-          src="/Image_Animation_and_VFX_Generation.gif"
-          alt=""
-          aria-hidden="true"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
-        />
+      <section id="hero" style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%)' }}>
+        {/* GIF Background (Desktop Only) */}
+        {isDesktop && (
+          <img
+            src="/Image_Animation_and_VFX_Generation.gif"
+            alt=""
+            aria-hidden="true"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+          />
+        )}
 
         {/* Bottom fade */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '180px', zIndex: 2, background: 'linear-gradient(to bottom, transparent, rgba(15,23,42,0.55))' }} />
@@ -462,7 +473,7 @@ export default function Landing() {
             </p>
           </div>
         </div>
-      </footer>hi
+      </footer>
 
       {/* ─── Keyframes + Responsive CSS ────────────────────── */}
       <style>{`

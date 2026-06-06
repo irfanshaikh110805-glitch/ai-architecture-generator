@@ -20,6 +20,7 @@ function ThemeToggle() {
             key={t.id}
             onClick={() => setColorTheme(t.id)}
             title={t.label}
+            aria-label={`Switch theme to ${t.label}`}
             className={`w-5 h-5 rounded-full transition-all duration-200 ${
               colorTheme === t.id
                 ? 'ring-2 ring-offset-1 ring-blue-400 scale-110 shadow-md'

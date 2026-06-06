@@ -61,6 +61,7 @@ function AIAssistant({ idea, onUpdate }) {
     return (
       <button
         onClick={() => setOpen(true)}
+        aria-label="Open AI assistant"
         className="fixed bottom-6 right-6 z-50 group flex items-center gap-2.5 px-5 py-3.5 text-white rounded-2xl font-semibold text-sm shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-brand-500/30"
         style={{
           background: 'linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)',
@@ -109,12 +110,14 @@ function AIAssistant({ idea, onUpdate }) {
         <div className="flex items-center gap-1">
           <button
             onClick={e => { e.stopPropagation(); setMin(m => !m); }}
+            aria-label={minimized ? "Expand AI assistant" : "Minimize AI assistant"}
             className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
           >
             <ChevronDown size={16} className={`transition-transform duration-300 ${minimized ? 'rotate-180' : ''}`} />
           </button>
           <button
             onClick={e => { e.stopPropagation(); setOpen(false); }}
+            aria-label="Close AI assistant"
             className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
           >
             <X size={16} />
@@ -202,6 +205,7 @@ function AIAssistant({ idea, onUpdate }) {
               <button
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim()}
+                aria-label="Send message"
                 className="flex-shrink-0 px-3 py-2 rounded-xl text-white disabled:opacity-50 transition-all hover:scale-105 active:scale-95"
                 style={{ background: 'linear-gradient(135deg, #2563eb, #06b6d4)' }}
               >

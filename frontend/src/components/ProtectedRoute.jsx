@@ -18,13 +18,13 @@ const ProtectedRoute = ({ children }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #e0f2fe 100%)'
+        background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)'
       }}>
         <div style={{
           width: '60px',
           height: '60px',
-          border: '4px solid rgba(255,255,255,0.3)',
-          borderTop: '4px solid white',
+          border: '4px solid rgba(37, 99, 235, 0.1)',
+          borderTop: '4px solid #2563eb',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
