@@ -140,7 +140,6 @@ async def root(request: Request, response: Response):
     return {"message": "AI Architecture Generator API", "status": "running", "version": "2.0.0"}
 
 @app.get("/health")
-@limiter.limit(f"{SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}seconds")
 async def health_check(request: Request, response: Response):
     return {"status": "healthy", "model": "gemini-2.0-flash"}
 
@@ -294,7 +293,6 @@ async def regenerate_api_key(
         raise HTTPException(status_code=500, detail="Failed to regenerate API key")
 
 @api_v1_router.get("/health")
-@limiter.limit(f"{SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}seconds")
 async def health_check_v1(request: Request, response: Response):
     return {"status": "healthy", "model": "gemini-2.0-flash", "version": "v1"}
 
