@@ -3,7 +3,7 @@ services:
   - type: static
     name: ai-architecture-generator-frontend
     rootDir: frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --legacy-peer-deps && npm run build
     publishPath: ./dist
     routes:
       - type: rewrite
