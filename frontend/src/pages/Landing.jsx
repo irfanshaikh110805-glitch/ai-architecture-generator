@@ -208,18 +208,16 @@ export default function Landing() {
           HERO
          ═══════════════════════════ */}
       <section id="hero" style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%)' }}>
-        {/* GIF Background (Desktop Only) */}
-        {isDesktop && (
-          <img
-            src="/Image_Animation_and_VFX_Generation.gif"
-            alt=""
-            aria-hidden="true"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
-          />
-        )}
+        {/* GIF Background (All Devices - responsive) */}
+        <img
+          src="/Image_Animation_and_VFX_Generation.gif"
+          alt=""
+          aria-hidden="true"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0, opacity: isDesktop ? 1 : 0.7 }}
+        />
 
         {/* Bottom fade */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '180px', zIndex: 2, background: 'linear-gradient(to bottom, transparent, rgba(15,23,42,0.55))' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '180px', zIndex: 2, background: 'linear-gradient(to bottom, transparent, rgba(15,23,42,0.65))' }} />
 
         {/* Content */}
         <div className="hero-content" style={{ position: 'relative', zIndex: 3, textAlign: 'center', maxWidth: '820px', padding: '8rem 1.25rem 5rem', animation: 'fadeInUp 0.8s ease both' }}>
@@ -439,7 +437,7 @@ export default function Landing() {
           </div>
 
           {/* Developer Info */}
-          <div style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(96,165,250,0.15)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', maxWidth: '500px', margin: '0 auto 1.5rem' }}>
+          <div className="footer-dev-info" style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(96,165,250,0.15)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', maxWidth: '500px', margin: '0 auto 1.5rem' }}>
             <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#60a5fa', letterSpacing: '0.05em', marginBottom: '0.75rem', textTransform: 'uppercase', textAlign: 'center' }}>
               Developed By
             </div>
@@ -448,13 +446,13 @@ export default function Landing() {
                 Irfan Shekh
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
-              <a href="mailto:irfanshaikh110805@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s' }}
+            <div className="footer-contact" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+              <a href="mailto:irfanshaikh110805@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s', wordBreak: 'break-all' }}
                 onMouseOver={e => e.currentTarget.style.color = '#60a5fa'}
                 onMouseOut={e => e.currentTarget.style.color = '#94a3b8'}
               >
-                <span style={{ fontSize: '1rem' }}>📧</span>
-                irfanshaikh110805@gmail.com
+                <span style={{ fontSize: '1rem', flexShrink: 0 }}>📧</span>
+                <span style={{ textAlign: 'center' }}>irfanshaikh110805@gmail.com</span>
               </a>
               <a href="tel:+919964264412" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s' }}
                 onMouseOver={e => e.currentTarget.style.color = '#60a5fa'}
@@ -486,27 +484,101 @@ export default function Landing() {
         @media (max-width: 768px) {
           .nav-links-desktop { display: none !important; }
           .nav-cta-desktop   { display: none !important; }
+          .nav-login-desktop { display: none !important; }
+          .nav-signup-desktop { display: none !important; }
           .nav-badge-desktop { display: none !important; }
           .nav-hamburger     { display: flex !important; }
 
           .stats-grid        { grid-template-columns: repeat(2, 1fr) !important; }
-          .features-grid     { grid-template-columns: 1fr 1fr !important; }
-          .steps-grid        { grid-template-columns: 1fr !important; max-width: 400px; margin: 0 auto; }
-          .testimonials-grid { grid-template-columns: 1fr !important; }
-          .hero-content      { padding-top: 6rem !important; }
+          .features-grid     { grid-template-columns: 1fr !important; gap: 1rem !important; }
+          .steps-grid        { grid-template-columns: 1fr !important; max-width: 480px; margin: 0 auto; gap: 1rem !important; }
+          .testimonials-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+          .hero-content      { padding: 6rem 1.5rem 4rem !important; }
+          
+          /* Mobile video visibility - reduce opacity slightly */
+          #hero img[aria-hidden="true"] { opacity: 0.7 !important; }
+          
+          /* Ensure section spacing */
+          #features, #how-it-works, #testimonials, #cta {
+            padding: 3.5rem 1.5rem !important;
+          }
+          
+          /* Hero buttons full width on tablet */
+          .hero-ctas { flex-direction: column !important; width: 100%; }
+          .hero-ctas a,
+          .hero-ctas button { width: 100%; max-width: 400px; }
+          
+          #hero-cta, #bottom-cta { 
+            width: 100%; 
+            max-width: 400px;
+            justify-content: center !important; 
+            font-size: 0.95rem !important;
+            padding: 0.85rem 1.5rem !important;
+            white-space: normal !important;
+            text-align: center !important;
+          }
         }
 
         /* ── Mobile (≤ 480px) ── */
         @media (max-width: 480px) {
-          .features-grid     { grid-template-columns: 1fr !important; }
-          .stats-grid        { grid-template-columns: repeat(2, 1fr) !important; }
-          .hero-ctas         { flex-direction: column !important; width: 100%; }
+          .features-grid     { grid-template-columns: 1fr !important; gap: 1rem !important; }
+          .stats-grid        { grid-template-columns: 1fr !important; }
+          .steps-grid        { grid-template-columns: 1fr !important; gap: 1rem !important; }
+          .testimonials-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+          
+          .hero-ctas         { flex-direction: column !important; width: 100%; gap: 0.75rem !important; }
           .hero-ctas a,
-          .hero-ctas button  { width: 100%; justify-content: center !important; }
-          .hero-content      { padding-left: 1rem !important; padding-right: 1rem !important; }
-          .hero-badge        { padding: 7px 14px !important; }
-          #bottom-cta        { width: 100%; justify-content: center !important; }
-          .cta-checks        { gap: 0.75rem !important; }
+          .hero-ctas button  { width: 100%; max-width: 100%; justify-content: center !important; }
+          
+          .hero-content      { 
+            padding: 5rem 1.25rem 3rem !important; 
+          }
+          
+          .hero-headline     { 
+            font-size: 2rem !important; 
+            line-height: 1.15 !important;
+          }
+          
+          .hero-badge        { padding: 7px 14px !important; font-size: 0.7rem !important; }
+          
+          #hero-cta, #bottom-cta { 
+            width: 100%; 
+            max-width: 100%;
+            justify-content: center !important; 
+            font-size: 0.9rem !important;
+            padding: 0.8rem 1.25rem !important;
+            white-space: normal !important;
+            text-align: center !important;
+          }
+          
+          .cta-checks { 
+            flex-direction: column !important;
+            gap: 0.5rem !important; 
+            align-items: center !important;
+          }
+          
+          /* Sections padding */
+          #features, #how-it-works, #testimonials, #cta {
+            padding: 3rem 1.25rem !important;
+          }
+          
+          /* Reduce orb sizes */
+          .orb { opacity: 0.25 !important; }
+          
+          /* Footer mobile */
+          footer { padding: 2rem 1.25rem 1.5rem !important; }
+          
+          .footer-dev-info { 
+            padding: 1rem !important; 
+            margin: 0 0.5rem 1rem !important;
+            max-width: 100% !important;
+          }
+          
+          .footer-contact a {
+            font-size: 0.8rem !important;
+            flex-wrap: wrap;
+            justify-content: center;
+          }
         }
       `}</style>
 

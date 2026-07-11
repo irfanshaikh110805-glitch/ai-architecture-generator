@@ -1006,6 +1006,64 @@ pre code { font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.7
 
   /* Home: feature chips — 4 cols on tablet */
   .grid-cols-4.md\:grid-cols-8 { grid-template-columns: repeat(4, 1fr) !important; }
+
+  /* Landing Page - Hero Section */
+  .hero-content {
+    padding: 6rem 1.5rem 4rem !important;
+  }
+
+  .hero-headline {
+    font-size: 2.5rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero-ctas {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  #hero-cta, #bottom-cta {
+    width: 100% !important;
+    justify-content: center !important;
+    font-size: 0.95rem !important;
+    padding: 0.85rem 1.5rem !important;
+  }
+
+  /* Features Grid */
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Steps Grid */
+  .steps-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Testimonials Grid */
+  .testimonials-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* CTA Checks */
+  .cta-checks {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Navigation */
+  .nav-links-desktop, 
+  .nav-login-desktop, 
+  .nav-signup-desktop, 
+  .nav-cta-desktop {
+    display: none !important;
+  }
+
+  .nav-hamburger {
+    display: block !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1020,6 +1078,32 @@ pre code { font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.7
 
   /* Modals are full-width */
   [class*="modal"], [class*="Modal"] { border-radius: 1.25rem 1.25rem 0 0 !important; }
+
+  /* Landing Page - Mobile Specific */
+  .hero-content {
+    padding: 5rem 1.25rem 3rem !important;
+  }
+
+  .hero-headline {
+    font-size: 2rem !important;
+    line-height: 1.15 !important;
+  }
+
+  #hero-cta, #bottom-cta {
+    font-size: 0.9rem !important;
+    padding: 0.8rem 1.25rem !important;
+  }
+
+  /* Section Padding */
+  #features, #how-it-works, #testimonials, #cta {
+    padding: 3rem 1.25rem !important;
+  }
+
+  /* Reduce orb sizes on mobile */
+  .orb {
+    width: 400px !important;
+    height: 400px !important;
+  }
 }
 
 
