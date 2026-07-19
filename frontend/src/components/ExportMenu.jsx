@@ -642,7 +642,8 @@ function ExportMenu({ result, idea }) {
       setExportProgress(95);
 
       // Save PDF
-      const fileName = `architecture_${idea.substring(0, 30).replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.pdf`;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const fileName = `architecture_${idea.substring(0, 30).replace(/[^a-z0-9]/gi, '_')}_${timestamp}.pdf`;
       doc.save(fileName);
       
       setExportProgress(100);

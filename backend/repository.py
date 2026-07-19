@@ -156,8 +156,14 @@ class ArchitectureRepository:
             )
             self.session.add(phase)
         
-        await self.session.commit()
-        await self.session.refresh(architecture)
+        try:
+            await self.session.commit()
+            await self.session.refresh(architecture)
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Error creating architecture: {e}")
+            raise
+        
         return architecture
     
     async def get_by_id(
@@ -263,9 +269,14 @@ class ArchitectureRepository:
         architecture = result.scalar_one_or_none()
         
         if architecture:
-            await self.session.delete(architecture)
-            await self.session.commit()
-            return True
+            try:
+                await self.session.delete(architecture)
+                await self.session.commit()
+                return True
+            except Exception as e:
+                await self.session.rollback()
+                logger.error(f"Error deleting architecture: {e}")
+                raise
         return False
 
 
@@ -290,7 +301,12 @@ class UsageRepository:
             cost=cost
         )
         self.session.add(record)
-        await self.session.commit()
+        try:
+            await self.session.commit()
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Error recording usage: {e}")
+            # Don't fail the request if usage recording fails
         return record
     
     async def get_daily_count(self, user_id: int) -> int:

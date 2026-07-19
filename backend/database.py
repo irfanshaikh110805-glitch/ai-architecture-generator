@@ -27,13 +27,25 @@ if "postgresql" in DATABASE_URL:
         max_overflow=20,
         pool_pre_ping=True,
         pool_recycle=3600,
-        echo=False
+        pool_timeout=30,  # Connection timeout
+        connect_args={
+            "command_timeout": 60,  # Query timeout
+            "server_settings": {
+                "application_name": "ai_architecture_generator",
+                "jit": "off"  # Disable JIT for better performance on small queries
+            }
+        },
+        echo=False,
+        echo_pool=False
     )
 else:
     # SQLite async settings
     engine = create_async_engine(
         DATABASE_URL,
-        connect_args={"check_same_thread": False},
+        connect_args={
+            "check_same_thread": False,
+            "timeout": 30  # SQLite timeout
+        },
         echo=False
     )
 
@@ -88,9 +100,25 @@ def run_migrations():
             logger.warning("Continuing without migrations in development mode")
 
 async def get_db() -> AsyncSession:
-    """Async database session dependency"""
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+    """Async database session dependency with proper error handling"""
+    session = AsyncSessionLocal()
+    try:
+        yield session
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()
+
+
+async def health_check_db() -> bool:
+    """Check database connectivity for health endpoints"""
+    try:
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+            return True
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        return False

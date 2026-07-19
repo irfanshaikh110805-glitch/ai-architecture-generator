@@ -198,13 +198,13 @@ from schemas import UserCreate, UserLogin, TokenResponse, UserResponse
 from database import get_db
 
 @api_v1_router.post("/auth/register", response_model=TokenResponse)
-@limiter.limit("10/hour")  # Stricter rate limit for auth
+@limiter.limit("5/hour")  # Stricter rate limit for registration
 async def register(
     request: Request,
     user_data: UserCreate,
     session: AsyncSession = Depends(get_db)
 ):
-    """Register a new user"""
+    """Register a new user with enhanced validation"""
     try:
         user = await AuthService.register_user(user_data, session)
         
@@ -231,15 +231,26 @@ async def register(
         raise HTTPException(status_code=500, detail="Registration failed")
 
 @api_v1_router.post("/auth/login", response_model=TokenResponse)
-@limiter.limit("20/hour")  # Stricter rate limit for auth
+@limiter.limit("10/hour")  # Stricter rate limit for login
 async def login(
     request: Request,
     credentials: UserLogin,
     session: AsyncSession = Depends(get_db)
 ):
-    """Login with email and password"""
+    """Login with email and password - includes account lockout protection"""
     try:
+        # Check if account is locked
+        if AuthService.is_account_locked(credentials.email):
+            logger.warning(f"Account locked due to too many failed attempts: {credentials.email}")
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Account temporarily locked due to too many failed login attempts. Try again in 15 minutes."
+            )
+        
         user = await AuthService.authenticate_user(credentials, session)
+        
+        # Clear failed attempts on successful login
+        AuthService.clear_failed_attempts(credentials.email)
         
         # Create access token
         access_token = AuthService.create_access_token(
@@ -257,7 +268,10 @@ async def login(
                 is_active=user.is_active
             )
         )
-    except HTTPException:
+    except HTTPException as he:
+        # Record failed attempt if it's authentication error
+        if he.status_code == status.HTTP_401_UNAUTHORIZED:
+            AuthService.record_failed_attempt(credentials.email)
         raise
     except Exception as e:
         logger.error(f"Login error: {e}")

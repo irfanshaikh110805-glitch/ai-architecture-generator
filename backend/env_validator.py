@@ -21,7 +21,7 @@ class EnvironmentValidator:
         ("RATE_LIMIT_REQUESTS", "Rate limit requests per window"),
         ("RATE_LIMIT_WINDOW", "Rate limit window in seconds"),
         ("ENVIRONMENT", "Environment (development/production)"),
-        ("SENTRY_DSN", "Sentry DSN for error tracking"),
+        # SENTRY_DSN is truly optional - don't warn if not set
     ]
     
     @classmethod
@@ -66,8 +66,7 @@ class EnvironmentValidator:
             if secret_key == "dev-secret-key-change-in-production":
                 errors.append("❌ Using development SECRET_KEY in production!")
             
-            if not os.getenv("SENTRY_DSN"):
-                warnings.append("⚠ SENTRY_DSN not set in production (error tracking disabled)")
+            # SENTRY_DSN is optional - no warning needed
         
         # Print warnings
         for warning in warnings:

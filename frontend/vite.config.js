@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,6 +10,13 @@ export default defineConfig({
       jsxRuntime: 'automatic',
     })
   ],
+  resolve: {
+    alias: {
+      // Ensure single React instance to avoid "Invalid hook call" errors
+      'react': path.resolve('./node_modules/react'),
+      'react-dom': path.resolve('./node_modules/react-dom'),
+    },
+  },
   build: {
     // Target modern browsers for better optimization
     target: 'es2015',
@@ -85,9 +93,13 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    host: true, // Listen on all network interfaces
     hmr: {
       protocol: 'ws',
       host: 'localhost',
+    },
+    watch: {
+      usePolling: false,
     }
   },
 })

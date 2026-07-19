@@ -28,7 +28,7 @@ def get_client() -> genai.Client:
     return _client
 
 
-MODEL_ID = "gemini-2.5-flash"
+MODEL_ID = "gemini-3.5-flash"  # Updated to latest stable model (Gemini 3.5 Flash)
 
 SYSTEM_PROMPT = """You are a Principal Software Architect with expertise across multiple domains.
 

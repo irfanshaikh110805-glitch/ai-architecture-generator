@@ -18,7 +18,8 @@ def init_sentry():
     environment = os.getenv("ENVIRONMENT", "development")
 
     if not sentry_dsn:
-        logger.info("Sentry not initialized: SENTRY_DSN is not set.")
+        # Silently skip Sentry initialization if DSN not configured
+        logger.debug("Sentry not initialized: SENTRY_DSN is not set.")
         return
 
     # Use lower sample rates in development to avoid quota noise

@@ -22,26 +22,69 @@ logger = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError(
+        "JWT_SECRET_KEY environment variable must be set. "
+        "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+    )
+if len(SECRET_KEY) < 32:
+    raise ValueError("JWT_SECRET_KEY must be at least 32 characters long")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
+# Failed login attempt tracking (in-memory, consider Redis for production)
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+
+login_attempts = defaultdict(list)
+LOCKOUT_THRESHOLD = 5
+LOCKOUT_DURATION = timedelta(minutes=15)
 
 # Security
 security = HTTPBearer()
 
 
 class AuthService:
-    """Authentication service"""
+    """Authentication service with enhanced security"""
     
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash a password"""
+        """Hash a password using bcrypt"""
         return pwd_context.hash(password)
     
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """Verify a password against a hash"""
-        return pwd_context.verify(plain_password, hashed_password)
+        try:
+            return pwd_context.verify(plain_password, hashed_password)
+        except Exception as e:
+            logger.error(f"Password verification error: {e}")
+            return False
+    
+    @staticmethod
+    def is_account_locked(identifier: str) -> bool:
+        """Check if account is temporarily locked due to failed attempts"""
+        now = datetime.now(timezone.utc)
+        attempts = login_attempts.get(identifier, [])
+        
+        # Remove old attempts
+        recent_attempts = [t for t in attempts if now - t < LOCKOUT_DURATION]
+        login_attempts[identifier] = recent_attempts
+        
+        return len(recent_attempts) >= LOCKOUT_THRESHOLD
+    
+    @staticmethod
+    def record_failed_attempt(identifier: str):
+        """Record a failed login attempt"""
+        login_attempts[identifier].append(datetime.now(timezone.utc))
+    
+    @staticmethod
+    def clear_failed_attempts(identifier: str):
+        """Clear failed attempts after successful login"""
+        if identifier in login_attempts:
+            del login_attempts[identifier]
     
     @staticmethod
     def generate_api_key() -> str:
@@ -110,8 +153,16 @@ class AuthService:
         )
         
         session.add(user)
-        await session.commit()
-        await session.refresh(user)
+        try:
+            await session.commit()
+            await session.refresh(user)
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"Error creating user: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create user account"
+            )
         
         logger.info(f"User registered: {user.email}")
         return user
@@ -145,7 +196,12 @@ class AuthService:
         
         # Update last login
         user.last_login = datetime.now(timezone.utc)
-        await session.commit()
+        try:
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            logger.warning(f"Failed to update last login for {user.email}: {e}")
+            # Don't fail authentication if last_login update fails
         
         logger.info(f"User authenticated: {user.email}")
         return user

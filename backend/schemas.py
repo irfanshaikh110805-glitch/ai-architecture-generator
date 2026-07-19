@@ -17,15 +17,25 @@ class UserCreate(BaseModel):
     @field_validator('password')
     @classmethod
     def validate_password(cls, v: str) -> str:
-        """Validate password strength"""
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters long")
-        if not any(c.isupper() for c in v):
-            raise ValueError("Password must contain at least one uppercase letter")
-        if not any(c.islower() for c in v):
-            raise ValueError("Password must contain at least one lowercase letter")
-        if not any(c.isdigit() for c in v):
-            raise ValueError("Password must contain at least one digit")
+        """Validate password strength with enhanced requirements"""
+        from security import SecurityConfig
+        is_valid, error_message = SecurityConfig.validate_password_strength(v)
+        if not is_valid:
+            raise ValueError(error_message)
+        return v
+    
+    @field_validator('full_name')
+    @classmethod
+    def validate_full_name(cls, v: Optional[str]) -> Optional[str]:
+        """Validate and sanitize full name"""
+        if v:
+            v = v.strip()
+            # Prevent XSS in name fields
+            import re
+            if re.search(r'[<>"\'/]', v):
+                raise ValueError("Name contains invalid characters")
+            if len(v) > 100:
+                raise ValueError("Name is too long (max 100 characters)")
         return v
 
 
@@ -85,7 +95,7 @@ class ProjectIdeaRequest(BaseModel):
     @field_validator('idea')
     @classmethod
     def validate_and_sanitize_idea(cls, v: str) -> str:
-        """Validate and sanitize the project idea input"""
+        """Validate and sanitize the project idea input with XSS protection"""
         # Sanitize input to prevent XSS and SQL injection
         sanitized = sanitize_input(v, allow_html=False)
         
@@ -97,6 +107,20 @@ class ProjectIdeaRequest(BaseModel):
         # Check for empty after sanitization
         if not sanitized or sanitized.isspace():
             raise ValueError("Project idea cannot be empty or contain only whitespace")
+        
+        # Additional validation for malicious patterns
+        import re
+        dangerous_patterns = [
+            r'<script[^>]*>.*?</script>',
+            r'javascript:',
+            r'on\w+\s*=',  # event handlers
+            r'<iframe[^>]*>',
+            r'eval\s*\(',
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, sanitized, re.IGNORECASE):
+                raise ValueError("Project idea contains potentially malicious content")
         
         return sanitized
 

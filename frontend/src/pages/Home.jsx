@@ -37,12 +37,14 @@ function Home() {
   const [showHistory, setShowHistory]     = useState(false);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [isFocused, setIsFocused]     = useState(false);
-  const [charCount, setCharCount]     = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const textareaRef                   = useRef(null);
   const cardRef                       = useRef(null);
   const navigate                      = useNavigate();
   const { setCurrentResult, versions } = useAppStore();
+  
+  // Calculate character count directly from idea (no separate state needed)
+  const charCount = idea.length;
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
@@ -71,11 +73,6 @@ function Home() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
-
-  // Update character count
-  useEffect(() => {
-    setCharCount(idea.length);
-  }, [idea]);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
