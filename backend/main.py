@@ -139,9 +139,12 @@ async def add_security_headers(request: Request, call_next):
 async def root(request: Request, response: Response):
     return {"message": "AI Architecture Generator API", "status": "running", "version": "2.0.0"}
 
+from ai_service import generate_architecture, get_model_id
+
 @app.get("/health")
 async def health_check(request: Request, response: Response):
-    return {"status": "healthy", "model": "gemini-2.0-flash"}
+    return {"status": "healthy", "model": get_model_id()}
+
 
 @app.get("/health/detailed")
 async def detailed_health_check(request: Request):
@@ -308,7 +311,8 @@ async def regenerate_api_key(
 
 @api_v1_router.get("/health")
 async def health_check_v1(request: Request, response: Response):
-    return {"status": "healthy", "model": "gemini-2.0-flash", "version": "v1"}
+    return {"status": "healthy", "model": get_model_id(), "version": "v1"}
+
 
 
 # Include v1 router
