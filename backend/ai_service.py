@@ -28,7 +28,13 @@ def get_client() -> genai.Client:
     return _client
 
 
-MODEL_ID = "gemini-3.5-flash"  # Updated to latest stable model (Gemini 3.5 Flash)
+def get_model_id() -> str:
+    """Get Gemini Model ID from environment variable or default to stable gemini-2.0-flash."""
+    return os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
+
+MODEL_ID = get_model_id()
+
 
 SYSTEM_PROMPT = """You are a Principal Software Architect with expertise across multiple domains.
 
@@ -327,7 +333,8 @@ async def generate_architecture(idea: str) -> ArchitectureResponse:
 
     for attempt in range(max_retries + 1):
         try:
-            logger.info(f"Attempt {attempt + 1}: calling Gemini API (model={MODEL_ID})")
+            model_id = get_model_id()
+            logger.info(f"Attempt {attempt + 1}: calling Gemini API (model={model_id})")
 
             client = get_client()
             prompt = f"{SYSTEM_PROMPT}\n\nProject Idea: {idea}"
@@ -338,7 +345,7 @@ async def generate_architecture(idea: str) -> ArchitectureResponse:
             response = await loop.run_in_executor(
                 None,
                 lambda: client.models.generate_content(
-                    model=MODEL_ID,
+                    model=model_id,
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         temperature=0.4,

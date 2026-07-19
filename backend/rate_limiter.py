@@ -1,21 +1,40 @@
 """
 Rate limiting middleware using slowapi
 """
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi import Request
 from security import SecurityConfig
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Get Redis URL for distributed rate limiting
 REDIS_URL = os.getenv("REDIS_URL", "memory://")
 
-# Initialize rate limiter with Redis for production
+
+def get_real_client_ip(request: Request) -> str:
+    """
+    Custom key function for rate limiting behind reverse proxies (Render, Cloudflare, Nginx).
+    Reads the original client IP from X-Forwarded-For if available.
+    """
+    x_forwarded_for = request.headers.get("X-Forwarded-For")
+    if x_forwarded_for:
+        # X-Forwarded-For header contains client IP first, followed by proxies
+        client_ip = x_forwarded_for.split(",")[0].strip()
+        if client_ip:
+            return client_ip
+    
+    # Fallback to standard remote address
+    return get_remote_address(request)
+
+
+# Initialize rate limiter
 limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=[f"{SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}seconds"],
-    storage_uri=REDIS_URL,  # Use Redis instead of memory
+    key_func=get_real_client_ip,
+    storage_uri=REDIS_URL,
     headers_enabled=True,
 )
 
@@ -23,9 +42,8 @@ limiter = Limiter(
 def get_rate_limit_key(request: Request) -> str:
     """
     Custom key function for rate limiting
-    Uses IP address as the key
     """
-    return get_remote_address(request)
+    return get_real_client_ip(request)
 
 
 # Custom rate limit exceeded handler
@@ -43,3 +61,4 @@ async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
             "retry_after": exc.detail,
         },
     )
+

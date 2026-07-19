@@ -41,10 +41,10 @@ This document summarizes the comprehensive analysis and high-priority improvemen
 
 **Exposed Credentials**:
 ```
-GEMINI_API_KEY=AQ.Ab8RN6KtWGd9vniUs6f7PxBlkuwCMRJtj_vrAmZKw1A0ouAZzw
-Database Password=Irfan996426
-SECRET_KEY=8kF9mN2pQ7rT5vX1wY3zA6bC4dE0fG8hJ9kL2mN5pQ7rT0vX3wY6zA9bC1dE4fG7hJ0kL3mN6pQ9rT2vX5wY8zA
-JWT_SECRET_KEY=2vX5wY8zA1bC4dE7fG0hJ3kL6mN9pQ2rT5vX8wY1zA4bC7dE0fG3hJ6kL9mN2pQ5rT8vX1wY4zA7bC0dE3fG6hJ
+GEMINI_API_KEY=<REDACTED - Real API key was exposed in git>
+Database Password=<REDACTED - Real password was exposed in git>
+SECRET_KEY=<REDACTED - Real secret key was exposed in git>
+JWT_SECRET_KEY=<REDACTED - Real JWT secret was exposed in git>
 ```
 
 **Action Required**:

@@ -22,13 +22,15 @@ const INITIAL_RETRY_DELAY = 1000; // 1 second
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const shouldRetry = (error) => {
+  // Never retry on 429 Too Many Requests - retrying immediately worsens rate limits
+  if (error.response?.status === 429) return false;
+  
   // Retry on network errors or 5xx server errors
   if (!error.response) return true;
   if (error.response.status >= 500 && error.response.status < 600) return true;
-  // Don't retry on 4xx client errors (except 429)
-  if (error.response.status === 429) return true;
   return false;
 };
+
 
 // Request interceptor for validation and sanitization
 api.interceptors.request.use(

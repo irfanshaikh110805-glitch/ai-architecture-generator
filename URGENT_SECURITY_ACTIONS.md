@@ -31,7 +31,7 @@ git filter-branch --force --index-filter \
 
 #### 2.1 Gemini API Key
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. **Delete the old API key**: `AQ.Ab8RN6KtWGd9vniUs6f7PxBlkuwCMRJtj_vrAmZKw1A0ouAZzw`
+2. **Delete the old API key** (the one in your .env file - it was exposed)
 3. Create a new API key
 4. Update `backend/.env` with the new key
 
@@ -96,19 +96,19 @@ git push origin --force --tags
 ## 📋 Exposed Credentials Checklist
 
 - [ ] **Gemini API Key** rotated
-  - Old key: `AQ.Ab8RN6KtWGd9vniUs6f7PxBlkuwCMRJtj_vrAmZKw1A0ouAZzw`
+  - Old key: `<REDACTED>`
   - Status: ❌ EXPOSED - DELETE IMMEDIATELY
 
 - [ ] **Database Password** changed
-  - Old: `Irfan996426`
+  - Old: `<REDACTED>`
   - Status: ❌ EXPOSED - CHANGE IMMEDIATELY
 
 - [ ] **SECRET_KEY** regenerated
-  - Old: `8kF9mN2pQ7rT5vX1wY3zA6bC4dE0fG8hJ9kL2mN5pQ7rT0vX3wY6zA9bC1dE4fG7hJ0kL3mN6pQ9rT2vX5wY8zA`
+  - Old: `<REDACTED>`
   - Status: ❌ EXPOSED - REGENERATE
 
 - [ ] **JWT_SECRET_KEY** regenerated
-  - Old: `2vX5wY8zA1bC4dE7fG0hJ3kL6mN9pQ2rT5vX8wY1zA4bC7dE0fG3hJ6kL9mN2pQ5rT8vX1wY4zA7bC0dE3fG6hJ`
+  - Old: `<REDACTED>`
   - Status: ❌ EXPOSED - REGENERATE
 
 - [ ] **Supabase Project URL** (less critical but exposed)

@@ -12,12 +12,16 @@ services:
         value: production
       - key: GEMINI_API_KEY
         sync: true
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
         sync: true
+      - key: REDIS_URL
+        sync: false
       - key: ALLOWED_ORIGINS
         value: "*"
       - key: ALLOWED_HOSTS

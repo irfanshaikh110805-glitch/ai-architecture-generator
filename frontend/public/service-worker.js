@@ -64,17 +64,14 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip cross-origin requests (except API calls to our backend)
-  if (url.origin !== location.origin) {
-    // Allow API calls to backend even if different origin
-    if (!url.pathname.startsWith('/api/')) {
-      return;
-    }
+  // 1. NEVER intercept non-GET requests (POST, PUT, DELETE, PATCH).
+  // Cache API does not support non-GET requests and throws TypeError.
+  if (request.method !== 'GET') {
+    return;
   }
 
-  // API requests - Network first, don't cache on failure
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkOnlyForAPI(request));
+  // 2. Bypass Service Worker completely for API calls and cross-origin requests
+  if (url.pathname.startsWith('/api/') || url.origin !== location.origin) {
     return;
   }
 
@@ -95,7 +92,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default - Network first
+  // Default GET requests - Network first
   event.respondWith(networkFirstStrategy(request));
 });
 
