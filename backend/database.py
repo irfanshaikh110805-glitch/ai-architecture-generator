@@ -19,41 +19,48 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./architecture_gen
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-# Create async engine with appropriate settings based on database type
+# Create async engine with optimized settings
 if "postgresql" in DATABASE_URL:
     engine = create_async_engine(
         DATABASE_URL,
-        pool_size=10,
-        max_overflow=20,
+        pool_size=20,  # Increased from 10 for better concurrency
+        max_overflow=40,  # Increased from 20 for peak loads
         pool_pre_ping=True,
         pool_recycle=3600,
-        pool_timeout=30,  # Connection timeout
+        pool_timeout=30,
         connect_args={
-            "command_timeout": 60,  # Query timeout
+            "command_timeout": 60,
             "server_settings": {
                 "application_name": "ai_architecture_generator",
-                "jit": "off"  # Disable JIT for better performance on small queries
+                "jit": "off",
+                "idle_in_transaction_session_timeout": "60000",  # 60 seconds
             }
         },
         echo=False,
-        echo_pool=False
+        echo_pool=False,
+        # Performance optimizations
+        execution_options={
+            "isolation_level": "READ COMMITTED"
+        }
     )
 else:
-    # SQLite async settings
+    # SQLite async settings with optimizations
     engine = create_async_engine(
         DATABASE_URL,
         connect_args={
             "check_same_thread": False,
-            "timeout": 30  # SQLite timeout
+            "timeout": 30
         },
-        echo=False
+        echo=False,
+        pool_size=5,  # SQLite benefits from connection pooling too
+        max_overflow=10
     )
 
-# Create async session maker
+# Create async session maker with optimized settings
 AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
-    expire_on_commit=False,
+    expire_on_commit=False,  # Better performance
     autocommit=False,
     autoflush=False
 )
@@ -100,7 +107,7 @@ def run_migrations():
             logger.warning("Continuing without migrations in development mode")
 
 async def get_db() -> AsyncSession:
-    """Async database session dependency with proper error handling"""
+    """Async database session dependency with proper error handling and connection pooling"""
     session = AsyncSessionLocal()
     try:
         yield session

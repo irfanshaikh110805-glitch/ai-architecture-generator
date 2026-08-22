@@ -2,19 +2,18 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import ErrorBoundary from './components/ErrorBoundary'
-import PerformanceMonitor from './components/PerformanceMonitor'
 import ProtectedRoute from './components/ProtectedRoute'
 import useAuthStore from './store/useAuthStore'
 import './App.css'
 
-// Lazy load pages for code splitting
-const Landing = lazy(() => import('./pages/Landing'))
-const Home = lazy(() => import('./pages/Home'))
-const Result = lazy(() => import('./pages/Result'))
-const Login = lazy(() => import('./pages/Login'))
-const Signup = lazy(() => import('./pages/Signup'))
+// Lazy load pages for code splitting and better performance
+const Landing = lazy(() => import(/* webpackChunkName: "landing" */ './pages/Landing'))
+const Home = lazy(() => import(/* webpackChunkName: "home" */ './pages/Home'))
+const Result = lazy(() => import(/* webpackChunkName: "result" */ './pages/Result'))
+const Login = lazy(() => import(/* webpackChunkName: "login" */ './pages/Login'))
+const Signup = lazy(() => import(/* webpackChunkName: "signup" */ './pages/Signup'))
 
-// Loading component with better UX
+// Optimized loading component with minimal re-renders
 const PageLoader = () => (
   <div style={{
     minHeight: '100vh',
@@ -43,16 +42,13 @@ const PageLoader = () => (
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
 
-  // Initialize auth state on app load
+  // Initialize auth state on app load - only runs once
   useEffect(() => {
     initialize();
   }, [initialize]);
 
   return (
     <ErrorBoundary>
-      {/* Performance monitoring in production */}
-      <PerformanceMonitor />
-      
       <Toaster
         position="top-right"
         toastOptions={{

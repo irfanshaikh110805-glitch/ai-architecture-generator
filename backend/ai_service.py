@@ -29,8 +29,12 @@ def get_client() -> genai.Client:
 
 
 def get_model_id() -> str:
-    """Get Gemini Model ID from environment variable or default to stable gemini-2.0-flash."""
-    return os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    """Get Gemini Model ID from environment variable or default to stable gemini-3.6-flash."""
+    model_name = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+    # For google-genai SDK v1.x, model names need 'models/' prefix
+    if not model_name.startswith("models/"):
+        model_name = f"models/{model_name}"
+    return model_name
 
 
 MODEL_ID = get_model_id()
@@ -250,6 +254,8 @@ def _sanitize_mermaid(diagram: str) -> str:
       6. Parentheses in node labels
       7. Invalid node ID formats
       8. Subgraph syntax issues
+      9. Special characters in labels
+      10. Empty or whitespace-only labels
     """
     if not diagram:
         return diagram
@@ -259,7 +265,9 @@ def _sanitize_mermaid(diagram: str) -> str:
         label = m.group(1)
         label = label.replace("/", "_").replace("\\", "_")
         label = re.sub(r"\s+", "_", label.strip())
-        return ": " + label
+        # Remove special characters that break Mermaid
+        label = re.sub(r'[<>(){}[\]\'"`]', '', label)
+        return ": " + label if label else ": has"
 
     # single-quoted
     diagram = re.sub(r":\s*'([^']*)'\s*$", _clean_label, diagram, flags=re.MULTILINE)
@@ -271,7 +279,8 @@ def _sanitize_mermaid(diagram: str) -> str:
         label = m.group(1)
         label = label.replace("/", "_").replace("\\", "_")
         label = re.sub(r"\s+", "_", label.strip())
-        return ": " + label
+        label = re.sub(r'[<>(){}[\]\'"`]', '', label)
+        return ": " + label if label else ": has"
 
     diagram = re.sub(
         r":\s+([A-Za-z_][A-Za-z0-9_]*(?:[/ ][A-Za-z][A-Za-z0-9_]*)+)\s*$",
@@ -297,11 +306,11 @@ def _sanitize_mermaid(diagram: str) -> str:
         label = re.sub(r'\([^)]*\)', '', label)
         label = label.strip()
         if not label:  # If label becomes empty, use node_id
-            label = node_id
+            label = node_id.replace('_', ' ')
         return f'{node_id}[{label}]'
     
     # Fix node labels with parentheses: A[Label (Text)] → A[Label Text]
-    diagram = re.sub(r'([A-Z][A-Z0-9]*)\[([^\]]*\([^\)]*\)[^\]]*)\]', _fix_node_label, diagram)
+    diagram = re.sub(r'([A-Z][A-Z0-9_]*)\[([^\]]*\([^\)]*\)[^\]]*)\]', _fix_node_label, diagram)
     
     # ── 7: Fix invalid node IDs (must start with letter) ─────────────────────
     # Replace node IDs that start with numbers or special chars
@@ -319,6 +328,9 @@ def _sanitize_mermaid(diagram: str) -> str:
     # ── 8: Fix subgraph syntax ───────────────────────────────────────────────
     # Ensure subgraph has proper format: subgraph Title
     diagram = re.sub(r'subgraph\s+([^\n]+)\s*\n', r'subgraph \1\n', diagram)
+
+    # ── 9: Remove empty or invalid relationship labels ───────────────────────
+    diagram = re.sub(r':\s*$', ': has', diagram, flags=re.MULTILINE)
 
     return diagram.strip()
 

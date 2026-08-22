@@ -4,47 +4,35 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 
-// Service Worker Registration
+// Service Worker Registration (Production Only)
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/service-worker.js')
-      .then((registration) => {
-        console.log('[PWA] Service Worker registered successfully:', registration.scope);
-
-        // Check for updates periodically
-        setInterval(() => {
-          registration.update();
-        }, 60 * 60 * 1000); // Check every hour
-
-        // Handle service worker updates
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New service worker available
-              console.log('[PWA] New version available! Refresh to update.');
-              
-              // Show update notification (optional)
-              if (window.confirm('A new version is available! Reload to update?')) {
-                newWorker.postMessage({ type: 'SKIP_WAITING' });
-                window.location.reload();
-              }
-            }
-          });
+  if (import.meta.env.PROD && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('[PWA] Service Worker registered successfully:', registration.scope);
+        })
+        .catch((error) => {
+          console.log('[PWA] Service Worker registration failed:', error);
         });
-      })
-      .catch((error) => {
-        console.log('[PWA] Service Worker registration failed:', error);
-      });
-
-    // Handle service worker controller change
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('[PWA] Service Worker controller changed, reloading...');
-      window.location.reload();
     });
-  });
+  } else {
+    // In development / local testing, unregister existing service workers to avoid caching old bundles
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+        console.log('[PWA] Unregistered stale service worker in local environment');
+      }
+    });
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        for (const name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+  }
 }
 
 // Online/Offline detection

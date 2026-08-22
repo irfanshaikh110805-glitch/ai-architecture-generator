@@ -15,20 +15,28 @@ logger = logging.getLogger(__name__)
 class CostTracker:
     """Track and manage AI API costs"""
     
-    # Gemini API pricing (as of 2024)
+    # Gemini API pricing
     # Source: https://ai.google.dev/pricing
     PRICING = {
+        "gemini-3.6-flash": {
+            "input_per_1k": 0.00001875,
+            "output_per_1k": 0.000075,
+        },
+        "gemini-3.7-flash": {
+            "input_per_1k": 0.00001875,
+            "output_per_1k": 0.000075,
+        },
         "gemini-2.5-flash": {
-            "input_per_1k": 0.00001875,   # $0.00001875 per 1K input tokens
-            "output_per_1k": 0.000075,    # $0.000075 per 1K output tokens
+            "input_per_1k": 0.00001875,
+            "output_per_1k": 0.000075,
         },
         "gemini-1.5-flash": {
-            "input_per_1k": 0.000035,     # $0.000035 per 1K input tokens
-            "output_per_1k": 0.00014,     # $0.00014 per 1K output tokens
+            "input_per_1k": 0.000035,
+            "output_per_1k": 0.00014,
         },
         "gemini-1.5-pro": {
-            "input_per_1k": 0.00125,      # $0.00125 per 1K input tokens
-            "output_per_1k": 0.005,       # $0.005 per 1K output tokens
+            "input_per_1k": 0.00125,
+            "output_per_1k": 0.005,
         }
     }
     
@@ -60,11 +68,14 @@ class CostTracker:
         Returns:
             Cost in USD
         """
-        if model not in self.PRICING:
-            logger.warning(f"Unknown model for pricing: {model}, using gemini-2.5-flash")
-            model = "gemini-2.5-flash"
-        
-        pricing = self.PRICING[model]
+        clean_model = model.removeprefix("models/")
+        if clean_model in self.PRICING:
+            pricing = self.PRICING[clean_model]
+        elif model in self.PRICING:
+            pricing = self.PRICING[model]
+        else:
+            logger.warning(f"Unknown model for pricing: {model}, using gemini-3.6-flash")
+            pricing = self.PRICING["gemini-3.6-flash"]
         
         input_cost = (input_tokens / 1000) * pricing["input_per_1k"]
         output_cost = (output_tokens / 1000) * pricing["output_per_1k"]

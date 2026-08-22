@@ -96,28 +96,6 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(networkFirstStrategy(request));
 });
 
-// Network only for API calls (don't interfere with API requests)
-async function networkOnlyForAPI(request) {
-  try {
-    return await fetch(request);
-  } catch (error) {
-    console.log('[Service Worker] API request failed (offline):', request.url, error);
-    
-    // Return offline response for API calls
-    return new Response(
-      JSON.stringify({
-        error: 'You are offline. Please check your internet connection.',
-        offline: true
-      }),
-      {
-        status: 503,
-        statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
-  }
-}
-
 // Network first strategy (for API calls)
 async function networkFirstStrategy(request) {
   try {

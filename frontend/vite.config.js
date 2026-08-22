@@ -1,33 +1,28 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      // Optimize JSX runtime
-      jsxRuntime: 'automatic',
-    })
+    react()
   ],
-  resolve: {
-    alias: {
-      // Ensure single React instance to avoid "Invalid hook call" errors
-      'react': path.resolve('./node_modules/react'),
-      'react-dom': path.resolve('./node_modules/react-dom'),
-    },
-  },
   build: {
     // Target modern browsers for better optimization
-    target: 'es2015',
+    target: 'es2020',
     // Enable CSS code splitting
     cssCodeSplit: true,
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+    // Enable source maps for production debugging (optional, set to false for smaller builds)
+    sourcemap: false,
+    // Report compressed size
+    reportCompressedSize: true,
     // Optimize chunk size
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // React core libraries
+            // React core libraries (most critical)
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
               return 'react-vendor';
             }
@@ -39,13 +34,21 @@ export default defineConfig({
             if (id.includes('axios') || id.includes('zustand') || id.includes('zod') || id.includes('dompurify')) {
               return 'utils';
             }
-            // Mermaid diagram library (large, loaded on demand)
+            // Mermaid diagram library (large, lazy loaded)
             if (id.includes('mermaid') || id.includes('dayjs')) {
               return 'diagram';
             }
             // Toast notifications
             if (id.includes('react-hot-toast')) {
               return 'toast';
+            }
+            // PDF export libraries (lazy loaded)
+            if (id.includes('jspdf') || id.includes('html2canvas')) {
+              return 'pdf';
+            }
+            // Supabase
+            if (id.includes('@supabase')) {
+              return 'supabase';
             }
             // Other vendor libraries
             return 'vendor';
@@ -62,6 +65,8 @@ export default defineConfig({
             return 'assets/images/[name]-[hash][extname]';
           } else if (/woff|woff2|eot|ttf|otf/i.test(ext)) {
             return 'assets/fonts/[name]-[hash][extname]';
+          } else if (/css/i.test(ext)) {
+            return 'assets/css/[name]-[hash][extname]';
           }
           return 'assets/[name]-[hash][extname]';
         },
@@ -69,17 +74,8 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
-    chunkSizeWarningLimit: 3500,
-    // Enable source maps for production debugging (optional)
-    sourcemap: false,
-    // Report compressed size
-    reportCompressedSize: true,
   },
-  // Optimize dependencies
-  // IMPORTANT: mermaid must be in 'include' (not 'exclude') so Vite pre-bundles
-  // it through its CJS->ESM transformer. Without this, mermaid's internal
-  // dependency on dayjs (a CJS module) fails with:
-  //   "dayjs.min.js does not provide an export named 'default'"
+  // Optimize dependencies - pre-bundle for faster cold starts
   optimizeDeps: {
     include: [
       'react',
@@ -88,18 +84,15 @@ export default defineConfig({
       'axios',
       'zustand',
       'mermaid', // pre-bundle mermaid so Vite wraps its CJS deps (dayjs) correctly
+      'react-hot-toast',
+      'dompurify',
+      'zod',
     ],
+    // Force optimization even if already cached
+    force: false,
   },
   server: {
     port: 5173,
-    strictPort: false,
-    host: true, // Listen on all network interfaces
-    hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-    },
-    watch: {
-      usePolling: false,
-    }
+    host: true,
   },
 })

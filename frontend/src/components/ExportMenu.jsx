@@ -718,25 +718,25 @@ function ExportMenu({ result, idea }) {
       <button
         onClick={() => setOpen(!open)}
         disabled={exportingPDF}
-        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl hover:from-blue-700 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed group"
+        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl hover:from-blue-700 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group active:scale-95 flex-shrink-0"
       >
         {exportingPDF ? (
           <>
-            <Loader2 size={16} className="animate-spin" />
-            <span className="text-sm font-semibold">Exporting... {exportProgress}%</span>
+            <Loader2 size={15} className="animate-spin" />
+            <span className="text-xs sm:text-sm font-semibold">{exportProgress}%</span>
           </>
         ) : (
           <>
-            <Download size={16} className="group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-semibold">Export</span>
-            <ChevronDown size={14} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+            <Download size={15} className="group-hover:scale-110 transition-transform" />
+            <span className="text-xs sm:text-sm font-semibold">Export</span>
+            <ChevronDown size={13} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
           </>
         )}
       </button>
 
       {/* Progress Bar */}
       {exportingPDF && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 p-3 z-30">
+        <div className="fixed sm:absolute top-auto bottom-4 sm:bottom-auto sm:top-full inset-x-4 sm:inset-x-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-gray-700">Generating PDF...</span>
             <span className="text-xs font-bold text-blue-600">{exportProgress}%</span>
@@ -752,8 +752,8 @@ function ExportMenu({ result, idea }) {
 
       {open && !exportingPDF && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 overflow-hidden animate-scale-in">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40 sm:hidden" onClick={() => setOpen(false)} />
+          <div className="fixed inset-x-3 bottom-4 sm:bottom-auto sm:inset-auto sm:right-0 sm:absolute sm:mt-2 max-w-sm sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-scale-in max-h-[85vh] overflow-y-auto">
             {/* Header */}
             <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-100">
               <div className="flex items-center gap-2">

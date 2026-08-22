@@ -227,23 +227,23 @@ ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- User Profiles Policies
 CREATE POLICY "Users can view own profile" ON public.user_profiles
-    FOR SELECT USING (auth.uid() = id);
+    FOR SELECT USING ((select auth.uid()) = id);
 
 CREATE POLICY "Users can update own profile" ON public.user_profiles
-    FOR UPDATE USING (auth.uid() = id);
+    FOR UPDATE USING ((select auth.uid()) = id);
 
 -- Architectures Policies
 CREATE POLICY "Users can view own architectures" ON public.architectures
-    FOR SELECT USING (auth.uid() = user_id);
+    FOR SELECT USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can create own architectures" ON public.architectures
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+    FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can update own architectures" ON public.architectures
-    FOR UPDATE USING (auth.uid() = user_id);
+    FOR UPDATE USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete own architectures" ON public.architectures
-    FOR DELETE USING (auth.uid() = user_id);
+    FOR DELETE USING ((select auth.uid()) = user_id);
 
 -- Features Policies
 CREATE POLICY "Users can view features of own architectures" ON public.features
@@ -251,7 +251,7 @@ CREATE POLICY "Users can view features of own architectures" ON public.features
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = features.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -260,7 +260,7 @@ CREATE POLICY "Users can create features for own architectures" ON public.featur
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = features.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -270,7 +270,7 @@ CREATE POLICY "Users can view database_tables of own architectures" ON public.da
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = database_tables.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -279,7 +279,7 @@ CREATE POLICY "Users can create database_tables for own architectures" ON public
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = database_tables.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -289,7 +289,7 @@ CREATE POLICY "Users can view apis of own architectures" ON public.apis
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = apis.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -298,7 +298,7 @@ CREATE POLICY "Users can create apis for own architectures" ON public.apis
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = apis.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -308,7 +308,7 @@ CREATE POLICY "Users can view components of own architectures" ON public.compone
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = components.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -317,7 +317,7 @@ CREATE POLICY "Users can create components for own architectures" ON public.comp
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = components.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -327,7 +327,7 @@ CREATE POLICY "Users can view roadmap_phases of own architectures" ON public.roa
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = roadmap_phases.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
@@ -336,26 +336,20 @@ CREATE POLICY "Users can create roadmap_phases for own architectures" ON public.
         EXISTS (
             SELECT 1 FROM public.architectures
             WHERE architectures.id = roadmap_phases.architecture_id
-            AND architectures.user_id = auth.uid()
+            AND architectures.user_id = (select auth.uid())
         )
     );
 
 -- Usage Records Policies
 CREATE POLICY "Users can view own usage records" ON public.usage_records
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Service can create usage records" ON public.usage_records
-    FOR INSERT WITH CHECK (true);
+    FOR SELECT USING ((select auth.uid()) = user_id);
 
 -- Notifications Policies
 CREATE POLICY "Users can view own notifications" ON public.notifications
-    FOR SELECT USING (auth.uid() = user_id);
+    FOR SELECT USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can update own notifications" ON public.notifications
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Service can create notifications" ON public.notifications
-    FOR INSERT WITH CHECK (true);
+    FOR UPDATE USING ((select auth.uid()) = user_id);
 
 -- ============================================================================
 -- FUNCTIONS AND TRIGGERS
@@ -363,12 +357,15 @@ CREATE POLICY "Service can create notifications" ON public.notifications
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Trigger for user_profiles
 CREATE TRIGGER update_user_profiles_updated_at
@@ -384,7 +381,11 @@ CREATE TRIGGER update_architectures_updated_at
 
 -- Function to create user profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
     INSERT INTO public.user_profiles (id, email, full_name, username)
     VALUES (
@@ -395,7 +396,10 @@ BEGIN
     );
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+-- Revoke execute from public/anon/authenticated on trigger function
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 -- Trigger to create user profile on signup
 CREATE TRIGGER on_auth_user_created

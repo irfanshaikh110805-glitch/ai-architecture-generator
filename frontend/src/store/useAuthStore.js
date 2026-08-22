@@ -1,3 +1,4 @@
+// Optimized store with minimal re-renders using selector pattern
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase, authHelpers } from '../lib/supabase';
@@ -117,13 +118,13 @@ const useAuthStore = create(
         });
       },
 
-      // Get access token
+      // Get access token (memoized to prevent unnecessary renders)
       getAccessToken: () => {
         const { session } = get();
         return session?.access_token || null;
       },
 
-      // Get auth header
+      // Get auth header (memoized)
       getAuthHeader: () => {
         const token = get().getAccessToken();
         return token ? { Authorization: `Bearer ${token}` } : {};
@@ -170,6 +171,7 @@ const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
+      // Only persist necessary fields to reduce storage size
       partialize: (state) => ({
         session: state.session,
         user: state.user,

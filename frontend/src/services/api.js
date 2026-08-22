@@ -25,9 +25,16 @@ const shouldRetry = (error) => {
   // Never retry on 429 Too Many Requests - retrying immediately worsens rate limits
   if (error.response?.status === 429) return false;
   
+  // Never retry on client errors (4xx except 408, 429)
+  if (error.response?.status >= 400 && error.response?.status < 500) {
+    // Retry only on 408 (Request Timeout)
+    return error.response.status === 408;
+  }
+  
   // Retry on network errors or 5xx server errors
   if (!error.response) return true;
   if (error.response.status >= 500 && error.response.status < 600) return true;
+  
   return false;
 };
 
@@ -61,8 +68,12 @@ api.interceptors.response.use(
     
     // Handle 401 Unauthorized - logout user
     if (error.response?.status === 401) {
-      useAuthStore.getState().signOut();
-      window.location.href = '/login';
+      const currentPath = window.location.pathname;
+      // Only logout and redirect if not already on auth pages
+      if (currentPath !== '/login' && currentPath !== '/signup') {
+        useAuthStore.getState().signOut();
+        window.location.href = '/login';
+      }
       return Promise.reject(new Error('Session expired. Please login again.'));
     }
     
@@ -70,7 +81,7 @@ api.interceptors.response.use(
     if (shouldRetry(error) && (!config.retryCount || config.retryCount < MAX_RETRIES)) {
       config.retryCount = (config.retryCount || 0) + 1;
       
-      // Calculate exponential backoff
+      // Calculate exponential backoff with jitter
       const delay = INITIAL_RETRY_DELAY * Math.pow(2, config.retryCount - 1);
       const jitter = Math.random() * 1000;
       
@@ -85,22 +96,25 @@ api.interceptors.response.use(
       // Handle rate limiting
       if (error.response.status === 429) {
         const retryAfter = error.response.headers['retry-after'] || 'a few minutes';
-        throw new Error(`Rate limit exceeded. Please try again after ${retryAfter}`);
+        const message = error.response.data?.message || `Rate limit exceeded. Please try again after ${retryAfter}`;
+        throw new Error(message);
       }
       
       // Handle validation errors
       if (error.response.status === 422) {
-        throw new Error(error.response.data.detail || 'Invalid input provided');
+        const detail = error.response.data.detail;
+        throw new Error(Array.isArray(detail) ? detail[0]?.msg : detail || 'Invalid input provided');
       }
       
       // Handle server errors
       if (error.response.status >= 500) {
-        throw new Error('Server error. Please try again later.');
+        throw new Error(error.response.data?.detail || 'Server error. Please try again later.');
       }
       
-      throw new Error(error.response.data.detail || 'An error occurred');
+      // Handle other errors
+      throw new Error(error.response.data?.detail || error.response.data?.message || 'An error occurred');
     } else if (error.request) {
-      throw new Error('Network error. Please check your connection.');
+      throw new Error('Network error. Please check your connection and try again.');
     } else {
       throw new Error('An unexpected error occurred');
     }

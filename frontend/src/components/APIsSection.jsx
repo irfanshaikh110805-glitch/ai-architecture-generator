@@ -35,51 +35,54 @@ function APIsSection({ apis }) {
   };
 
   return (
-    <div className="card-premium p-6 fade-in">
+    <div className="card-premium p-4 sm:p-6 fade-in">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <div className="section-icon">
             <Globe size={16} />
           </div>
           <div>
-            <h2 className="section-title">
+            <h2 className="section-title text-base sm:text-lg">
               REST APIs
-              <span className="text-gray-400 font-normal text-sm ml-1.5">({apis.length} endpoints)</span>
+              <span className="text-gray-400 font-normal text-xs sm:text-sm ml-1.5">({apis.length} endpoints)</span>
             </h2>
-            {/* Method filter pills */}
-            <div className="flex gap-1.5 mt-2 flex-wrap">
-              {methods.map(m => {
-                const c = METHOD_COLORS[m];
-                const isActive = filter === m;
-                return (
-                  <button
-                    key={m}
-                    onClick={() => setFilter(m)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 ${
-                      isActive && m !== 'ALL'
-                        ? 'text-white shadow-sm'
-                        : isActive
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-surface-100 text-gray-500 hover:bg-surface-200'
-                    }`}
-                    style={isActive && c ? { background: `linear-gradient(135deg, ${c.from}, ${c.to})` } : {}}
-                  >
-                    {m}
-                  </button>
-                );
-              })}
-            </div>
           </div>
         </div>
 
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-all border border-transparent hover:border-brand-200"
-        >
-          {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+          {/* Method filter pills */}
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide touch-pan-x max-w-[calc(100vw-120px)] sm:max-w-none">
+            {methods.map(m => {
+              const c = METHOD_COLORS[m];
+              const isActive = filter === m;
+              return (
+                <button
+                  key={m}
+                  onClick={() => setFilter(m)}
+                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 active:scale-95 ${
+                    isActive && m !== 'ALL'
+                      ? 'text-white shadow-xs'
+                      : isActive
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-surface-100 text-gray-500 hover:bg-surface-200'
+                  }`}
+                  style={isActive && c ? { background: `linear-gradient(135deg, ${c.from}, ${c.to})` } : {}}
+                >
+                  {m}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200 hover:border-brand-200 flex-shrink-0"
+          >
+            {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+            <span>{copied ? 'Copied' : 'Copy'}</span>
+          </button>
+        </div>
       </div>
 
       {/* API list */}
@@ -87,16 +90,16 @@ function APIsSection({ apis }) {
         {filtered.map((api, idx) => (
           <div
             key={idx}
-            className="group flex items-start gap-3 p-3.5 rounded-xl border border-surface-200 bg-white hover:border-brand-200 hover:shadow-sm transition-all duration-200 hover:-translate-y-0.5 fade-in"
+            className="group flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-xl border border-surface-200 bg-white hover:border-brand-200 hover:shadow-sm transition-all duration-200 hover:-translate-y-0.5 fade-in"
           >
-            <span className={`px-2.5 py-1 rounded-lg font-mono font-bold text-xs flex-shrink-0 uppercase tracking-wide ${METHOD_STYLES[api.method] || METHOD_STYLES.GET}`}>
+            <span className={`px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg font-mono font-bold text-[10px] sm:text-xs flex-shrink-0 uppercase tracking-wide mt-0.5 ${METHOD_STYLES[api.method] || METHOD_STYLES.GET}`}>
               {api.method}
             </span>
             <div className="flex-1 min-w-0">
-              <code className="text-brand-600 font-mono text-sm font-semibold block truncate group-hover:text-brand-700 transition-colors">
+              <code className="text-brand-600 font-mono text-xs sm:text-sm font-semibold block break-all group-hover:text-brand-700 transition-colors">
                 {api.endpoint}
               </code>
-              <p className="text-gray-400 text-xs mt-0.5 leading-relaxed">{api.description}</p>
+              <p className="text-gray-500 text-xs mt-0.5 leading-relaxed break-words">{api.description}</p>
             </div>
           </div>
         ))}

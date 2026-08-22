@@ -81,3 +81,7 @@ pip-delete-this-directory.txt
 # Agent-related
 .agents/
 skills-lock.json
+
+# Reports with potential secrets
+*OPTIMIZATION_REPORT.md
+*QUICK_CHANGES_SUMMARY.md

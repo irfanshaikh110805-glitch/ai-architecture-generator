@@ -136,116 +136,116 @@ function Result() {
     <div className="min-h-screen" style={{ backgroundColor: '#f8f9fc' }}>
 
       {/* ── Sticky Top Bar ── */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-surface-200"
-              style={{ boxShadow: '0 1px 20px rgba(66,99,235,0.07)' }}>
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-3">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-surface-200 shadow-sm"
+              style={{ boxShadow: '0 2px 16px rgba(37,99,235,0.06)' }}>
+        {/* Main Header Row */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo + Brand */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-brand-50 transition-all duration-200 group flex-shrink-0"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-brand-50 transition-all duration-200 flex-shrink-0"
           >
-            <img src="/logo.jpg" alt="ArchitechAI" className="w-10 h-10 rounded-lg object-cover shadow-sm" />
-            <span className="font-display font-800 text-lg tracking-tight text-gray-900 hidden sm:block">
+            <img src="/logo.jpg" alt="ArchitechAI" className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-cover shadow-sm" />
+            <span className="font-display font-bold text-base sm:text-lg tracking-tight text-gray-900">
               Architech<span className="gradient-text">AI</span>
             </span>
           </button>
-          
-          <div className="w-px h-6 bg-surface-200 hidden sm:block" />
 
-          {/* Project title */}
-          <div className="flex-1 min-w-0 hidden md:block">
-            <div className="flex items-center gap-2">
-              <Sparkles size={12} className="text-brand-400 flex-shrink-0" />
-              <p className="text-sm font-medium text-gray-600 truncate">{idea.substring(0, 70)}{idea.length > 70 ? '…' : ''}</p>
-            </div>
-          </div>
-
-          {/* Section nav pills (scrollable) */}
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 mx-2">
-            {/* eslint-disable-next-line no-unused-vars */}
-            {NAV_SECTIONS.map(({ id, label, icon: NavIcon }) => (
-              <button
-                key={id}
-                onClick={() => scrollTo(id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                  activeSection === id
-                    ? 'bg-brand-50 text-brand-600 border border-brand-200'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-surface-100'
-                }`}
-              >
-                <NavIcon size={11} />
-                {label}
-              </button>
-            ))}
+          {/* Project title preview (desktop/tablet only) */}
+          <div className="flex-1 min-w-0 hidden md:flex items-center gap-2 max-w-md">
+            <Sparkles size={13} className="text-brand-500 flex-shrink-0" />
+            <p className="text-xs font-medium text-gray-600 truncate">{idea}</p>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <button
               onClick={() => setShowHistory(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-transparent hover:border-brand-200"
+              aria-label="View Version History"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-surface-200 hover:border-brand-200"
             >
-              <Clock size={14} />
-              <span className="hidden sm:block">History</span>
+              <Clock size={15} />
+              <span className="hidden sm:inline">History</span>
             </button>
             <button
               onClick={() => setShowShare(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-transparent hover:border-brand-200"
+              aria-label="Share Architecture"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-surface-200 hover:border-brand-200"
             >
-              <Share2 size={14} />
-              <span className="hidden sm:block">Share</span>
+              <Share2 size={15} />
+              <span className="hidden sm:inline">Share</span>
             </button>
             <ExportMenu result={result} idea={idea} />
+          </div>
+        </div>
 
+        {/* Subnav Section Pills (Horizontally scrollable on mobile) */}
+        <div className="border-t border-surface-100 bg-surface-50/80">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-hide touch-pan-x">
+            {NAV_SECTIONS.map((sec) => {
+              const Icon = sec.icon;
+              return (
+                <button
+                  key={sec.id}
+                  onClick={() => scrollTo(sec.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 active:scale-95 ${
+                    activeSection === sec.id
+                      ? 'bg-brand-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/80 bg-white/40 border border-surface-200/50'
+                  }`}
+                >
+                  <Icon size={12} />
+                  {sec.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </header>
 
       {/* ── Project Hero Card ── */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 pb-1 sm:pb-2">
         <div
-          className="rounded-2xl p-6 overflow-hidden relative"
+          className="rounded-2xl p-4 sm:p-6 overflow-hidden relative"
           style={{
-              background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%)',
-              boxShadow: '0 8px 32px rgba(37,99,235,0.25), 0 2px 8px rgba(37,99,235,0.1)',
+            background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%)',
+            boxShadow: '0 8px 32px rgba(37,99,235,0.2), 0 2px 8px rgba(37,99,235,0.1)',
           }}
         >
           {/* Background decorations */}
-          <div className="absolute top-0 right-0 w-72 h-72 opacity-10"
+          <div className="absolute top-0 right-0 w-72 h-72 opacity-10 pointer-events-none"
                style={{ background: 'radial-gradient(circle, white, transparent 70%)', transform: 'translate(30%, -30%)' }} />
-          <div className="absolute bottom-0 left-1/3 w-40 h-40 opacity-10"
+          <div className="absolute bottom-0 left-1/3 w-40 h-40 opacity-10 pointer-events-none"
                style={{ background: 'radial-gradient(circle, white, transparent 70%)', transform: 'translateY(50%)' }} />
 
-          <div className="relative z-10 flex items-start justify-between gap-4 flex-wrap">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-                  <Sparkles size={12} className="text-white" />
-                  <span className="text-xs font-semibold text-white/90">Generated Architecture</span>
-                </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
+                <Sparkles size={12} className="text-white" />
+                <span className="text-[11px] sm:text-xs font-semibold text-white/90">Generated Architecture</span>
               </div>
-              <h2 className="text-xl md:text-2xl font-display font-700 text-white mb-4 leading-snug">
-                {idea.substring(0, 100)}{idea.length > 100 ? '…' : ''}
-              </h2>
-              <div className="flex items-center gap-2 flex-wrap">
-                {[
-                  { label: result.architecture?.type, bg: 'bg-white/20' },
-                  { label: `${result.features?.length || 0} features`, bg: 'bg-emerald-400/20' },
-                  { label: `${result.apis?.length || 0} APIs`, bg: 'bg-blue-400/20' },
-                  { label: `${result.database?.length || 0} tables`, bg: 'bg-cyan-400/20' },
-                ].filter(b => b.label).map((badge, i) => (
-                  <span key={i} className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/20 ${badge.bg} backdrop-blur-sm`}>
-                    {badge.label}
-                  </span>
-                ))}
-              </div>
+            </div>
+            <h2 className="text-base sm:text-xl md:text-2xl font-display font-bold text-white mb-3 sm:mb-4 leading-snug break-words">
+              {idea}
+            </h2>
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              {[
+                { label: result.architecture?.type, bg: 'bg-white/25' },
+                { label: `${result.features?.length || 0} features`, bg: 'bg-emerald-400/25' },
+                { label: `${result.apis?.length || 0} APIs`, bg: 'bg-blue-400/25' },
+                { label: `${result.database?.length || 0} tables`, bg: 'bg-cyan-400/25' },
+              ].filter(b => b.label).map((badge, i) => (
+                <span key={i} className={`inline-flex items-center px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/20 ${badge.bg} backdrop-blur-sm`}>
+                  {badge.label}
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       {/* ── Main Content with Lazy Loading ── */}
-      <main className="max-w-7xl mx-auto px-4 py-5 space-y-5">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 sm:pb-12">
         <Suspense fallback={<SectionLoader />}>
           <div id="features">   <FeaturesSection features={result.features} /> </div>
         </Suspense>

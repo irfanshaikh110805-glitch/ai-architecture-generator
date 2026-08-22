@@ -111,22 +111,37 @@ function TechRecommendations({ architecture }) {
   }, [stack]);
 
   const tabs = [
-    { id: 'alternatives', label: 'Architecture Substitutes', icon: Code },
-    { id: 'security', label: 'Defensive Strategy', icon: Shield },
-    { id: 'performance', label: 'Optimization Vector', icon: Zap },
+    { id: 'alternatives', label: 'Alternatives', icon: Code },
+    { id: 'security', label: 'Security Hardening', icon: Shield },
+    { id: 'performance', label: 'Performance Tips', icon: Zap },
   ];
 
+  const parseTechString = (str = '') => {
+    if (!str) return { chips: [], note: '' };
+    const parenMatch = str.match(/^([^(]+)(?:\(([^)]+)\))?/);
+    const mainPart = parenMatch ? parenMatch[1] : str;
+    const note = parenMatch && parenMatch[2] ? parenMatch[2] : '';
+    const chips = mainPart.split(/\s*\+\s*|\s*,\s*/).map(s => s.trim()).filter(Boolean);
+    return { chips, note };
+  };
+
   return (
-    <div className="card-premium overflow-hidden transition-all duration-300 stagger">
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6">
-        <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
-          <Lightbulb size={22} className="text-white/80" /> Strategic Intelligence
-        </h2>
-        <p className="text-emerald-50 text-sm mt-1.5 font-medium">Platform-Specific Guidance • Alternatives • Hardening Tips</p>
+    <div className="card-premium overflow-hidden fade-in">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 p-4 sm:p-6 text-white">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20 flex-shrink-0">
+            <Lightbulb size={20} />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-xl font-bold tracking-tight">Strategic Tech Recommendations</h2>
+            <p className="text-emerald-100 text-xs sm:text-sm mt-0.5">Architecture alternatives, security hardening & speed optimization</p>
+          </div>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-surface-100 bg-surface-50/30">
+      <div className="flex border-b border-surface-200 bg-surface-50/80 p-1.5 gap-1.5 overflow-x-auto scrollbar-hide touch-pan-x">
         {tabs.map(t => {
           const TabIcon = t.icon;
           const isActive = activeTab === t.id;
@@ -134,77 +149,95 @@ function TechRecommendations({ architecture }) {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-300 border-b-2 ${
+              className={`flex-1 min-w-[110px] flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
                 isActive
-                  ? 'border-brand-500 text-brand-600 bg-white shadow-inner-sm'
-                  : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-surface-50'
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-200/60'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'
               }`}
             >
-              <TabIcon size={14} className={isActive ? 'text-brand-500' : 'text-gray-300'} /> {t.label}
+              <TabIcon size={14} className={isActive ? 'text-emerald-600' : 'text-gray-400'} />
+              <span>{t.label}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="p-7">
+      <div className="p-4 sm:p-6">
         {/* Alternatives tab */}
         {activeTab === 'alternatives' && (
-          <div className="space-y-5">
-            {Object.entries(altsByLayer).map(([key, layer], idx) => {
+          <div className="space-y-3 sm:space-y-4">
+            {Object.entries(altsByLayer).map(([key, layer]) => {
               const LayerIcon = layer.icon;
               const isExpanded = expanded[key];
+              const parsed = parseTechString(layer.current);
+
               return (
-                <div key={key} className={`border border-surface-200 rounded-3xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md hover:border-brand-200 animate-fade-in`} style={{ animationDelay: `${idx * 150}ms` }}>
+                <div key={key} className="border border-surface-200 rounded-2xl overflow-hidden bg-white shadow-xs transition-all hover:border-emerald-300">
                   <button
                     onClick={() => toggleExpand(key)}
-                    className={`w-full flex items-center justify-between p-5 transition-all duration-300 ${isExpanded ? 'bg-brand-50/30' : 'bg-white hover:bg-surface-50'}`}
+                    className={`w-full flex items-start sm:items-center justify-between p-3.5 sm:p-4 text-left transition-all ${
+                      isExpanded ? 'bg-emerald-50/40 border-b border-surface-200' : 'hover:bg-surface-50/50'
+                    }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-brand-600 shadow-sm border border-brand-100">
-                        <LayerIcon size={20} />
+                    <div className="flex items-start gap-3 min-w-0 flex-1 pr-2">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200/60 flex-shrink-0 mt-0.5 sm:mt-0">
+                        <LayerIcon size={16} />
                       </div>
-                      <div className="text-left">
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{layer.label}</p>
-                        <p className="text-base font-bold text-gray-900 mt-0.5">{layer.current}</p>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{layer.label}</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {parsed.chips.map((chip, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-md text-xs font-semibold bg-surface-100 text-gray-800 border border-surface-200">
+                              {chip}
+                            </span>
+                          ))}
+                        </div>
+                        {parsed.note && (
+                          <p className="text-[11px] text-gray-500 mt-1 leading-snug">{parsed.note}</p>
+                        )}
                       </div>
                     </div>
-                    <div className={`w-8 h-8 rounded-full border border-surface-200 flex items-center justify-center text-gray-400 transition-transform ${isExpanded ? 'rotate-180 bg-white text-brand-600 border-brand-200' : ''}`}>
-                       <ChevronDown size={14} />
+                    <div className={`w-7 h-7 rounded-lg border border-surface-200 flex items-center justify-center text-gray-400 transition-transform flex-shrink-0 ${
+                      isExpanded ? 'rotate-180 bg-white text-emerald-600 border-emerald-300' : ''
+                    }`}>
+                      <ChevronDown size={14} />
                     </div>
                   </button>
 
                   {isExpanded && (
-                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-surface-100 bg-white">
+                    <div className="p-3.5 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 bg-surface-50/30">
                       {layer.alternatives.length === 0 ? (
-                        <div className="col-span-full py-8 text-center bg-surface-50/50 rounded-2xl border border-dashed border-surface-200">
-                           <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">Default Configuration Optimal</p>
+                        <div className="col-span-full py-6 text-center bg-white rounded-xl border border-dashed border-surface-200">
+                          <p className="text-xs text-gray-400 font-medium">Selected configuration is already industry standard.</p>
                         </div>
                       ) : layer.alternatives.map((alt) => (
-                        <div key={alt.name} className="flex flex-col gap-4 p-5 rounded-2xl border border-surface-100 hover:border-brand-200 hover:bg-brand-50/10 transition-all group scale-in">
-                          <p className="text-base font-bold text-gray-900 group-hover:text-brand-600 transition-colors">{alt.name}</p>
-                          <div className="space-y-3">
-                            <div className="space-y-1.5">
-                              <p className="text-[10px] text-emerald-600 font-black uppercase tracking-wider flex items-center gap-1.5">
-                                <CheckCircle size={10} /> Pro Factors
-                              </p>
-                              {alt.pros.map(p => <p key={p} className="text-[11px] text-gray-500 leading-relaxed font-medium">• {p}</p>)}
-                            </div>
-                            <div className="space-y-1.5 pt-1">
-                              <p className="text-[10px] text-rose-500 font-black uppercase tracking-wider flex items-center gap-1.5">
-                                <AlertTriangle size={10} /> Constraints
-                              </p>
-                              {alt.cons.map(c => <p key={c} className="text-[11px] text-gray-500 leading-relaxed font-medium">• {c}</p>)}
+                        <div key={alt.name} className="flex flex-col justify-between p-3.5 sm:p-4 rounded-xl border border-surface-200 bg-white hover:border-emerald-300 hover:shadow-xs transition-all">
+                          <div>
+                            <p className="text-sm font-bold text-gray-900 mb-2">{alt.name}</p>
+                            <div className="space-y-2">
+                              <div className="space-y-1">
+                                <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                                  <CheckCircle size={10} /> Advantages
+                                </p>
+                                {alt.pros.map(p => <p key={p} className="text-xs text-gray-600 pl-3 leading-snug">• {p}</p>)}
+                              </div>
+                              <div className="space-y-1 pt-1">
+                                <p className="text-[10px] text-rose-500 font-bold uppercase tracking-wider flex items-center gap-1">
+                                  <AlertTriangle size={10} /> Trade-offs
+                                </p>
+                                {alt.cons.map(c => <p key={c} className="text-xs text-gray-600 pl-3 leading-snug">• {c}</p>)}
+                              </div>
                             </div>
                           </div>
-                          <div className="space-y-3 pt-3 mt-auto border-t border-surface-100">
-                             <div className="space-y-1">
-                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Efficiency Vector</p>
-                                <BarMeter value={alt.perf} color="brand" />
-                             </div>
-                             <div className="space-y-1">
-                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Security Score</p>
-                                <BarMeter value={alt.security} color="emerald" />
-                             </div>
+                          <div className="space-y-2 pt-3 mt-3 border-t border-surface-100">
+                            <div className="space-y-0.5">
+                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Performance</p>
+                              <BarMeter value={alt.perf} color="brand" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Security</p>
+                              <BarMeter value={alt.security} color="emerald" />
+                            </div>
                           </div>
                         </div>
                       ))}

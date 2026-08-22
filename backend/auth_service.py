@@ -37,10 +37,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Failed login attempt tracking (in-memory, consider Redis for production)
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+from threading import Lock
 
 login_attempts = defaultdict(list)
+login_attempts_lock = Lock()
 LOCKOUT_THRESHOLD = 5
 LOCKOUT_DURATION = timedelta(minutes=15)
+MAX_ATTEMPTS_CACHE_SIZE = 10000  # Prevent memory leaks
 
 # Security
 security = HTTPBearer()
@@ -66,25 +69,55 @@ class AuthService:
     @staticmethod
     def is_account_locked(identifier: str) -> bool:
         """Check if account is temporarily locked due to failed attempts"""
-        now = datetime.now(timezone.utc)
-        attempts = login_attempts.get(identifier, [])
-        
-        # Remove old attempts
-        recent_attempts = [t for t in attempts if now - t < LOCKOUT_DURATION]
-        login_attempts[identifier] = recent_attempts
-        
-        return len(recent_attempts) >= LOCKOUT_THRESHOLD
+        with login_attempts_lock:
+            now = datetime.now(timezone.utc)
+            attempts = login_attempts.get(identifier, [])
+            
+            # Remove old attempts
+            recent_attempts = [t for t in attempts if now - t < LOCKOUT_DURATION]
+            
+            if recent_attempts:
+                login_attempts[identifier] = recent_attempts
+            elif identifier in login_attempts:
+                # Clean up empty entries to prevent memory leaks
+                del login_attempts[identifier]
+            
+            # Prevent memory leak: if cache grows too large, clean old entries
+            if len(login_attempts) > MAX_ATTEMPTS_CACHE_SIZE:
+                AuthService._cleanup_old_attempts()
+            
+            return len(recent_attempts) >= LOCKOUT_THRESHOLD
     
     @staticmethod
     def record_failed_attempt(identifier: str):
         """Record a failed login attempt"""
-        login_attempts[identifier].append(datetime.now(timezone.utc))
+        with login_attempts_lock:
+            login_attempts[identifier].append(datetime.now(timezone.utc))
     
     @staticmethod
     def clear_failed_attempts(identifier: str):
         """Clear failed attempts after successful login"""
-        if identifier in login_attempts:
+        with login_attempts_lock:
+            if identifier in login_attempts:
+                del login_attempts[identifier]
+    
+    @staticmethod
+    def _cleanup_old_attempts():
+        """Clean up old login attempts to prevent memory leaks"""
+        now = datetime.now(timezone.utc)
+        identifiers_to_remove = []
+        
+        for identifier, attempts in login_attempts.items():
+            recent_attempts = [t for t in attempts if now - t < LOCKOUT_DURATION]
+            if not recent_attempts:
+                identifiers_to_remove.append(identifier)
+            else:
+                login_attempts[identifier] = recent_attempts
+        
+        for identifier in identifiers_to_remove:
             del login_attempts[identifier]
+        
+        logger.info(f"Cleaned up {len(identifiers_to_remove)} old login attempt records")
     
     @staticmethod
     def generate_api_key() -> str:

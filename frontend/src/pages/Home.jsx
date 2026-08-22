@@ -273,44 +273,18 @@ function Home() {
                     disabled={loading}
                   />
                   {/* Character count with progress indicator */}
-                  <div className="absolute bottom-3 right-4 flex items-center gap-3">
-                    {/* Progress circle */}
-                    <div className="relative w-12 h-12">
-                      <svg className="transform -rotate-90" width="48" height="48">
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
-                          stroke="#e5e7eb"
-                          strokeWidth="3"
-                          fill="none"
-                        />
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
-                          stroke={charCount >= 10 ? '#10b981' : '#3b82f6'}
-                          strokeWidth="3"
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * 20}`}
-                          strokeDashoffset={`${2 * Math.PI * 20 * (1 - Math.min(charCount / 100, 1))}`}
-                          className="transition-all duration-300"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`text-xs font-bold transition-colors ${charCount >= 10 ? 'text-emerald-500' : 'text-gray-400'}`}>
-                          {charCount}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="absolute bottom-3 right-4 flex items-center gap-2">
+                    <span className={`text-xs font-semibold ${charCount >= 10 ? 'text-emerald-600' : 'text-gray-400'}`}>
+                      {charCount} / min 10
+                    </span>
                     {charCount >= 10 && (
-                      <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-lg animate-scale-in">
-                        <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                      <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-lg animate-scale-in border border-emerald-200/60">
+                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 flex items-center justify-center">
                           <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
                             <path d="M1.5 4L3.5 6L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </div>
-                        <span className="text-xs font-semibold text-emerald-600">Ready!</span>
+                        <span className="text-[11px] font-semibold text-emerald-700">Ready</span>
                       </div>
                     )}
                   </div>

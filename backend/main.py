@@ -216,16 +216,23 @@ async def register(
             data={"sub": user.id, "email": user.email}
         )
         
+        user_response = UserResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            tier=user.tier,
+            daily_limit=user.daily_limit,
+            monthly_limit=user.monthly_limit,
+            is_active=user.is_active,
+            is_verified=user.is_verified,
+            created_at=user.created_at
+        )
+        
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            user=UserResponse(
-                id=user.id,
-                email=user.email,
-                full_name=user.full_name,
-                tier=user.tier,
-                is_active=user.is_active
-            )
+            expires_in=604800,
+            user=user_response
         )
     except HTTPException:
         raise
@@ -260,16 +267,23 @@ async def login(
             data={"sub": user.id, "email": user.email}
         )
         
+        user_response = UserResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            tier=user.tier,
+            daily_limit=user.daily_limit,
+            monthly_limit=user.monthly_limit,
+            is_active=user.is_active,
+            is_verified=user.is_verified,
+            created_at=user.created_at
+        )
+        
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            user=UserResponse(
-                id=user.id,
-                email=user.email,
-                full_name=user.full_name,
-                tier=user.tier,
-                is_active=user.is_active
-            )
+            expires_in=604800,
+            user=user_response
         )
     except HTTPException as he:
         # Record failed attempt if it's authentication error
