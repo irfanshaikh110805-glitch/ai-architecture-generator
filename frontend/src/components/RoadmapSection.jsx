@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Map, Copy, Check, CheckCircle2 } from 'lucide-react';
+import { Map, Copy, Check, CheckSquare, Square } from 'lucide-react';
 
-const PHASE_CONFIGS = [
-  { from: '#4263eb', to: '#7c5cbf', bg: '#f0f4ff', border: '#c3d3ff', label_bg: '#e0e9ff', label_text: '#2a3faa' },
-  { from: '#0ea5e9', to: '#8b5cf6', bg: '#f0f9ff', border: '#bae6fd', label_bg: '#e0f2fe', label_text: '#0369a1' },
-  { from: '#10b981', to: '#0ea5e9', bg: '#f0fdf4', border: '#bbf7d0', label_bg: '#dcfce7', label_text: '#065f46' },
-  { from: '#f59e0b', to: '#f97316', bg: '#fffbeb', border: '#fde68a', label_bg: '#fef3c7', label_text: '#92400e' },
-  { from: '#ec4899', to: '#8b5cf6', bg: '#fdf4ff', border: '#e9d5ff', label_bg: '#fce7f3', label_text: '#9d174d' },
+const PHASE_COLORS = [
+  { header: 'bg-[#FF00FF] text-white', badge: 'bg-[#FFE600] text-black' },
+  { header: 'bg-[#00FF00] text-black', badge: 'bg-[#00FFFF] text-black' },
+  { header: 'bg-[#FFE600] text-black', badge: 'bg-[#FF00FF] text-white' },
+  { header: 'bg-[#00FFFF] text-black', badge: 'bg-[#00FF00] text-black' },
+  { header: 'bg-[#FF5500] text-white', badge: 'bg-[#FFE600] text-black' },
 ];
 
 function RoadmapSection({ roadmap }) {
-  const [copied, setCopied]       = useState(false);
+  const [copied, setCopied]        = useState(false);
   const [checkedTasks, setChecked] = useState({});
 
   if (!roadmap?.length) return null;
@@ -31,31 +31,33 @@ function RoadmapSection({ roadmap }) {
   };
 
   return (
-    <div className="card-premium p-4 sm:p-6 fade-in">
+    <div className="card-premium p-5 sm:p-7">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="section-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)' }}>
-            <Map size={16} />
+      <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-black">
+        <div className="flex items-center gap-3">
+          <div className="section-icon bg-[#FF5500] text-white">
+            <Map size={18} className="stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="section-title text-base sm:text-lg">Development Roadmap</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{roadmap.length} phases</p>
+            <h2 className="section-title text-base sm:text-xl">DEVELOPMENT ROADMAP</h2>
+            <p className="font-mono text-xs font-bold text-gray-600 mt-0.5">
+              {roadmap.length} EXECUTION PHASES
+            </p>
           </div>
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200 hover:border-brand-200 flex-shrink-0"
+          className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1 flex-shrink-0 uppercase"
         >
-          {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-          <span>{copied ? 'Copied' : 'Copy'}</span>
+          {copied ? <Check size={14} className="stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+          <span>{copied ? 'COPIED' : 'COPY'}</span>
         </button>
       </div>
 
       {/* Phase Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 stagger">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {roadmap.map((phase, idx) => {
-          const cfg = PHASE_CONFIGS[idx % PHASE_CONFIGS.length];
+          const cfg = PHASE_COLORS[idx % PHASE_COLORS.length];
           const totalTasks = phase.tasks?.length || 0;
           const doneTasks  = Object.keys(checkedTasks).filter(k => k.startsWith(`${idx}-`) && checkedTasks[k]).length;
           const progress   = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
@@ -63,61 +65,48 @@ function RoadmapSection({ roadmap }) {
           return (
             <div
               key={idx}
-              className="rounded-xl border overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 fade-in"
-              style={{ borderColor: cfg.border, background: cfg.bg }}
+              className="bg-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] overflow-hidden hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000000] transition-all"
             >
               {/* Phase header */}
-              <div
-                className="px-3.5 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2"
-                style={{ borderBottom: `1px solid ${cfg.border}` }}
-              >
+              <div className="p-3.5 border-b-2 border-black flex items-center justify-between gap-2 bg-[#FDF6E3]">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-white text-[11px] sm:text-xs font-bold flex-shrink-0"
-                    style={{ background: `linear-gradient(135deg, ${cfg.from}, ${cfg.to})` }}
-                  >
-                    {idx + 1}
+                  <div className={`w-7 h-7 border-2 border-black flex items-center justify-center font-mono font-black text-xs ${cfg.header}`}>
+                    P{idx + 1}
                   </div>
-                  <h3 className="font-bold text-xs sm:text-sm text-gray-800 break-words">{phase.phase}</h3>
+                  <h3 className="font-mono font-black text-xs sm:text-sm text-black break-words uppercase">
+                    {phase.phase}
+                  </h3>
                 </div>
-                <span
-                  className="text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                  style={{ background: cfg.label_bg, color: cfg.label_text }}
-                >
+                <span className={`font-mono text-xs font-black px-2 py-0.5 border border-black shadow-[1px_1px_0px_0px_#000000] ${cfg.badge}`}>
                   {doneTasks}/{totalTasks}
                 </span>
               </div>
 
               {/* Progress bar */}
-              <div className="h-1 bg-white/70">
+              <div className="h-2 bg-[#F4ECC8] border-b-2 border-black">
                 <div
-                  className="h-full transition-all duration-500 rounded-full"
-                  style={{
-                    width: `${progress}%`,
-                    background: `linear-gradient(90deg, ${cfg.from}, ${cfg.to})`,
-                  }}
+                  className="h-full bg-[#00FF00] border-r-2 border-black transition-all duration-300"
+                  style={{ width: `${progress}%` }}
                 />
               </div>
 
               {/* Tasks */}
-              <ul className="p-3 sm:p-4 space-y-2">
+              <ul className="p-4 space-y-2 bg-[#FDF6E3]/40">
                 {phase.tasks?.map((task, taskIdx) => {
                   const key  = `${idx}-${taskIdx}`;
                   const done = checkedTasks[key];
                   return (
                     <li
                       key={taskIdx}
-                      className="flex items-start gap-2.5 cursor-pointer group py-1 active:bg-black/5 rounded-lg px-1 transition-colors select-none"
+                      className="flex items-start gap-2.5 cursor-pointer py-1 select-none hover:bg-white transition-colors p-1 border border-transparent hover:border-black"
                       onClick={() => toggleTask(idx, taskIdx)}
                     >
-                      <CheckCircle2
-                        size={16}
-                        className={`flex-shrink-0 mt-0.5 transition-all duration-200 ${
-                          done ? 'text-emerald-500' : 'text-gray-300 group-hover:text-gray-400'
-                        }`}
-                        fill={done ? 'currentColor' : 'none'}
-                      />
-                      <span className={`text-xs sm:text-sm leading-relaxed transition-all duration-200 break-words ${done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                      {done ? (
+                        <CheckSquare size={16} className="text-black stroke-[2.5] flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <Square size={16} className="text-black stroke-[2.5] flex-shrink-0 mt-0.5" />
+                      )}
+                      <span className={`font-mono text-xs leading-relaxed break-words font-medium ${done ? 'text-gray-400 line-through' : 'text-black font-bold'}`}>
                         {task}
                       </span>
                     </li>

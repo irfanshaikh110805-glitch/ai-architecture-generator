@@ -4,8 +4,8 @@
   "description": "Transform project ideas into complete system architectures with AI",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#FDF6E3",
+  "theme_color": "#FFE600",
   "orientation": "portrait-primary",
   "icons": [
     {

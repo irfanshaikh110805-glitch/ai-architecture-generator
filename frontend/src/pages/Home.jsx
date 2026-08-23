@@ -1,422 +1,373 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateArchitecture } from '../services/api';
-import {
-  Zap, Clock, Layers, GitMerge, Database, Globe, Code, BarChart,
-  ArrowRight, Sparkles, ChevronRight, Star, ChevronLeft, TrendingUp, Rocket
+import { 
+  Zap, 
+  Sparkles, 
+  Clock, 
+  ChevronRight, 
+  ChevronLeft, 
+  Star, 
+  Terminal, 
+  TrendingUp, 
+  Check, 
+  ArrowRight, 
+  Layers, 
+  Database, 
+  DollarSign, 
+  Activity, 
+  Code2, 
+  Server 
 } from 'lucide-react';
+import { generateArchitecture } from '../services/api';
+import useAppStore from '../store/useAppStore';
 import TemplateSelector from '../components/TemplateSelector';
 import VersionHistory from '../components/VersionHistory';
-
-import useAppStore from '../store/useAppStore';
+import ComparisonView from '../components/ComparisonView';
 import toast from 'react-hot-toast';
 
-const FEATURES_LIST = [
-  { icon: Layers,   label: 'Architecture Design', color: 'from-blue-500 to-blue-600' },
-  { icon: Database, label: 'DB Schema',            color: 'from-emerald-500 to-teal-600' },
-  { icon: Globe,    label: 'REST APIs',             color: 'from-orange-500 to-amber-600' },
-  { icon: Code,     label: 'Code Generation',       color: 'from-brand-500 to-accent-500' },
-  { icon: BarChart, label: 'Cost Estimation',       color: 'from-rose-500 to-pink-600' },
-  { icon: GitMerge, label: 'ER Diagrams',           color: 'from-cyan-500 to-sky-600' },
-  { icon: Clock,    label: 'Roadmap',               color: 'from-indigo-500 to-blue-600' },
-  { icon: Zap,      label: 'Tech Recs',             color: 'from-amber-500 to-yellow-600' },
-];
-
 const PLACEHOLDER_IDEAS = [
-  'A social media platform for pet owners with photo sharing, vet appointments, and a marketplace for pet supplies...',
-  'A real-time collaborative code editor with AI pair programming, syntax highlighting, and one-click deployment...',
-  'An e-commerce platform for handmade goods with seller analytics, integrated payments, and AI-powered recommendations...',
-  'A fitness tracking app with wearable integration, workout planning, nutrition tracking, and social challenges...',
+  'A social media platform for pet owners with real-time photo sharing, vet consultation booking, and community feed',
+  'An AI-powered recipe generator that creates custom meal plans based on dietary restrictions and pantry ingredients',
+  'A B2B SaaS platform for automated invoice processing with OCR, multi-currency support, and QuickBooks sync',
+  'A real-time collaborative code editor with syntax highlighting, live video chat, and git integration',
+  'A marketplace for freelance designers with portfolio showcasing, milestone-based escrow payments, and client reviews'
 ];
 
 function Home() {
-  const [idea, setIdea]               = useState('');
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState('');
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [showHistory, setShowHistory]     = useState(false);
+  const navigate = useNavigate();
+  const { 
+    currentIdea, 
+    setCurrentResult, 
+    versions 
+  } = useAppStore();
+
+  const [idea, setIdea] = useState(currentIdea || '');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [isFocused, setIsFocused]     = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const textareaRef                   = useRef(null);
-  const cardRef                       = useRef(null);
-  const navigate                      = useNavigate();
-  const { setCurrentResult, versions } = useAppStore();
-  
-  // Calculate character count directly from idea (no separate state needed)
-  const charCount = idea.length;
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [compareVersions, setCompareVersions] = useState(null);
 
-  useEffect(() => {
-    document.documentElement.classList.remove('dark');
-    document.body.classList.add('bg-premium-animated');
-    return () => { document.body.classList.remove('bg-premium-animated'); };
-  }, []);
+  const textareaRef = useRef(null);
 
-  // Cycle placeholder text
+  // Rotate placeholders every 4 seconds if input is empty
   useEffect(() => {
+    if (idea) return;
     const interval = setInterval(() => {
-      setPlaceholderIdx(i => (i + 1) % PLACEHOLDER_IDEAS.length);
+      setPlaceholderIdx(prev => (prev + 1) % PLACEHOLDER_IDEAS.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [idea]);
 
-  // Track mouse position for parallax effect
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (cardRef.current) {
-        const rect = cardRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
-        const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
-        setMousePosition({ x, y });
-      }
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  const charCount = idea.trim().length;
 
   const handleSubmit = async (e) => {
-    e?.preventDefault();
+    e.preventDefault();
     if (idea.trim().length < 10) {
-      setError('Please provide at least 10 characters describing your project idea.');
+      setError('Please provide at least 10 characters describing your idea.');
       return;
     }
+
     setLoading(true);
-    setError('');
+    setError(null);
+
     try {
-      const result = await generateArchitecture(idea);
-      localStorage.setItem('lastResult', JSON.stringify(result));
-      localStorage.setItem('lastIdea', idea);
-      setCurrentResult(result, idea);
-      toast.success('Architecture generated!', { icon: '✨' });
+      const data = await generateArchitecture(idea.trim());
+      setCurrentResult(data, idea.trim());
+      
+      localStorage.setItem('lastResult', JSON.stringify(data));
+      localStorage.setItem('lastIdea', idea.trim());
+
+      toast.success('Architecture compiled successfully!');
       navigate('/result');
     } catch (err) {
-      const msg = err.message || 'Failed to generate architecture. Please try again.';
-      setError(msg);
-      toast.error(msg);
+      console.error(err);
+      setError(err.message || 'Failed to generate architecture. Please try again.');
+      toast.error(err.message || 'Generation failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleTemplateSelect = (prompt) => {
-    setIdea(prompt);
+  const handleTemplateSelect = (templateText) => {
+    setIdea(templateText);
+    setError(null);
     setShowTemplates(false);
-    textareaRef.current?.focus();
-  };
-
-  const handleLoadVersion = (version) => {
-    localStorage.setItem('lastResult', JSON.stringify(version.result));
-    localStorage.setItem('lastIdea', version.idea);
-    setShowHistory(false);
-    navigate('/result');
-    toast.success(`Loaded: ${version.label}`);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-transparent">
-
-      {/* ── Decorative 3D Orbs & Grid ── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Floating 3D Orbs */}
-        <div className="orb-3d orb-brand"  style={{ width: 700, height: 700, top: '-200px', right: '-150px' }} />
-        <div className="orb-3d orb-accent" style={{ width: 600, height: 600, bottom: '-150px', left: '-100px', animationDelay: '-5s' }} />
-        <div className="orb-3d orb-sky"    style={{ width: 400, height: 400, top: '40%', left: '45%', animationDelay: '-10s' }} />
-        <div className="orb-3d orb-emerald" style={{ width: 500, height: 500, top: '10%', left: '-10%', animationDelay: '-15s' }} />
-
-        {/* 3D Perspective Grid */}
-        <div className="absolute inset-0 perspective-grid">
-          <div className="grid-3d" />
-        </div>
-
-        {/* Floating geometric shapes */}
-        <div className="floating-shapes">
-          <div className="shape-cube" style={{ top: '15%', left: '10%', animationDelay: '0s' }} />
-          <div className="shape-cube" style={{ top: '60%', right: '15%', animationDelay: '-3s' }} />
-          <div className="shape-sphere" style={{ top: '30%', right: '25%', animationDelay: '-6s' }} />
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#FDF6E3] bg-neo-pattern text-black font-sans selection:bg-[#00FF00] selection:text-black">
+      
       {/* ── Top Navigation ── */}
-      <header className="relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="bg-[#FDF6E3] border-b-[3px] border-black shadow-[0_4px_0px_0px_#000000] relative z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           {/* Logo + Back */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors duration-200"
+              className="flex items-center gap-1 font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-2.5 py-1.5 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all uppercase"
             >
-              <ChevronLeft size={16} />
-              Home
+              <ChevronLeft size={16} className="stroke-[3]" />
+              HOME
             </button>
-            <div className="w-px h-5 bg-gray-200" />
-            <div className="flex items-center gap-2.5">
-              <img src="/logo.jpg" alt="ArchitechAI" className="w-12 h-12 rounded-xl object-cover shadow-btn" />
-              <span className="font-display font-800 text-xl tracking-tight text-gray-900">
-                Architech<span className="gradient-text">AI</span>
+            <div className="w-[2px] h-6 bg-black" />
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 border-2 border-black bg-[#FF00FF] p-0.5 shadow-[2px_2px_0px_0px_#000000]">
+                <img src="/logo.jpg" alt="ArchitechAI" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-display font-black text-lg sm:text-xl tracking-tight text-black">
+                ARCHITECH<span className="bg-[#00FF00] px-1 ml-1 text-black border border-black text-xs">AI</span>
               </span>
             </div>
           </div>
 
-          {/* Nav actions */}
+          {/* History trigger */}
           <div className="flex items-center gap-3">
-            {versions.length > 0 && (
-              <button
-                onClick={() => setShowHistory(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-white/70 hover:bg-white text-gray-700 rounded-xl text-sm font-medium transition-all duration-200 border border-white/60 hover:border-blue-200 hover:text-blue-600 shadow-sm hover:shadow-md backdrop-blur-sm"
-              >
-                <Clock size={14} />
-                History
-                <span className="bg-blue-100 text-blue-600 text-xs font-semibold px-1.5 py-0.5 rounded-md">
-                  {versions.length}
-                </span>
-              </button>
-            )}
+            <button
+              onClick={() => setShowHistory(true)}
+              className="flex items-center gap-1.5 font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000000] px-3.5 py-1.5 hover:bg-[#00FFFF] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase"
+            >
+              <Clock size={14} className="stroke-[2.5]" />
+              HISTORY
+              <span className="bg-[#FF00FF] text-white text-[10px] font-black px-1.5 py-0.2 border border-black">
+                {versions.length}
+              </span>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* ── Hero Content ── */}
-      <main className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-12">
-        <div className="w-full max-w-2xl">
+      {/* ── Main Workspace Content ── */}
+      <main className="flex items-center justify-center min-h-[calc(100vh-75px)] px-4 py-12">
+        <div className="w-full max-w-3xl">
 
-          {/* Badge with pulse animation */}
-          <div className="flex justify-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-brand-200/60 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 cursor-default">
+          {/* Neo-Brutalist Top Stamp */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0px_0px_#000000] px-3.5 py-1.5 transform -rotate-1">
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={11} className="text-amber-400 fill-amber-400 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+                  <Star key={i} size={12} className="fill-black text-black" />
                 ))}
               </div>
-              <span className="text-sm font-semibold text-gray-700">AI-Powered Architecture Generator</span>
-              <span className="px-2 py-0.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white text-xs font-bold rounded-full animate-pulse">v2.0</span>
+              <span className="font-mono text-xs font-black uppercase text-black tracking-wider">
+                ENGINEERING SPEC COMPILER
+              </span>
+              <span className="bg-black text-[#00FF00] font-mono text-[10px] font-black px-1.5 py-0.5">
+                V2.0
+              </span>
             </div>
           </div>
 
-          {/* Headline with gradient animation */}
-          <div className="text-center mb-8" style={{ animationDelay: '0.1s' }}>
-            <h1 className="font-display font-800 text-5xl md:text-6xl leading-[1.05] tracking-tight text-gray-900 mb-4">
-              Build Better Software
+          {/* Big Uppercase Headline */}
+          <div className="text-center mb-8">
+            <h1 className="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-black leading-tight mb-2">
+              BUILD BETTER SOFTWARE
               <br />
-              <span className="gradient-text-animated">Faster with AI</span>
+              <span className="bg-[#FF00FF] text-white px-3 py-0.5 border-2 border-black shadow-[4px_4px_0px_0px_#000000] inline-block mt-1">
+                FASTER WITH AI
+              </span>
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-xl mx-auto font-medium">
-              Describe your idea and get a complete, production-ready architecture —
-              from DB schema to deployment roadmap — in seconds.
+            <p className="font-mono text-xs sm:text-sm font-bold text-gray-800 max-w-lg mx-auto">
+              Describe your software concept and generate full production specs in seconds.
             </p>
           </div>
 
-          {/* ── Main Card with 3D Effect & Parallax ── */}
-          <div
-            ref={cardRef}
-            className="card-3d-enhanced bg-white/90 backdrop-blur-xl rounded-3xl shadow-3d border border-white/90 p-8 transform-gpu relative overflow-hidden"
-            style={{
-              animationDelay: '0.2s',
-              transform: `perspective(1000px) rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)`,
-              transition: 'transform 0.1s ease-out',
-            }}
-          >
-            {/* Animated gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          {/* ── Main Neo-Brutalist Control Card ── */}
+          <div className="bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000] p-6 sm:p-8 relative">
             
-            {/* Sparkle effects */}
-            <div className="sparkle-container">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="sparkle" style={{ 
-                  left: `${20 + i * 30}%`, 
-                  top: `${10 + i * 20}%`,
-                  animationDelay: `${i * 0.5}s` 
-                }} />
-              ))}
-            </div>
-            {/* Card header row with animated icons */}
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg animate-bounce-gentle">
-                  <Rocket size={20} className="text-white" />
+            {/* Card Header Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b-2 border-black">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 border-2 border-black bg-[#00FF00] shadow-[2px_2px_0px_0px_#000000] flex items-center justify-center text-black font-black">
+                  <Terminal size={20} className="stroke-[2.5]" />
                 </div>
                 <div>
-                  <label htmlFor="idea" className="block text-sm font-semibold text-gray-700 mb-0.5">
-                    Describe Your Project Idea
+                  <label htmlFor="idea" className="block font-display font-black text-sm uppercase text-black">
+                    DESCRIBE YOUR PROJECT IDEA
                   </label>
-                  <p className="text-xs text-gray-400 flex items-center gap-1">
-                    <TrendingUp size={12} className="text-emerald-500" />
-                    Be as detailed as possible for better results
+                  <p className="font-mono text-[11px] font-bold text-gray-600 flex items-center gap-1">
+                    <TrendingUp size={12} className="text-black" />
+                    Be as detailed as possible about users, scale, and core requirements
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowTemplates(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-600 hover:from-blue-100 hover:to-cyan-100 rounded-xl text-sm font-semibold transition-all duration-200 border border-blue-200/60 hover:border-blue-300 hover:shadow-md hover:scale-105"
-              >
-                <Sparkles size={13} className="animate-pulse" />
-                Use Template
-                <ChevronRight size={13} />
-              </button>
+
+              {/* Action Buttons: History & Template Selector */}
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowHistory(true)}
+                  className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#00FFFF] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-1.5 uppercase"
+                >
+                  <Clock size={14} className="stroke-[2.5]" />
+                  HISTORY ({versions.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowTemplates(true)}
+                  className="font-mono text-xs font-bold text-black bg-[#FFE600] border-2 border-black shadow-[3px_3px_0px_0px_#000000] px-3 py-1.5 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-1.5 uppercase"
+                >
+                  <Sparkles size={14} className="stroke-[2.5]" />
+                  USE TEMPLATE
+                  <ChevronRight size={14} className="stroke-[2.5]" />
+                </button>
+              </div>
             </div>
 
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Textarea with 3D depth effect and progress bar */}
+              
+              {/* Textarea Box */}
               <div className="relative">
-                <div className={`relative rounded-2xl transition-all duration-300 input-3d ${isFocused ? 'input-3d-focused' : ''}`}>
-                  <textarea
-                    id="idea"
-                    ref={textareaRef}
-                    value={idea}
-                    onChange={(e) => setIdea(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder={PLACEHOLDER_IDEAS[placeholderIdx]}
-                    className="w-full h-44 px-5 py-4 rounded-2xl border-2 resize-none text-sm leading-relaxed bg-white text-gray-800 placeholder-gray-300 transition-all duration-300 focus:outline-none"
-                    style={{
-                      borderColor: isFocused ? '#6b8eff' : '#e8ecf5',
-                    }}
-                    disabled={loading}
-                  />
-                  {/* Character count with progress indicator */}
-                  <div className="absolute bottom-3 right-4 flex items-center gap-2">
-                    <span className={`text-xs font-semibold ${charCount >= 10 ? 'text-emerald-600' : 'text-gray-400'}`}>
-                      {charCount} / min 10
+                <textarea
+                  id="idea"
+                  ref={textareaRef}
+                  value={idea}
+                  onChange={(e) => setIdea(e.target.value)}
+                  placeholder={PLACEHOLDER_IDEAS[placeholderIdx]}
+                  disabled={loading}
+                  className="w-full h-44 p-4 font-mono text-xs sm:text-sm font-bold text-black placeholder-gray-400 bg-[#FDF6E3] border-3 border-black shadow-[4px_4px_0px_0px_#000000] focus:outline-none focus:bg-white focus:shadow-[6px_6px_0px_0px_#000000] transition-all resize-none leading-relaxed"
+                />
+
+                {/* Character Count & Ready Badge */}
+                <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                  <span className={`font-mono text-xs font-bold px-2 py-0.5 border border-black ${charCount >= 10 ? 'bg-[#00FF00] text-black shadow-[1px_1px_0px_0px_#000000]' : 'bg-white text-gray-500'}`}>
+                    {charCount} / min 10
+                  </span>
+                  {charCount >= 10 && (
+                    <span className="font-mono text-[10px] font-black bg-[#00FF00] text-black px-2 py-0.5 border border-black shadow-[1px_1px_0px_0px_#000000] uppercase flex items-center gap-1">
+                      <Check size={12} className="stroke-[3]" />
+                      READY
                     </span>
-                    {charCount >= 10 && (
-                      <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-lg animate-scale-in border border-emerald-200/60">
-                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 flex items-center justify-center">
-                          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                            <path d="M1.5 4L3.5 6L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span className="text-[11px] font-semibold text-emerald-700">Ready</span>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
-                {/* Typing indicator */}
-                {isFocused && charCount > 0 && (
-                  <div className="absolute -bottom-6 left-0 flex items-center gap-2 text-xs text-gray-400 animate-fade-in">
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                    </div>
-                    <span>AI is ready to analyze...</span>
-                  </div>
-                )}
               </div>
 
+              {/* Error Box */}
               {error && (
-                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm fade-in">
-                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-red-600 text-xs font-bold">!</span>
-                  </div>
+                <div className="bg-[#FF5500] text-white border-2 border-black shadow-[3px_3px_0px_0px_#000000] p-3 font-mono text-xs font-bold flex items-center gap-2">
+                  <span className="w-5 h-5 bg-black text-white font-mono font-bold flex items-center justify-center text-xs">!</span>
                   {error}
                 </div>
               )}
 
-              {/* Submit Button with 3D effect and loading animation */}
+              {/* Submit Button */}
               <button
                 id="generate-btn"
                 type="submit"
                 disabled={loading || idea.trim().length < 10}
-                className="btn-3d-enhanced w-full relative flex items-center justify-center gap-3 py-4 px-6 rounded-2xl text-white font-semibold text-base transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
+                className="w-full font-display font-black text-base sm:text-lg bg-[#00FF00] text-black border-3 border-black shadow-[5px_5px_0px_0px_#000000] py-4 px-6 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-[5px] active:translate-y-[5px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 uppercase tracking-wide"
               >
-                {/* Animated background gradient */}
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-accent-500 to-brand-600 bg-[length:200%_100%] animate-gradient-x" />
-                
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
-                {/* Particle effects on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="particle"
-                      style={{
-                        left: `${20 * i}%`,
-                        animationDelay: `${i * 0.1}s`,
-                      }}
-                    />
-                  ))}
-                </div>
-
-                <div className="relative z-10 flex items-center gap-3">
-                  {loading ? (
-                    <>
-                      <div className="relative w-5 h-5">
-                        <div className="absolute inset-0 border-2 border-white/30 rounded-full" />
-                        <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      </div>
-                      <span>Analyzing & Generating Architecture...</span>
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Zap size={18} className="group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
-                      <span>Generate Architecture</span>
-                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
-                    </>
-                  )}
-                </div>
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-3 border-black border-t-transparent animate-spin inline-block" />
+                    <span>ANALYZING & GENERATING ARCHITECTURE...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={20} className="stroke-[3]" />
+                    <span>GENERATE ARCHITECTURE</span>
+                    <ArrowRight size={20} className="stroke-[3]" />
+                  </>
+                )}
               </button>
             </form>
 
-            {/* Features Grid */}
-            <div className="mt-7 pt-7 border-t border-surface-100">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-4 text-center">
-                What you'll get instantly
-              </p>
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-2 stagger">
-                {/* eslint-disable-next-line no-unused-vars */}
-                {FEATURES_LIST.map(({ icon: FeatureIcon, label, color }) => (
-                  <div
-                    key={label}
-                    className="feature-card-3d flex flex-col items-center gap-2 p-2.5 rounded-xl text-center group cursor-default transition-all duration-300 fade-in"
+            {/* Quick Helper Badges */}
+            <div className="mt-5 pt-4 border-t-2 border-black flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
+              <span className="font-bold text-gray-700 uppercase">SUGGESTED PLATFORMS:</span>
+              <div className="flex flex-wrap gap-2">
+                {['E-COMMERCE', 'FINTECH CORE', 'AI COPILOT', 'MICROSERVICES'].map((tag, i) => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      const prompts = [
+                        'A full-featured e-commerce platform with product catalog, cart, checkout, and inventory',
+                        'A modern fintech platform with banking integrations, ledger, KYC/AML, and payment gateway',
+                        'An AI copilot application with retrieval-augmented generation (RAG), vector DB, and live chat',
+                        'A distributed microservices architecture with API Gateway, service mesh, and message broker'
+                      ];
+                      setIdea(prompts[i]);
+                      setError(null);
+                    }}
+                    className="font-mono text-[11px] font-bold text-black bg-[#FDF6E3] hover:bg-[#FFE600] px-2 py-0.5 border border-black transition-colors uppercase shadow-[1px_1px_0px_0px_#000000]"
                   >
-                    <div className={`icon-3d w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300`}>
-                      <FeatureIcon size={14} className="text-white" />
-                    </div>
-                    <span className="text-xs leading-tight text-gray-500 group-hover:text-gray-700 font-medium transition-colors">{label}</span>
-                  </div>
+                    {tag}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Social proof */}
-          <div className="flex items-center justify-center gap-6 mt-6 fade-in" style={{ animationDelay: '0.4s' }}>
-            <div className="flex -space-x-2">
-              {['#2563eb','#06b6d4','#f59e0b','#10b981'].map((c, i) => (
-                <div key={i} className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white" style={{ background: c }}>
-                  {String.fromCharCode(65 + i)}
+          {/* ── Feature Capabilities Grid ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 mt-6">
+            {[
+              { icon: Layers, label: 'MoSCoW FEATURES', bg: 'bg-[#FFE600]' },
+              { icon: Database, label: '3NF SCHEMAS', bg: 'bg-[#00FFFF]' },
+              { icon: Server, label: 'REST & OPENAPI', bg: 'bg-[#00FF00]' },
+              { icon: Code2, label: 'IAC & DOCKER', bg: 'bg-[#FF00FF] text-white' },
+              { icon: DollarSign, label: 'CLOUD BUDGETS', bg: 'bg-[#FFE600]' },
+              { icon: Activity, label: 'LIVE AI COPILOT', bg: 'bg-[#00FF00]' }
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className={`p-3 border-2 border-black ${item.bg} shadow-[3px_3px_0px_0px_#000000] flex items-center gap-2.5`}>
+                  <div className="w-7 h-7 bg-white text-black border border-black flex items-center justify-center flex-shrink-0">
+                    <Icon size={14} className="stroke-[2.5]" />
+                  </div>
+                  <span className="font-mono text-xs font-black uppercase tracking-tight text-black">
+                    {item.label}
+                  </span>
                 </div>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500">
-              <span className="font-bold text-gray-700">2,400+</span> architectures generated this week
-            </p>
+              );
+            })}
           </div>
+
         </div>
       </main>
 
-      {/* ── Modals ── */}
+      {/* ── Auxiliary Drawers & Modals ── */}
       {showTemplates && (
         <TemplateSelector
           onSelect={handleTemplateSelect}
           onClose={() => setShowTemplates(false)}
         />
       )}
+
       {showHistory && (
         <VersionHistory
           onClose={() => setShowHistory(false)}
-          onLoad={handleLoadVersion}
-          onCompare={(a, b) => {
-            localStorage.setItem('compareA', JSON.stringify(a));
-            localStorage.setItem('compareB', JSON.stringify(b));
-            navigate('/compare');
+          onLoad={(v) => {
+            localStorage.setItem('lastResult', JSON.stringify(v.result));
+            localStorage.setItem('lastIdea', v.idea);
+            setCurrentResult(v.result, v.idea);
+            setShowHistory(false);
+            navigate('/result');
           }}
+          onRestore={(res, ideaText) => {
+            localStorage.setItem('lastResult', JSON.stringify(res));
+            localStorage.setItem('lastIdea', ideaText);
+            setCurrentResult(res, ideaText);
+            setShowHistory(false);
+            navigate('/result');
+          }}
+          onCompare={(vA, vB) => {
+            setCompareVersions({ vA, vB });
+            setShowHistory(false);
+          }}
+        />
+      )}
+
+      {compareVersions && (
+        <ComparisonView
+          versionA={compareVersions.vA}
+          versionB={compareVersions.vB}
+          onClose={() => setCompareVersions(null)}
         />
       )}
     </div>

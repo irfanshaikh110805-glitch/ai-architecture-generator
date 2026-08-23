@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { Info } from 'lucide-react';
 
-/**
- * Accessible Tooltip Component
- * Provides contextual help with keyboard and screen reader support
- */
 const Tooltip = ({ 
   children, 
   content, 
   position = 'top',
-  delay = 200,
+  delay = 100,
   icon = true 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -40,13 +36,6 @@ const Tooltip = ({
     right: 'left-full top-1/2 -translate-y-1/2 ml-2',
   };
 
-  const arrows = {
-    top: 'top-full left-1/2 -translate-x-1/2 -mt-1',
-    bottom: 'bottom-full left-1/2 -translate-x-1/2 -mb-1 rotate-180',
-    left: 'left-full top-1/2 -translate-y-1/2 -ml-1 rotate-90',
-    right: 'right-full top-1/2 -translate-y-1/2 -mr-1 -rotate-90',
-  };
-
   return (
     <div className="relative inline-block">
       <div
@@ -62,8 +51,8 @@ const Tooltip = ({
         {children}
         {icon && (
           <Info 
-            size={16} 
-            className="text-gray-400 hover:text-blue-500 transition-colors" 
+            size={14} 
+            className="text-black hover:text-[#FF00FF] transition-colors stroke-[2.5]" 
           />
         )}
       </div>
@@ -71,15 +60,10 @@ const Tooltip = ({
       {isVisible && (
         <div
           role="tooltip"
-          className={`absolute ${positions[position]} z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg whitespace-nowrap animate-fade-in`}
+          className={`absolute ${positions[position]} z-50 px-2.5 py-1.5 font-mono text-[11px] font-bold text-black bg-[#FFE600] border-2 border-black shadow-[3px_3px_0px_0px_#000000] whitespace-nowrap`}
           style={{ maxWidth: '240px', whiteSpace: 'normal' }}
         >
           {content}
-          {/* Arrow */}
-          <div
-            className={`absolute ${arrows[position]} w-2 h-2 bg-gray-900 transform`}
-            style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
-          />
         </div>
       )}
     </div>

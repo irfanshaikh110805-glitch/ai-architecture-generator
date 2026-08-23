@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Copy, Check, Calculator } from 'lucide-react';
 
 function EstimationSection({ estimation }) {
   const [copied, setCopied] = useState(false);
@@ -11,28 +12,38 @@ function EstimationSection({ estimation }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 fade-in">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Project Estimation</h2>
+    <div className="card-premium p-5 sm:p-7">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-black">
+        <div className="flex items-center gap-3">
+          <div className="section-icon bg-[#FFE600] text-black">
+            <Calculator size={18} className="stroke-[2.5]" />
+          </div>
+          <div>
+            <h2 className="section-title text-base sm:text-xl">PROJECT ESTIMATION</h2>
+            <p className="font-mono text-xs font-bold text-gray-600 mt-0.5">DEV EFFORT & RESOURCE SIZING</p>
+          </div>
+        </div>
         <button
           onClick={handleCopy}
-          className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
+          className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1 flex-shrink-0 uppercase"
         >
-          {copied ? '✓ Copied' : 'Copy'}
+          {copied ? <Check size={14} className="stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+          <span>{copied ? 'COPIED' : 'COPY'}</span>
         </button>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg text-center">
-          <p className="text-sm font-semibold text-blue-800 mb-2">Development Hours</p>
-          <p className="text-2xl font-bold text-blue-900">{estimation.hours}</p>
+        <div className="bg-[#FDF6E3] border-2 border-black shadow-[3px_3px_0px_0px_#000000] p-5 text-center">
+          <p className="font-mono text-xs font-black text-gray-700 uppercase mb-2">[ DEV HOURS ]</p>
+          <p className="font-display font-black text-2xl sm:text-3xl text-black uppercase">{estimation.hours}</p>
         </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg text-center">
-          <p className="text-sm font-semibold text-green-800 mb-2">Team Size</p>
-          <p className="text-2xl font-bold text-green-900">{estimation.team_size}</p>
+        <div className="bg-[#00FF00] border-2 border-black shadow-[3px_3px_0px_0px_#000000] p-5 text-center">
+          <p className="font-mono text-xs font-black text-black uppercase mb-2">[ TEAM SIZING ]</p>
+          <p className="font-display font-black text-xl sm:text-2xl text-black uppercase">{estimation.team_size}</p>
         </div>
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-6 rounded-lg text-center">
-          <p className="text-sm font-semibold text-blue-800 mb-2">Estimated Cost</p>
-          <p className="text-2xl font-bold text-blue-900">{estimation.cost}</p>
+        <div className="bg-[#FF00FF] text-white border-2 border-black shadow-[3px_3px_0px_0px_#000000] p-5 text-center">
+          <p className="font-mono text-xs font-black text-white uppercase mb-2">[ ESTIMATED BUDGET ]</p>
+          <p className="font-display font-black text-xl sm:text-2xl text-white uppercase">{estimation.cost}</p>
         </div>
       </div>
     </div>

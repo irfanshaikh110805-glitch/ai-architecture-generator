@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Hard Offset Drop Shadow -->
+  <rect x="18" y="18" width="90" height="90" fill="#000000" />
+  
+  <!-- Canvas Base -->
+  <rect x="12" y="12" width="90" height="90" fill="#FDF6E3" stroke="#000000" stroke-width="5" stroke-linejoin="miter" />
+
+  <!-- Isometric / Modular Neo-Brutalist Architecture Graph -->
+  <!-- Top Left Cube (Magenta) -->
+  <rect x="22" y="22" width="30" height="30" fill="#FF00FF" stroke="#000000" stroke-width="4" stroke-linejoin="miter" />
+  <rect x="30" y="30" width="14" height="14" fill="#000000" />
+  <rect x="34" y="34" width="6" height="6" fill="#FFFFFF" />
+
+  <!-- Top Right Cube (Lime Green) -->
+  <rect x="62" y="22" width="30" height="30" fill="#00FF00" stroke="#000000" stroke-width="4" stroke-linejoin="miter" />
+  <line x1="62" y1="22" x2="92" y2="52" stroke="#000000" stroke-width="3" />
+  <line x1="62" y1="52" x2="92" y2="22" stroke="#000000" stroke-width="3" />
+
+  <!-- Bottom Left Cube (Cyber Yellow) -->
+  <rect x="22" y="62" width="30" height="30" fill="#FFE600" stroke="#000000" stroke-width="4" stroke-linejoin="miter" />
+  <circle cx="37" cy="77" r="7" fill="#000000" />
+  <circle cx="37" cy="77" r="3" fill="#FFE600" />
+
+  <!-- Bottom Right Cube (Cyber Cyan) -->
+  <rect x="62" y="62" width="30" height="30" fill="#00FFFF" stroke="#000000" stroke-width="4" stroke-linejoin="miter" />
+  <rect x="70" y="70" width="14" height="14" fill="#000000" />
+
+  <!-- Center Hub Connection Point -->
+  <rect x="49" y="49" width="16" height="16" fill="#000000" />
+  <rect x="53" y="53" width="8" height="8" fill="#00FF00" />
+</svg>

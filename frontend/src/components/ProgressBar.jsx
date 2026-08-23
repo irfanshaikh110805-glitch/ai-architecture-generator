@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Smooth Progress Bar Component
- * Shows upload/generation progress with animation
+ * Smooth Progress Bar Component (Neo-Brutalist)
  */
 const ProgressBar = ({ 
   progress = 0, 
   showPercentage = true, 
   label = '', 
-  color = 'blue',
-  height = 'h-2',
-  animated = true 
+  height = 'h-3.5',
 }) => {
   const [displayProgress, setDisplayProgress] = useState(0);
 
   useEffect(() => {
-    // Smooth animation to target progress
     const timeout = setTimeout(() => {
       setDisplayProgress(progress);
     }, 50);
@@ -23,50 +19,30 @@ const ProgressBar = ({
     return () => clearTimeout(timeout);
   }, [progress]);
 
-  const colors = {
-    blue: 'bg-blue-600',
-    green: 'bg-green-600',
-    red: 'bg-red-600',
-    yellow: 'bg-yellow-600',
-    purple: 'bg-purple-600',
-  };
-
-  const bgColors = {
-    blue: 'bg-blue-100',
-    green: 'bg-green-100',
-    red: 'bg-red-100',
-    yellow: 'bg-yellow-100',
-    purple: 'bg-purple-100',
-  };
-
   return (
-    <div className="w-full">
+    <div className="w-full font-mono">
       {(label || showPercentage) && (
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1.5 text-xs font-bold uppercase text-black">
           {label && (
-            <span className="text-sm font-medium text-gray-700">{label}</span>
+            <span>{label}</span>
           )}
           {showPercentage && (
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="bg-[#FFE600] px-1.5 py-0.2 border border-black text-[10px]">
               {Math.round(displayProgress)}%
             </span>
           )}
         </div>
       )}
 
-      <div className={`w-full ${bgColors[color]} rounded-full ${height} overflow-hidden`}>
+      <div className={`w-full bg-[#FDF6E3] border-2 border-black ${height} overflow-hidden`}>
         <div
-          className={`${colors[color]} ${height} rounded-full transition-all duration-500 ease-out relative overflow-hidden`}
+          className={`bg-[#00FF00] ${height} border-r-2 border-black transition-all duration-300 ease-out`}
           style={{ width: `${displayProgress}%` }}
           role="progressbar"
           aria-valuenow={displayProgress}
           aria-valuemin="0"
           aria-valuemax="100"
-        >
-          {animated && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-          )}
-        </div>
+        />
       </div>
     </div>
   );

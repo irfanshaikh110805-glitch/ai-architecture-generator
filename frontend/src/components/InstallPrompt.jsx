@@ -1,59 +1,34 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Smartphone } from 'lucide-react';
 
-/**
- * InstallPrompt Component
- * 
- * Displays a prompt to install the PWA when the app is installable.
- * Handles the beforeinstallprompt event and provides a user-friendly install button.
- */
 const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(() => {
-    // Initialize state based on display mode
     return window.matchMedia('(display-mode: standalone)').matches;
   });
 
   useEffect(() => {
-    // Don't set up listeners if already installed
-    if (isInstalled) {
-      return;
-    }
+    if (isInstalled) return;
 
-    // Check if already dismissed
     const dismissed = localStorage.getItem('pwa-install-dismissed');
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
       const daysSinceDismissed = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
-      
-      // Show again after 7 days
-      if (daysSinceDismissed < 7) {
-        return;
-      }
+      if (daysSinceDismissed < 7) return;
     }
 
-    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
-      console.log('[InstallPrompt] beforeinstallprompt event fired');
-      
-      // Prevent the default browser install prompt
       e.preventDefault();
-      
-      // Store the event for later use
       setDeferredPrompt(e);
-      
-      // Show our custom install prompt after a delay
       setTimeout(() => {
         setShowPrompt(true);
-      }, 3000); // Show after 3 seconds
+      }, 3000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Listen for successful installation
     window.addEventListener('appinstalled', () => {
-      console.log('[InstallPrompt] App installed successfully');
       setIsInstalled(true);
       setShowPrompt(false);
       setDeferredPrompt(null);
@@ -62,28 +37,12 @@ const InstallPrompt = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [isInstalled]); // Added isInstalled to dependency array
+  }, [isInstalled]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      console.log('[InstallPrompt] No deferred prompt available');
-      return;
-    }
-
-    // Show the browser's install prompt
+    if (!deferredPrompt) return;
     deferredPrompt.prompt();
-
-    // Wait for the user's response
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('[InstallPrompt] User choice:', outcome);
-
-    if (outcome === 'accepted') {
-      console.log('[InstallPrompt] User accepted the install prompt');
-    } else {
-      console.log('[InstallPrompt] User dismissed the install prompt');
-    }
-
-    // Clear the deferred prompt
+    await deferredPrompt.userChoice;
     setDeferredPrompt(null);
     setShowPrompt(false);
   };
@@ -93,72 +52,66 @@ const InstallPrompt = () => {
     localStorage.setItem('pwa-install-dismissed', new Date().toISOString());
   };
 
-  // Don't show if already installed or no prompt available
   if (isInstalled || !showPrompt) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 animate-slide-up">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50">
+      <div className="bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000] overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+        <div className="bg-[#00FF00] border-b-2 border-black p-4 text-black">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <Smartphone className="w-6 h-6" />
+              <div className="w-10 h-10 bg-black text-[#00FF00] border-2 border-black flex items-center justify-center">
+                <Smartphone className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
-                <h3 className="font-bold text-lg">Install ArchitechAI</h3>
-                <p className="text-sm text-white/90">Get the app experience</p>
+                <h3 className="font-display font-black text-sm uppercase">INSTALL PWA</h3>
+                <p className="font-mono text-[11px] font-bold text-gray-800">OFFLINE ENGINE ACCESS</p>
               </div>
             </div>
             <button
               onClick={handleDismiss}
-              className="text-white/80 hover:text-white transition-colors p-1"
+              className="p-1 bg-white border border-black hover:bg-[#FF5500] hover:text-white"
               aria-label="Dismiss install prompt"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 stroke-[3]" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-4">
-          <ul className="space-y-2 mb-4 text-sm text-gray-600 dark:text-gray-300">
+        <div className="p-4 bg-[#FDF6E3]">
+          <ul className="space-y-1.5 mb-4 font-mono text-xs font-bold text-black">
             <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              <span>Works offline</span>
+              <span className="w-4 h-4 bg-[#00FF00] border border-black flex items-center justify-center text-[10px]">✓</span>
+              <span>Works 100% offline</span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              <span>Faster loading</span>
+              <span className="w-4 h-4 bg-[#00FF00] border border-black flex items-center justify-center text-[10px]">✓</span>
+              <span>Zero latency spec compilation</span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              <span>Home screen access</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              <span>Native app experience</span>
+              <span className="w-4 h-4 bg-[#00FF00] border border-black flex items-center justify-center text-[10px]">✓</span>
+              <span>Standalone desktop & mobile app</span>
             </li>
           </ul>
 
           {/* Install Button */}
           <button
             onClick={handleInstallClick}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group"
+            className="w-full bg-[#FF00FF] text-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] py-3 px-4 font-display font-black text-sm uppercase hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all flex items-center justify-center gap-2"
           >
-            <Download className="w-5 h-5 group-hover:animate-bounce" />
-            Install Now
+            <Download className="w-4 h-4 stroke-[3]" />
+            INSTALL ARCHITECH.AI
           </button>
 
-          {/* Dismiss Link */}
           <button
             onClick={handleDismiss}
-            className="w-full mt-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            className="w-full mt-2 font-mono text-[11px] font-bold text-gray-700 hover:text-black uppercase text-center"
           >
-            Maybe later
+            MAYBE LATER
           </button>
         </div>
       </div>

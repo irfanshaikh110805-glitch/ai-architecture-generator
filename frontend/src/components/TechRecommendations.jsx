@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Lightbulb, Shield, Zap, TrendingUp, Code, Database, Layout, Server, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, Info, Layers } from 'lucide-react';
+import { Lightbulb, Shield, Zap, Code, Database, Layout, Server, ChevronDown, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const ALTERNATIVES = {
   frontend: {
@@ -50,8 +50,8 @@ const SECURITY_TIPS = [
   { icon: Shield, level: 'critical', label: 'Input Validation', tip: 'Validate all inputs server-side. Use parameterized queries to prevent SQL injection.' },
   { icon: AlertTriangle, level: 'high', label: 'Rate Limiting', tip: 'Apply rate limiting on all public endpoints. Use Redis-based rate limiter for distributed systems.' },
   { icon: Shield, level: 'high', label: 'CORS Policy', tip: 'Configure strict CORS policies. Never use wildcard (*) origins in production.' },
-  { icon: Info, level: 'medium', label: 'Secrets Management', tip: 'Store secrets in environment variables or vault services (AWS Secrets Manager, HashiCorp Vault).' },
-  { icon: Info, level: 'medium', label: 'Dependency Scanning', tip: 'Run npm audit / pip check in CI/CD. Use Snyk or Dependabot for automated vulnerability monitoring.' },
+  { icon: Shield, level: 'medium', label: 'Secrets Management', tip: 'Store secrets in environment variables or vault services (AWS Secrets Manager, HashiCorp Vault).' },
+  { icon: Shield, level: 'medium', label: 'Dependency Scanning', tip: 'Run npm audit / pip check in CI/CD. Use Snyk or Dependabot for automated vulnerability monitoring.' },
 ];
 
 const PERF_TIPS = [
@@ -63,21 +63,16 @@ const PERF_TIPS = [
   { label: 'Horizontal Scaling', tip: 'Design stateless APIs to allow horizontal scaling behind a load balancer.', impact: 10 },
 ];
 
-function BarMeter({ value, color = 'brand' }) {
-  const getGradient = () => {
-     if (color === 'emerald') return 'from-emerald-400 to-teal-400';
-     if (color === 'red') return 'from-rose-400 to-red-500';
-     return 'from-brand-400 to-cyan-400';
-  };
+function BarMeter({ value }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 bg-surface-100 rounded-full h-1.5 overflow-hidden">
+    <div className="flex items-center gap-2">
+      <div className="flex-1 bg-[#FDF6E3] border border-black h-2 overflow-hidden">
         <div
-          className={`h-full rounded-full bg-gradient-to-r ${getGradient()} shadow-sm shadow-brand-500/10 transition-all duration-700`}
+          className="h-full bg-[#00FF00] border-r border-black"
           style={{ width: `${value * 10}%` }}
         />
       </div>
-      <span className="text-[10px] font-black font-mono text-gray-400 w-8">{value}/10</span>
+      <span className="font-mono text-[10px] font-black text-black w-8">{value}/10</span>
     </div>
   );
 }
@@ -126,22 +121,26 @@ function TechRecommendations({ architecture }) {
   };
 
   return (
-    <div className="card-premium overflow-hidden fade-in">
+    <div className="card-premium overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 p-4 sm:p-6 text-white">
+      <div className="bg-[#FFE600] border-b-3 border-black p-4 sm:p-5 text-black">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20 flex-shrink-0">
-            <Lightbulb size={20} />
+          <div className="w-9 h-9 bg-black text-white flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_#000000] flex-shrink-0">
+            <Lightbulb size={18} className="stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="text-base sm:text-xl font-bold tracking-tight">Strategic Tech Recommendations</h2>
-            <p className="text-emerald-100 text-xs sm:text-sm mt-0.5">Architecture alternatives, security hardening & speed optimization</p>
+            <h2 className="font-display font-black text-base sm:text-lg uppercase">
+              STRATEGIC TECH RECOMMENDATIONS
+            </h2>
+            <p className="font-mono text-xs font-bold text-gray-800">
+              STACK ALTERNATIVES, SECURITY HARDENING & HIGH-THROUGHPUT TUNING
+            </p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-surface-200 bg-surface-50/80 p-1.5 gap-1.5 overflow-x-auto scrollbar-hide touch-pan-x">
+      <div className="flex border-b-2 border-black bg-[#F4ECC8] p-2 gap-2 overflow-x-auto scrollbar-hide">
         {tabs.map(t => {
           const TabIcon = t.icon;
           const isActive = activeTab === t.id;
@@ -149,95 +148,91 @@ function TechRecommendations({ architecture }) {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 min-w-[110px] flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
+              className={`flex-1 min-w-[120px] flex items-center justify-center gap-1.5 px-3 py-2 font-mono text-xs font-bold uppercase border-2 border-black transition-all ${
                 isActive
-                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-200/60'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'
+                  ? 'bg-[#FF00FF] text-white shadow-[2px_2px_0px_0px_#000000] transform -translate-y-0.5'
+                  : 'bg-white text-black hover:bg-[#00FF00]'
               }`}
             >
-              <TabIcon size={14} className={isActive ? 'text-emerald-600' : 'text-gray-400'} />
+              <TabIcon size={14} className="stroke-[2.5]" />
               <span>{t.label}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="p-4 sm:p-6">
+      <div className="p-5 sm:p-6 bg-[#FDF6E3]">
         {/* Alternatives tab */}
         {activeTab === 'alternatives' && (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-4">
             {Object.entries(altsByLayer).map(([key, layer]) => {
               const LayerIcon = layer.icon;
               const isExpanded = expanded[key];
               const parsed = parseTechString(layer.current);
 
               return (
-                <div key={key} className="border border-surface-200 rounded-2xl overflow-hidden bg-white shadow-xs transition-all hover:border-emerald-300">
+                <div key={key} className="bg-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] overflow-hidden">
                   <button
                     onClick={() => toggleExpand(key)}
-                    className={`w-full flex items-start sm:items-center justify-between p-3.5 sm:p-4 text-left transition-all ${
-                      isExpanded ? 'bg-emerald-50/40 border-b border-surface-200' : 'hover:bg-surface-50/50'
-                    }`}
+                    className="w-full flex items-start sm:items-center justify-between p-4 text-left transition-all hover:bg-[#FDF6E3]"
                   >
                     <div className="flex items-start gap-3 min-w-0 flex-1 pr-2">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200/60 flex-shrink-0 mt-0.5 sm:mt-0">
-                        <LayerIcon size={16} />
+                      <div className="w-8 h-8 bg-[#00FF00] text-black border-2 border-black shadow-[2px_2px_0px_0px_#000000] flex items-center justify-center flex-shrink-0">
+                        <LayerIcon size={16} className="stroke-[2.5]" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{layer.label}</span>
+                        <span className="font-mono text-[10px] font-black text-gray-700 uppercase tracking-wider block">
+                          [ {layer.label} ]
+                        </span>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {parsed.chips.map((chip, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-md text-xs font-semibold bg-surface-100 text-gray-800 border border-surface-200">
+                            <span key={i} className="px-2 py-0.5 font-mono text-xs font-bold bg-white text-black border border-black shadow-[1px_1px_0px_0px_#000000]">
                               {chip}
                             </span>
                           ))}
                         </div>
                         {parsed.note && (
-                          <p className="text-[11px] text-gray-500 mt-1 leading-snug">{parsed.note}</p>
+                          <p className="font-mono text-xs text-gray-700 mt-1">{parsed.note}</p>
                         )}
                       </div>
                     </div>
-                    <div className={`w-7 h-7 rounded-lg border border-surface-200 flex items-center justify-center text-gray-400 transition-transform flex-shrink-0 ${
-                      isExpanded ? 'rotate-180 bg-white text-emerald-600 border-emerald-300' : ''
+                    <div className={`w-7 h-7 bg-white border-2 border-black flex items-center justify-center text-black transition-transform flex-shrink-0 ${
+                      isExpanded ? 'rotate-180 bg-[#FFE600]' : ''
                     }`}>
-                      <ChevronDown size={14} />
+                      <ChevronDown size={14} className="stroke-[3]" />
                     </div>
                   </button>
 
                   {isExpanded && (
-                    <div className="p-3.5 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 bg-surface-50/30">
+                    <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 border-t-2 border-black bg-[#FDF6E3]">
                       {layer.alternatives.length === 0 ? (
-                        <div className="col-span-full py-6 text-center bg-white rounded-xl border border-dashed border-surface-200">
-                          <p className="text-xs text-gray-400 font-medium">Selected configuration is already industry standard.</p>
+                        <div className="col-span-full py-4 text-center bg-white border-2 border-dashed border-black">
+                          <p className="font-mono text-xs font-bold text-gray-600 uppercase">Selected configuration is already industry standard.</p>
                         </div>
                       ) : layer.alternatives.map((alt) => (
-                        <div key={alt.name} className="flex flex-col justify-between p-3.5 sm:p-4 rounded-xl border border-surface-200 bg-white hover:border-emerald-300 hover:shadow-xs transition-all">
+                        <div key={alt.name} className="flex flex-col justify-between p-4 bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000000]">
                           <div>
-                            <p className="text-sm font-bold text-gray-900 mb-2">{alt.name}</p>
+                            <p className="font-mono font-black text-sm text-black mb-2 uppercase">{alt.name}</p>
                             <div className="space-y-2">
-                              <div className="space-y-1">
-                                <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1">
-                                  <CheckCircle size={10} /> Advantages
+                              <div>
+                                <p className="font-mono text-[10px] text-black font-black uppercase flex items-center gap-1">
+                                  <CheckCircle size={10} className="stroke-[3] text-black" /> [ PROS ]
                                 </p>
-                                {alt.pros.map(p => <p key={p} className="text-xs text-gray-600 pl-3 leading-snug">• {p}</p>)}
+                                {alt.pros.map(p => <p key={p} className="font-mono text-xs text-gray-800 pl-3 leading-snug font-medium">• {p}</p>)}
                               </div>
-                              <div className="space-y-1 pt-1">
-                                <p className="text-[10px] text-rose-500 font-bold uppercase tracking-wider flex items-center gap-1">
-                                  <AlertTriangle size={10} /> Trade-offs
+                              <div>
+                                <p className="font-mono text-[10px] text-black font-black uppercase flex items-center gap-1">
+                                  <AlertTriangle size={10} className="stroke-[3] text-black" /> [ CONS ]
                                 </p>
-                                {alt.cons.map(c => <p key={c} className="text-xs text-gray-600 pl-3 leading-snug">• {c}</p>)}
+                                {alt.cons.map(c => <p key={c} className="font-mono text-xs text-gray-800 pl-3 leading-snug font-medium">• {c}</p>)}
                               </div>
                             </div>
                           </div>
-                          <div className="space-y-2 pt-3 mt-3 border-t border-surface-100">
-                            <div className="space-y-0.5">
-                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Performance</p>
-                              <BarMeter value={alt.perf} color="brand" />
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Security</p>
-                              <BarMeter value={alt.security} color="emerald" />
-                            </div>
+                          <div className="space-y-1.5 pt-3 mt-3 border-t border-black">
+                            <p className="font-mono text-[9px] font-black text-gray-700 uppercase">Performance</p>
+                            <BarMeter value={alt.perf} />
+                            <p className="font-mono text-[9px] font-black text-gray-700 uppercase">Security</p>
+                            <BarMeter value={alt.security} />
                           </div>
                         </div>
                       ))}
@@ -252,69 +247,64 @@ function TechRecommendations({ architecture }) {
         {/* Security tab */}
         {activeTab === 'security' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* eslint-disable-next-line no-unused-vars */}
-            {SECURITY_TIPS.map(({ icon: SecurityIcon, level, label, tip }, idx) => (
-              <div
-                key={label}
-                className={`flex flex-col gap-4 p-6 rounded-[2rem] border transition-all duration-300 animate-fade-in scale-in ${
-                  level === 'critical' ? 'bg-rose-50 border-rose-100' :
-                  level === 'high' ? 'bg-amber-50 border-amber-100' :
-                  'bg-brand-50 border-brand-100'
-                }`}
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <div className="flex items-center justify-between">
-                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border shadow-sm ${
-                      level === 'critical' ? 'bg-white text-rose-500 border-rose-200' :
-                      level === 'high' ? 'bg-white text-amber-500 border-amber-200' :
-                      'bg-white text-brand-500 border-brand-200'
-                   }`}>
-                      <SecurityIcon size={20} />
-                   </div>
-                   <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-[0.2em] border ${
-                      level === 'critical' ? 'bg-rose-200/50 text-rose-700 border-rose-300/50' :
-                      level === 'high' ? 'bg-amber-200/50 text-amber-700 border-amber-300/50' :
-                      'bg-brand-200/50 text-brand-700 border-brand-300/50'
-                   }`}>{level} Priority</span>
+            {SECURITY_TIPS.map((tipItem) => {
+              const SecurityIcon = tipItem.icon;
+              return (
+                <div
+                  key={tipItem.label}
+                  className="bg-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] p-5 space-y-3"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b-2 border-black">
+                    <div className="w-9 h-9 bg-[#00FFFF] text-black border-2 border-black flex items-center justify-center">
+                      <SecurityIcon size={18} className="stroke-[2.5]" />
+                    </div>
+                    <span className={`font-mono text-[10px] font-black px-2.5 py-0.5 border border-black uppercase ${
+                      tipItem.level === 'critical' ? 'bg-[#FF5500] text-white' :
+                      tipItem.level === 'high' ? 'bg-[#FFE600] text-black' :
+                      'bg-[#00FF00] text-black'
+                    }`}>
+                      {tipItem.level} PRIORITY
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-mono font-black text-sm text-black mb-1 uppercase">{tipItem.label}</p>
+                    <p className="font-mono text-xs text-gray-800 font-medium leading-relaxed">{tipItem.tip}</p>
+                  </div>
                 </div>
-                <div>
-                   <p className="font-bold text-base text-gray-900 mb-2">{label}</p>
-                   <p className="text-xs text-gray-600 font-medium leading-relaxed">{tip}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* Performance tab */}
         {activeTab === 'performance' && (
           <div className="space-y-4">
-             <div className="bg-brand-50/50 border border-brand-100 p-6 rounded-3xl flex items-start gap-5 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-white border border-brand-200 flex items-center justify-center text-brand-600 shadow-sm flex-shrink-0">
-                   <Zap size={24} fill="currentColor" className="opacity-80" />
-                </div>
-                <div>
-                   <h4 className="text-base font-bold text-gray-900">High Velocity Optimization</h4>
-                   <p className="text-xs text-gray-600 mt-1 font-medium">Critical performance vectors sorted by system impact. Implement these to maximize throughput and minimize latency.</p>
-                </div>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {PERF_TIPS.sort((a, b) => b.impact - a.impact).map(({ label, tip, impact }, idx) => (
-                <div key={label} className="p-6 rounded-[2rem] border border-surface-200 bg-white hover:border-brand-300 hover:shadow-lg transition-all duration-300 group scale-in" style={{ animationDelay: `${idx * 100}ms` }}>
-                  <div className="flex items-center justify-between mb-4">
-                     <p className="font-bold text-base text-gray-900">{label}</p>
-                     <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1.5">Impact: {impact}/10</span>
-                        <div className="w-24">
-                           <BarMeter value={impact} color="emerald" />
-                        </div>
-                     </div>
+            <div className="bg-[#FFE600] border-3 border-black shadow-[4px_4px_0px_0px_#000000] p-4 flex items-start gap-3">
+              <div className="w-10 h-10 bg-black text-[#00FF00] flex items-center justify-center border-2 border-black flex-shrink-0">
+                <Zap size={20} className="stroke-[3]" />
+              </div>
+              <div>
+                <h4 className="font-mono font-black text-sm text-black uppercase">HIGH VELOCITY OPTIMIZATION</h4>
+                <p className="font-mono text-xs text-gray-800 font-medium mt-0.5">
+                  Critical performance vectors sorted by system impact. Implement these to maximize throughput and minimize latency.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {PERF_TIPS.sort((a, b) => b.impact - a.impact).map(({ label, tip, impact }) => (
+                <div key={label} className="bg-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] p-5">
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-black">
+                    <p className="font-mono font-black text-sm text-black uppercase">{label}</p>
+                    <span className="font-mono text-xs font-black bg-[#00FF00] text-black px-2 py-0.5 border border-black">
+                      IMPACT: {impact}/10
+                    </span>
                   </div>
-                  <p className="text-xs text-gray-500 leading-relaxed font-medium group-hover:text-gray-700 transition-colors">{tip}</p>
+                  <p className="font-mono text-xs text-gray-800 leading-relaxed font-medium mb-3">{tip}</p>
+                  <BarMeter value={impact} />
                 </div>
               ))}
-             </div>
+            </div>
           </div>
         )}
       </div>

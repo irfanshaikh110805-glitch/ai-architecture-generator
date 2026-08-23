@@ -13,25 +13,42 @@ const Result = lazy(() => import(/* webpackChunkName: "result" */ './pages/Resul
 const Login = lazy(() => import(/* webpackChunkName: "login" */ './pages/Login'))
 const Signup = lazy(() => import(/* webpackChunkName: "signup" */ './pages/Signup'))
 
-// Optimized loading component with minimal re-renders
+// Neo-Brutalist loading component
 const PageLoader = () => (
   <div style={{
     minHeight: '100vh',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)'
+    gap: '16px',
+    backgroundColor: '#FDF6E3'
   }}>
     <div style={{
-      width: '60px',
-      height: '60px',
-      border: '4px solid rgba(37, 99, 235, 0.1)',
-      borderTop: '4px solid #2563eb',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite'
+      width: '54px',
+      height: '54px',
+      border: '4px solid #000000',
+      borderTopColor: '#FF00FF',
+      borderRightColor: '#00FF00',
+      boxShadow: '4px 4px 0px 0px #000000',
+      animation: 'neoSpin 0.7s steps(8) infinite'
     }} />
+    <div style={{
+      fontFamily: "'Space Mono', monospace",
+      fontWeight: 800,
+      fontSize: '13px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.1em',
+      background: '#00FF00',
+      color: '#000000',
+      padding: '4px 12px',
+      border: '2px solid #000000',
+      boxShadow: '3px 3px 0px 0px #000000'
+    }}>
+      Loading...
+    </div>
     <style>{`
-      @keyframes spin {
+      @keyframes neoSpin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
@@ -54,20 +71,29 @@ function App() {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#ffffff',
-            color: '#0f172a',
-            borderRadius: '12px',
-            border: '1px solid rgba(37,99,235,0.12)',
-            boxShadow: '0 4px 24px rgba(37,99,235,0.12)',
-            fontSize: '14px',
-            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-            fontWeight: 500,
+            background: '#FFFFFF',
+            color: '#000000',
+            borderRadius: '4px',
+            border: '2.5px solid #000000',
+            boxShadow: '4px 4px 0px 0px #000000',
+            fontSize: '13px',
+            fontFamily: "'Space Mono', monospace",
+            fontWeight: 700,
+            textTransform: 'uppercase',
           },
           success: {
-            iconTheme: { primary: '#2563eb', secondary: '#fff' },
+            iconTheme: { primary: '#000000', secondary: '#00FF00' },
+            style: {
+              background: '#FFFFFF',
+              border: '2.5px solid #000000',
+            }
           },
           error: {
-            iconTheme: { primary: '#dc2626', secondary: '#fff' },
+            iconTheme: { primary: '#000000', secondary: '#FF00FF' },
+            style: {
+              background: '#FFFFFF',
+              border: '2.5px solid #000000',
+            }
           },
         }}
       />

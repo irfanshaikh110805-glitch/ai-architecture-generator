@@ -283,9 +283,9 @@ ${routes}
 }
 
 const CODE_OUTPUTS = [
-  { id: 'docker', label: 'Docker Compose', icon: Cloud, color: 'blue', generate: generateDockerCompose },
-  { id: 'terraform', label: 'Terraform (AWS)', icon: Globe, color: 'orange', generate: generateTerraform },
-  { id: 'api', label: 'API Stubs', icon: Code2, color: 'green', generate: generateAPIStubs },
+  { id: 'docker', label: 'Docker Compose', icon: Cloud, generate: generateDockerCompose },
+  { id: 'terraform', label: 'Terraform (AWS)', icon: Globe, generate: generateTerraform },
+  { id: 'api', label: 'API Stubs', icon: Code2, generate: generateAPIStubs },
 ];
 
 function CodeGenerator({ result }) {
@@ -299,7 +299,7 @@ function CodeGenerator({ result }) {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast.success('Code copied!');
+      toast.success('Code copied!', { icon: '⚡' });
     });
   };
 
@@ -310,57 +310,64 @@ function CodeGenerator({ result }) {
     const a = document.createElement('a');
     a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
-    toast.success(`${filename} downloaded!`);
+    toast.success(`${filename} downloaded!`, { icon: '💾' });
   };
 
   return (
-    <div className="card-premium overflow-hidden transition-all duration-300 stagger">
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
-        <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
-          <Terminal size={22} className="text-white/80" /> Code Infrastructure
+    <div className="card-premium overflow-hidden">
+      {/* Header */}
+      <div className="bg-[#00FFFF] border-b-3 border-black p-4 sm:p-5 text-black">
+        <h2 className="font-display font-black text-lg sm:text-xl uppercase flex items-center gap-2.5">
+          <Terminal size={22} className="stroke-[2.5]" />
+          CODE INFRASTRUCTURE & BOILERPLATE
         </h2>
-        <p className="text-blue-100 text-sm mt-2 font-medium">Production-ready boilerplate & deployment scripts</p>
+        <p className="font-mono text-xs font-bold text-gray-800 mt-1">
+          PRODUCTION-READY SCRIPTS, DOCKER CONTAINERS & BACKEND CONTROLLERS
+        </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="flex border-b-2 border-black bg-[#F4ECC8] p-2 gap-2 overflow-x-auto scrollbar-hide">
         {CODE_OUTPUTS.map(tab => {
           const Icon = tab.icon;
+          const isActive = active === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActive(tab.id)}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-bold tracking-tight uppercase transition-all duration-300 ${
-                active === tab.id
-                  ? 'border-b-4 border-brand-500 text-brand-600 bg-brand-50/50'
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-surface-50'
+              className={`flex items-center gap-2 px-4 py-2 font-mono text-xs font-bold uppercase border-2 border-black transition-all ${
+                isActive
+                  ? 'bg-[#00FF00] text-black shadow-[2px_2px_0px_0px_#000000] transform -translate-y-0.5'
+                  : 'bg-white text-black hover:bg-[#FFE600]'
               }`}
             >
-              <Icon size={16} /> {tab.label}
+              <Icon size={14} className="stroke-[2.5]" />
+              <span>{tab.label}</span>
             </button>
           );
         })}
       </div>
 
       {/* Code area */}
-      <div className="relative">
-        <div className="absolute top-3 right-3 flex gap-2 z-10">
+      <div className="relative bg-black">
+        <div className="absolute top-3 right-3 flex gap-2 z-10 font-mono text-xs font-bold">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-xs transition"
+            className="flex items-center gap-1 px-3 py-1.5 bg-white text-black border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] uppercase transition-all"
           >
-            {copied ? <Check size={13} /> : <Copy size={13} />}
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? <Check size={13} className="stroke-[3]" /> : <Copy size={13} className="stroke-[2.5]" />}
+            <span>{copied ? 'COPIED' : 'COPY'}</span>
           </button>
           <button
             onClick={handleDownload}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF00FF] text-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FF5500] active:translate-x-[1px] active:translate-y-[1px] uppercase transition-all"
           >
-            <Download size={14} /> Export
+            <Download size={13} className="stroke-[3]" />
+            <span>EXPORT</span>
           </button>
         </div>
 
-        <pre className="bg-gray-900 dark:bg-gray-950 text-green-300 text-xs overflow-x-auto overflow-y-auto p-6 max-h-96 font-mono leading-relaxed">
+        <pre className="text-[#00FF00] text-xs overflow-x-auto overflow-y-auto p-6 max-h-96 font-mono leading-relaxed selection:bg-[#FF00FF] selection:text-white">
           <code>{code}</code>
         </pre>
       </div>

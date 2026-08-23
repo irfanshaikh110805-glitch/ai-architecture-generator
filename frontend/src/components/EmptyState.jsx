@@ -1,9 +1,5 @@
 import { FileQuestion, Plus, Search, Inbox } from 'lucide-react';
 
-/**
- * Empty State Component
- * Provides helpful guidance when no content is available
- */
 const EmptyState = ({ 
   type = 'default',
   title,
@@ -16,26 +12,26 @@ const EmptyState = ({
   const presets = {
     default: {
       icon: Inbox,
-      title: 'No items found',
-      description: 'Get started by creating your first item',
-      actionLabel: 'Create New',
+      title: 'NO ITEMS FOUND',
+      description: 'Get started by creating your first architecture blueprint.',
+      actionLabel: 'CREATE SPEC',
     },
     search: {
       icon: Search,
-      title: 'No results found',
-      description: 'Try adjusting your search terms or filters',
+      title: 'NO MATCHING RESULTS',
+      description: 'Try adjusting your search criteria or keywords.',
     },
     error: {
       icon: FileQuestion,
-      title: 'Something went wrong',
-      description: 'We couldn\'t load this content. Please try again.',
-      actionLabel: 'Retry',
+      title: 'SYSTEM ERROR DETECTED',
+      description: 'Could not resolve data stream. Please re-try.',
+      actionLabel: 'RETRY',
     },
     history: {
       icon: Inbox,
-      title: 'No history yet',
-      description: 'Your generated architectures will appear here',
-      actionLabel: 'Generate Architecture',
+      title: 'NO REVISION LOGS YET',
+      description: 'Compiled architecture specifications appear here automatically.',
+      actionLabel: 'GENERATE NOW',
     },
   };
 
@@ -46,25 +42,25 @@ const EmptyState = ({
   const finalActionLabel = actionLabel || preset.actionLabel;
 
   return (
-    <div className={`flex flex-col items-center justify-center py-12 px-4 ${className}`}>
-      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <Icon size={32} className="text-gray-400" />
+    <div className={`flex flex-col items-center justify-center py-12 px-4 bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000] text-center ${className}`}>
+      <div className="w-14 h-14 bg-[#FFE600] border-2 border-black flex items-center justify-center mb-4 shadow-[3px_3px_0px_0px_#000000]">
+        <Icon size={26} className="text-black stroke-[2.5]" />
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
+      <h3 className="font-display font-black text-base sm:text-lg uppercase text-black mb-1">
         {finalTitle}
       </h3>
 
-      <p className="text-sm text-gray-500 mb-6 text-center max-w-md">
+      <p className="font-mono text-xs text-gray-700 mb-6 max-w-md font-medium">
         {finalDescription}
       </p>
 
       {finalActionLabel && onAction && (
         <button
           onClick={onAction}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00FF00] text-black font-display font-black text-xs uppercase border-2 border-black shadow-[3px_3px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
         >
-          <Plus size={16} />
+          <Plus size={16} className="stroke-[3]" />
           {finalActionLabel}
         </button>
       )}

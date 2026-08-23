@@ -7,52 +7,49 @@ function diffValue(a, b) {
   return sa !== sb;
 }
 
-// Move components outside render to avoid recreation
 const SectionHeader = ({ id, label, changed, openSections, toggle }) => (
-    <button
-      onClick={() => toggle(id)}
-      className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl font-bold text-sm tracking-tight transition-all duration-300 ${
-        changed
-          ? 'bg-amber-50 text-amber-800 border-2 border-amber-200 shadow-sm'
-          : 'bg-surface-50 text-gray-700 border border-surface-200'
-      }`}
-    >
-      <span className="flex items-center gap-3">
-        <div className={`transition-transform duration-300 ${openSections[id] ? 'rotate-90' : ''}`}>
-          <ChevronRight size={16} />
-        </div>
-        {label}
-        {changed && (
-          <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-200/50 text-amber-800 rounded-full text-[10px] uppercase font-bold tracking-widest border border-amber-200">
-            <AlertCircle size={10} />
-            Diff
-          </span>
-        )}
-      </span>
-      {changed ? (
-        <span className="text-[10px] font-bold text-amber-600 opacity-60">MODIFIED</span>
-      ) : (
-        <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
-          <CheckCircle2 size={10} /> MATCH
+  <button
+    onClick={() => toggle(id)}
+    className={`w-full flex items-center justify-between p-3.5 border-2 border-black font-mono font-black text-xs uppercase tracking-wide transition-all ${
+      changed
+        ? 'bg-[#FFE600] text-black shadow-[3px_3px_0px_0px_#000000]'
+        : 'bg-white text-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FDF6E3]'
+    }`}
+  >
+    <span className="flex items-center gap-2">
+      <ChevronRight size={16} className={`stroke-[3] transition-transform ${openSections[id] ? 'rotate-90' : ''}`} />
+      {label}
+      {changed && (
+        <span className="flex items-center gap-1 px-2 py-0.2 bg-black text-[#FFE600] text-[9px] font-black uppercase">
+          <AlertCircle size={10} className="stroke-[3]" />
+          DIFF
         </span>
       )}
-    </button>
-  );
+    </span>
+    {changed ? (
+      <span className="text-[10px] font-black text-black bg-[#FF5500] text-white px-2 py-0.2">MODIFIED</span>
+    ) : (
+      <span className="text-[10px] font-black text-black bg-[#00FF00] px-2 py-0.2 flex items-center gap-1">
+        <CheckCircle2 size={10} className="stroke-[3]" /> MATCH
+      </span>
+    )}
+  </button>
+);
 
 const TwoCol = ({ valA, valB }) => {
-    const changed = String(valA) !== String(valB);
-    return (
-      <div className={`grid grid-cols-2 gap-4 py-3 px-4 rounded-xl text-sm transition-all duration-300 border ${changed ? 'bg-amber-50/30 border-amber-100 scale-[1.01] shadow-sm' : 'border-transparent'}`}>
-        <div>
-          <span className="text-[10px] font-bold text-brand-500 uppercase tracking-widest block mb-1.5">Version A</span>
-          <span className={`block leading-relaxed ${changed ? 'text-amber-700 font-bold' : 'text-gray-700 font-medium'}`}>{String(valA)}</span>
-        </div>
-        <div className="border-l border-surface-100 pl-4">
-          <span className="text-[10px] font-bold text-accent-500 uppercase tracking-widest block mb-1.5">Version B</span>
-          <span className={`block leading-relaxed ${changed ? 'text-amber-700 font-bold' : 'text-gray-700 font-medium'}`}>{String(valB)}</span>
-        </div>
+  const changed = String(valA) !== String(valB);
+  return (
+    <div className={`grid grid-cols-2 gap-3 p-3 border-2 border-black font-mono text-xs ${changed ? 'bg-[#FFE600]/30 shadow-[2px_2px_0px_0px_#000000]' : 'bg-white'}`}>
+      <div>
+        <span className="text-[10px] font-black text-black uppercase block mb-1">[ REVISION A ]</span>
+        <span className={`block leading-relaxed break-words ${changed ? 'text-black font-black' : 'text-gray-800 font-medium'}`}>{String(valA)}</span>
       </div>
-    );
+      <div className="border-l-2 border-black pl-3">
+        <span className="text-[10px] font-black text-black uppercase block mb-1">[ REVISION B ]</span>
+        <span className={`block leading-relaxed break-words ${changed ? 'text-black font-black' : 'text-gray-800 font-medium'}`}>{String(valB)}</span>
+      </div>
+    </div>
+  );
 };
 
 function ComparisonView({ versionA, versionB, onClose }) {
@@ -66,57 +63,57 @@ function ComparisonView({ versionA, versionB, onClose }) {
   const rb = versionB.result;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-fade-in">
-      <div className="bg-white rounded-[2.5rem] shadow-premium-lg w-full max-w-4xl max-h-[92vh] flex flex-col border border-white/20 scale-in overflow-hidden">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 selection:bg-[#00FF00] selection:text-black">
+      <div className="bg-white border-3 border-black shadow-[8px_8px_0px_0px_#000000] w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-7 border-b border-surface-100 relative bg-white/50 backdrop-blur-sm">
-          <div className="flex items-center gap-5">
-            <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-brand-500/25 shadow-lg">
-              <GitCompare size={24} />
+        <div className="flex items-center justify-between p-5 bg-[#00FFFF] border-b-3 border-black text-black">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-black text-white flex items-center justify-center border-2 border-black">
+              <GitCompare size={20} className="stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-2xl font-display font-bold text-gray-900 tracking-tight leading-none">Perspective Diff</h2>
-              <div className="flex gap-6 mt-2.5">
-                <span className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                  <div className="w-2.5 h-2.5 rounded-full bg-brand-500" />
-                  <span className="text-brand-600 font-bold">A:</span> {versionA.label}
+              <h2 className="font-display font-black text-lg sm:text-xl uppercase leading-none">
+                STRUCTURAL PERSPECTIVE DIFF
+              </h2>
+              <div className="flex gap-4 mt-1.5 font-mono text-xs font-bold">
+                <span className="bg-[#FF00FF] text-white px-1.5 py-0.2 border border-black">
+                  A: {versionA.label}
                 </span>
-                <span className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                  <div className="w-2.5 h-2.5 rounded-full bg-accent-500" />
-                  <span className="text-accent-600 font-bold">B:</span> {versionB.label}
+                <span className="bg-[#00FF00] text-black px-1.5 py-0.2 border border-black">
+                  B: {versionB.label}
                 </span>
               </div>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="w-12 h-12 flex items-center justify-center hover:bg-surface-100 text-gray-400 hover:text-gray-600 rounded-2xl transition-all border border-transparent hover:border-surface-200 active:scale-90"
+            className="p-1 bg-white border-2 border-black hover:bg-[#FF5500] hover:text-white transition-colors"
           >
-            <X size={24} />
+            <X size={20} className="stroke-[3]" />
           </button>
         </div>
 
-        {/* Content Tabs Header (A vs B Labels) */}
-        <div className="grid grid-cols-2 gap-0 border-b border-surface-100 bg-surface-50/50">
-          <div className="py-4 text-center border-r border-surface-100">
-            <p className="text-[10px] font-bold text-brand-600 uppercase tracking-[0.2em] mb-1">Architecture A</p>
-            <p className="text-sm font-bold text-gray-900 line-clamp-1 px-4">{versionA.idea}</p>
+        {/* Labels Header */}
+        <div className="grid grid-cols-2 border-b-2 border-black bg-[#F4ECC8]">
+          <div className="p-3 text-center border-r-2 border-black font-mono">
+            <p className="text-[10px] font-black text-black uppercase">[ REVISION A CONCEPT ]</p>
+            <p className="text-xs font-bold text-black truncate px-2">{versionA.idea}</p>
           </div>
-          <div className="py-4 text-center">
-            <p className="text-[10px] font-bold text-accent-600 uppercase tracking-[0.2em] mb-1">Architecture B</p>
-            <p className="text-sm font-bold text-gray-900 line-clamp-1 px-4">{versionB.idea}</p>
+          <div className="p-3 text-center font-mono">
+            <p className="text-[10px] font-black text-black uppercase">[ REVISION B CONCEPT ]</p>
+            <p className="text-xs font-bold text-black truncate px-2">{versionB.idea}</p>
           </div>
         </div>
 
-        {/* Main Side-by-Side Content */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin">
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 bg-[#FDF6E3]">
           
           {/* Architecture Details */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <SectionHeader id="architecture" label="Pattern & Stack Info" changed={diffValue(ra.architecture, rb.architecture)} openSections={openSections} toggle={toggle} />
+          <div>
+            <SectionHeader id="architecture" label="Pattern & Tech Stack" changed={diffValue(ra.architecture, rb.architecture)} openSections={openSections} toggle={toggle} />
             {openSections.architecture && (
-              <div className="mt-4 grid grid-cols-1 gap-3 px-2">
+              <div className="mt-2 space-y-2">
                 <TwoCol valA={ra.architecture?.type} valB={rb.architecture?.type} />
                 <TwoCol valA={ra.architecture?.tech_stack?.frontend} valB={rb.architecture?.tech_stack?.frontend} />
                 <TwoCol valA={ra.architecture?.tech_stack?.backend} valB={rb.architecture?.tech_stack?.backend} />
@@ -126,24 +123,24 @@ function ComparisonView({ versionA, versionB, onClose }) {
             )}
           </div>
 
-          {/* Business Features */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          {/* Features */}
+          <div>
             <SectionHeader id="features" label="Feature Set Comparison" changed={diffValue(ra.features, rb.features)} openSections={openSections} toggle={toggle} />
             {openSections.features && (
-              <div className="mt-4 grid grid-cols-2 gap-5 px-2">
-                <div className="space-y-2">
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
                   {ra.features?.map((f, i) => (
-                    <div key={i} className="flex flex-col gap-1 p-3 rounded-xl bg-brand-50/50 border border-brand-100 group hover:border-brand-300 transition-all">
-                      <span className="text-[9px] font-black tracking-widest text-brand-600 uppercase mb-1">{f.priority}</span>
-                      <span className="text-xs font-bold text-gray-800">{f.name}</span>
+                    <div key={i} className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+                      <span className="font-mono text-[9px] font-black bg-[#FF00FF] text-white px-1 py-0.2 border border-black uppercase">{f.priority}</span>
+                      <p className="font-mono text-xs font-bold text-black mt-1">{f.name}</p>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {rb.features?.map((f, i) => (
-                    <div key={i} className="flex flex-col gap-1 p-3 rounded-xl bg-accent-50/50 border border-accent-100 group hover:border-accent-300 transition-all">
-                      <span className="text-[9px] font-black tracking-widest text-accent-600 uppercase mb-1">{f.priority}</span>
-                      <span className="text-xs font-bold text-gray-800">{f.name}</span>
+                    <div key={i} className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+                      <span className="font-mono text-[9px] font-black bg-[#00FF00] text-black px-1 py-0.2 border border-black uppercase">{f.priority}</span>
+                      <p className="font-mono text-xs font-bold text-black mt-1">{f.name}</p>
                     </div>
                   ))}
                 </div>
@@ -151,11 +148,11 @@ function ComparisonView({ versionA, versionB, onClose }) {
             )}
           </div>
 
-          {/* Development Estimation */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          {/* Estimation */}
+          <div>
             <SectionHeader id="estimation" label="Resources & Timeline" changed={diffValue(ra.estimation, rb.estimation)} openSections={openSections} toggle={toggle} />
             {openSections.estimation && (
-              <div className="mt-4 grid grid-cols-1 gap-3 px-2">
+              <div className="mt-2 space-y-2">
                 <TwoCol valA={ra.estimation?.hours} valB={rb.estimation?.hours} />
                 <TwoCol valA={ra.estimation?.team_size} valB={rb.estimation?.team_size} />
                 <TwoCol valA={ra.estimation?.cost} valB={rb.estimation?.cost} />
@@ -163,24 +160,24 @@ function ComparisonView({ versionA, versionB, onClose }) {
             )}
           </div>
 
-          {/* API Endpoints */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <SectionHeader id="apis" label={`API Infrastructure (${ra.apis?.length} vs ${rb.apis?.length})`} changed={diffValue(ra.apis, rb.apis)} openSections={openSections} toggle={toggle} />
+          {/* APIs */}
+          <div>
+            <SectionHeader id="apis" label={`API Endpoints (${ra.apis?.length} vs ${rb.apis?.length})`} changed={diffValue(ra.apis, rb.apis)} openSections={openSections} toggle={toggle} />
             {openSections.apis && (
-              <div className="mt-4 grid grid-cols-2 gap-5 px-2">
-                <div className="space-y-2">
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
                   {ra.apis?.map((api, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-brand-50/50 border border-brand-100 flex flex-col gap-1.5 shadow-sm">
-                      <span className="text-[10px] font-black font-mono text-brand-600">{api.method}</span>
-                      <span className="text-[10px] font-bold text-gray-800 font-mono break-all">{api.endpoint}</span>
+                    <div key={i} className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+                      <span className="font-mono text-[9px] font-black px-1.5 py-0.5 border border-black bg-[#FF00FF] text-white">{api.method}</span>
+                      <code className="font-mono text-xs font-bold block mt-1 break-all">{api.endpoint}</code>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {rb.apis?.map((api, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-accent-50/50 border border-accent-100 flex flex-col gap-1.5 shadow-sm">
-                      <span className="text-[10px] font-black font-mono text-accent-600">{api.method}</span>
-                      <span className="text-[10px] font-bold text-gray-800 font-mono break-all">{api.endpoint}</span>
+                    <div key={i} className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+                      <span className="font-mono text-[9px] font-black px-1.5 py-0.5 border border-black bg-[#00FF00] text-black">{api.method}</span>
+                      <code className="font-mono text-xs font-bold block mt-1 break-all">{api.endpoint}</code>
                     </div>
                   ))}
                 </div>
@@ -188,24 +185,24 @@ function ComparisonView({ versionA, versionB, onClose }) {
             )}
           </div>
 
-          {/* Database Entities */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+          {/* Database */}
+          <div>
             <SectionHeader id="database" label={`Data Entities (${ra.database?.length} vs ${rb.database?.length})`} changed={diffValue(ra.database, rb.database)} openSections={openSections} toggle={toggle} />
             {openSections.database && (
-              <div className="mt-4 grid grid-cols-2 gap-5 px-2">
-                <div className="space-y-2">
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
                   {ra.database?.map((t, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-brand-50/50 border border-brand-100 flex flex-col gap-1 border-l-4 border-l-brand-400">
-                      <span className="text-[10px] font-black text-brand-700 uppercase tracking-tighter">{t.table}</span>
-                      <span className="text-[10px] text-gray-500 font-medium leading-relaxed">{t.fields.join(', ')}</span>
+                    <div key={i} className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+                      <span className="font-mono text-xs font-black uppercase text-black">{t.table}</span>
+                      <p className="font-mono text-[10px] text-gray-700 mt-0.5 leading-snug">{t.fields?.join(', ')}</p>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {rb.database?.map((t, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-accent-50/50 border border-accent-100 flex flex-col gap-1 border-l-4 border-l-accent-400">
-                      <span className="text-[10px] font-black text-accent-700 uppercase tracking-tighter">{t.table}</span>
-                      <span className="text-[10px] text-gray-500 font-medium leading-relaxed">{t.fields.join(', ')}</span>
+                    <div key={i} className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+                      <span className="font-mono text-xs font-black uppercase text-black">{t.table}</span>
+                      <p className="font-mono text-[10px] text-gray-700 mt-0.5 leading-snug">{t.fields?.join(', ')}</p>
                     </div>
                   ))}
                 </div>
@@ -214,19 +211,17 @@ function ComparisonView({ versionA, versionB, onClose }) {
           </div>
         </div>
 
-        {/* Footer info/legend */}
-        <div className="px-8 py-5 bg-surface-50 border-t border-surface-100 flex items-center justify-between">
-           <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-amber-400" />
-                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Modified Field</span>
-              </div>
-              <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identical Field</span>
-              </div>
-           </div>
-           <p className="text-[10px] text-gray-300 font-black uppercase tracking-[0.2em]">Architecture Analytics engine v2.0</p>
+        {/* Footer */}
+        <div className="p-3 bg-[#F4ECC8] border-t-2 border-black flex items-center justify-between font-mono text-[10px] font-black uppercase">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 bg-[#FF5500] border border-black" /> MODIFIED
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 bg-[#00FF00] border border-black" /> IDENTICAL
+            </span>
+          </div>
+          <span>ARCHITECH DIFF COMPILER</span>
         </div>
       </div>
     </div>

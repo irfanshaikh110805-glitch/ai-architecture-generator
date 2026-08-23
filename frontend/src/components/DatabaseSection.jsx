@@ -19,92 +19,90 @@ function DatabaseSection({ database }) {
   };
 
   return (
-    <div className="card-premium p-4 sm:p-6 fade-in">
+    <div className="card-premium p-5 sm:p-7">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="section-icon" style={{ background: 'linear-gradient(135deg, #10b981, #0ea5e9)' }}>
-            <Database size={16} />
+      <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-black">
+        <div className="flex items-center gap-3">
+          <div className="section-icon bg-[#00FF00] text-black">
+            <Database size={18} className="stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="section-title text-base sm:text-lg">
-              Database Schema
-              <span className="text-gray-400 font-normal text-xs sm:text-sm ml-1.5">(3NF)</span>
+            <h2 className="section-title text-base sm:text-xl">
+              DATABASE SCHEMA
+              <span className="font-mono text-xs font-bold text-gray-700 ml-2">[3NF]</span>
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">{database.length} tables</p>
+            <p className="font-mono text-xs font-bold text-gray-600 mt-0.5">
+              {database.length} TABLES DEFINED
+            </p>
           </div>
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200 hover:border-brand-200 flex-shrink-0"
+          className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1 flex-shrink-0 uppercase"
         >
-          {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-          <span>{copied ? 'Copied' : 'Copy'}</span>
+          {copied ? <Check size={14} className="stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+          <span>{copied ? 'COPIED' : 'COPY'}</span>
         </button>
       </div>
 
       {/* Table Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4 stagger">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {database.map((table, idx) => (
           <div
             key={idx}
-            className="group relative overflow-hidden rounded-xl border border-surface-200 bg-white hover:border-brand-200 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 fade-in"
+            className="bg-[#FDF6E3] border-3 border-black shadow-[4px_4px_0px_0px_#000000] p-4 sm:p-5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000000] transition-all"
           >
-            {/* Table color accent */}
-            <div
-              className="absolute top-0 left-0 right-0 h-0.5"
-              style={{
-                background: `linear-gradient(90deg, hsl(${(idx * 47) % 360}, 70%, 55%), hsl(${(idx * 47 + 60) % 360}, 70%, 65%))`,
-              }}
-            />
-
-            <div className="p-3.5 sm:p-4 pt-4 sm:pt-5">
-              {/* Table name */}
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <div
-                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0"
-                  style={{
-                    background: `linear-gradient(135deg, hsl(${(idx * 47) % 360}, 70%, 55%), hsl(${(idx * 47 + 60) % 360}, 70%, 65%))`,
-                  }}
-                >
-                  <Database size={12} />
+            {/* Table Name Header */}
+            <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b-2 border-black">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-black text-[#00FF00] flex items-center justify-center font-mono font-bold text-xs">
+                  #
                 </div>
-                <h3 className="font-bold text-gray-800 font-mono text-xs sm:text-sm group-hover:text-brand-600 transition-colors break-words">
+                <h3 className="font-mono font-black text-sm sm:text-base text-black break-words">
                   {table.table}
                 </h3>
               </div>
+              <span className="font-mono text-[10px] font-black bg-[#FFE600] text-black px-2 py-0.5 border border-black uppercase">
+                ENTITY
+              </span>
+            </div>
 
-              {/* Fields */}
-              <div className="mb-3">
-                <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Fields</p>
-                <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                  {table.fields?.map((field, i) => (
-                    <span
+            {/* Fields */}
+            <div className="mb-4">
+              <p className="font-mono text-[10px] font-black text-gray-700 uppercase tracking-wider mb-2">
+                [ COLUMNS / ATTRIBUTES ]
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {table.fields?.map((field, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-0.5 bg-white font-mono font-bold text-xs text-black border-2 border-black shadow-[1px_1px_0px_0px_#000000] break-all"
+                  >
+                    {field}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Relationships */}
+            {table.relationships?.length > 0 && (
+              <div>
+                <p className="font-mono text-[10px] font-black text-gray-700 uppercase tracking-wider mb-2">
+                  [ FOREIGN RELATIONS ]
+                </p>
+                <div className="space-y-1.5">
+                  {table.relationships.map((rel, i) => (
+                    <div
                       key={i}
-                      className="px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[11px] sm:text-xs font-mono text-brand-700 border break-all"
-                      style={{ background: '#f0f4ff', borderColor: '#c3d3ff' }}
+                      className="flex items-center gap-1.5 text-xs font-mono font-bold text-black bg-[#00FFFF] border-2 border-black p-1.5 shadow-[1px_1px_0px_0px_#000000] break-all"
                     >
-                      {field}
-                    </span>
+                      <Link size={12} className="stroke-[3] flex-shrink-0" />
+                      <span>{rel}</span>
+                    </div>
                   ))}
                 </div>
               </div>
-
-              {/* Relationships */}
-              {table.relationships?.length > 0 && (
-                <div>
-                  <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Relationships</p>
-                  <div className="space-y-1 sm:space-y-1.5">
-                    {table.relationships.map((rel, i) => (
-                      <div key={i} className="flex items-center gap-1.5 text-[11px] sm:text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg font-mono break-all">
-                        <Link size={10} className="flex-shrink-0 text-emerald-600" />
-                        <span>{rel}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         ))}
       </div>

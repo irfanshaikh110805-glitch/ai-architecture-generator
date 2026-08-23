@@ -15,19 +15,19 @@ const SECTION_VIDEOS = {
 const CLICK_SPIN_VIDEO = '/Chibi_AI_Architect/CTA Jump + Click Spin Animations/002_A_child_wearing_a_wizard_hat_and_robe_adorned_OF1tCAYh.mp4';
 
 const SECTION_MESSAGES = {
-  hero:           "I can generate your architecture in seconds! ⚡",
-  features:       "Look at all these features I can build! 🏗️",
-  'how-it-works': "Just 3 simple steps to production! 😄",
-  testimonials:   "Developers worldwide love my work! ❤️",
-  cta:            "Ready to build something amazing? 🚀",
+  hero:           "I compile full system specs in seconds! ⚡",
+  features:       "Review comprehensive MoSCoW features below! 🏗️",
+  'how-it-works': "3 simple steps to production readiness! 😄",
+  testimonials:   "Engineers worldwide rely on ArchitechAI! 🚀",
+  cta:            "Ready to compile your next architecture? ⚡",
 };
 
 const jokes = [
-  "Stop poking me, I'm calculating your DB shards! 😵‍💫",
-  "Did you know I dream in React components? ⚛️",
-  "I'm 99% logic and 1% caffeine! ☕",
-  "Loading... just kidding, I'm instant! ✨",
-  "Architecture is art, and I'm the brush! 🎨",
+  "Hold on, calculating distributed database shards! 😵‍💫",
+  "Did you know I compile in pure Web3 brutalism? ⚡",
+  "100% deterministic logic, zero fluff! ☕",
+  "Loading... instant response delivered! ✨",
+  "Clean code architecture is pure engineering art! 📐",
 ];
 
 const Mascot = () => {
@@ -77,7 +77,6 @@ const Mascot = () => {
     setShowSpeech(true);
     setIsClicked(true);
 
-    // After 5 seconds, return to section-based animation
     clearTimeout(clickTimerRef.current);
     clickTimerRef.current = setTimeout(() => {
       setIsClicked(false);
@@ -96,175 +95,156 @@ const Mascot = () => {
 
   return (
     <>
-    <style>{`
-      .mascot-container { bottom: 40px; right: 40px; }
-      .mascot-frame { width: 140px; height: 140px; }
-      .mascot-speech { bottom: 160px; right: 10px; }
-      @media (max-width: 480px) {
-        .mascot-container { bottom: 16px; right: 12px; }
-        .mascot-frame { width: 92px !important; height: 92px !important; }
-        .mascot-speech { bottom: 108px; right: 6px; max-width: 170px !important; font-size: 0.75rem !important; }
-      }
-    `}</style>
-    <div
-      className="mascot-container"
-      style={{
-        position: 'fixed',
-        zIndex: 1000,
-        pointerEvents: 'none',
-      }}
-    >
-      <div style={{ position: 'relative', pointerEvents: 'auto' }}>
+      <style>{`
+        .mascot-container { bottom: 40px; right: 40px; }
+        .mascot-frame { width: 140px; height: 140px; }
+        .mascot-speech { bottom: 160px; right: 10px; }
+        @media (max-width: 480px) {
+          .mascot-container { bottom: 16px; right: 12px; }
+          .mascot-frame { width: 92px !important; height: 92px !important; }
+          .mascot-speech { bottom: 108px; right: 6px; max-width: 170px !important; font-size: 0.75rem !important; }
+        }
+      `}</style>
+      <div
+        className="mascot-container"
+        style={{
+          position: 'fixed',
+          zIndex: 1000,
+          pointerEvents: 'none',
+        }}
+      >
+        <div style={{ position: 'relative', pointerEvents: 'auto' }}>
 
-        {/* ── SPEECH BUBBLE ── */}
-        <AnimatePresence>
-          {showSpeech && (
-            <motion.div
-              key={currentMessage}
-              className="mascot-speech"
-              initial={{ opacity: 0, y: 10, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              style={{
-                position: 'absolute',
-                background: 'white',
-                padding: '12px 18px',
-                borderRadius: '20px',
-                borderBottomRightRadius: '3px',
-                boxShadow: '0 8px 32px rgba(37,99,235,0.18)',
-                border: '1px solid rgba(37,99,235,0.12)',
-                width: 'max-content',
-                maxWidth: '220px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: '#1e293b',
-                lineHeight: 1.4,
-              }}
-            >
-              {currentMessage}
+          {/* ── SPEECH BUBBLE (Neo-Brutalist) ── */}
+          <AnimatePresence>
+            {showSpeech && (
+              <motion.div
+                key={currentMessage}
+                className="mascot-speech"
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                style={{
+                  position: 'absolute',
+                  background: '#FFFFFF',
+                  padding: '10px 14px',
+                  border: '2.5px solid #000000',
+                  boxShadow: '3px 3px 0px 0px #000000',
+                  width: 'max-content',
+                  maxWidth: '220px',
+                  fontFamily: 'Space Mono, monospace',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: '#000000',
+                  lineHeight: 1.3,
+                }}
+              >
+                {currentMessage}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-8px',
+                  right: '20px',
+                  width: '12px',
+                  height: '8px',
+                  background: '#000000',
+                  clipPath: 'polygon(0 0, 100% 0, 50% 100%)'
+                }} />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              {/* Triangle tail */}
-              <div style={{
-                position: 'absolute',
-                bottom: '-8px',
-                right: '20px',
-                width: 0,
-                height: 0,
-                borderLeft: '8px solid transparent',
-                borderRight: '8px solid transparent',
-                borderTop: '8px solid white',
-              }} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── MASCOT VIDEO ── */}
-        <motion.div
-          drag
-          dragConstraints={{ left: -80, right: 20, top: -100, bottom: 10 }}
-          onHoverStart={() => setIsHovered(true)}
-          onHoverEnd={() => setIsHovered(false)}
-          onClick={handleMascotClick}
-          animate={{
-            y: [0, -8, 0],
-            scale: isHovered ? 1.06 : 1,
-          }}
-          transition={{
-            y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' },
-            scale: { duration: 0.2 },
-          }}
-          style={{
-            cursor: 'grab',
-            filter: 'drop-shadow(0 16px 40px rgba(37,99,235,0.35))',
-          }}
-        >
-          {/* Circular Glass Frame */}
-          <div className="mascot-frame" style={{
-            borderRadius: '50%',
-            overflow: 'hidden',
-            background: 'rgba(10, 15, 40, 0.85)',
-            backdropFilter: 'blur(12px)',
-            border: '2.5px solid rgba(96, 165, 250, 0.5)',
-            boxShadow: '0 0 0 4px rgba(37,99,235,0.12), 0 8px 40px rgba(37,99,235,0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}>
-            <video
-              ref={videoRef}
-              key={currentVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderRadius: '50%',
-              }}
-            >
-              <source src={currentVideo} type="video/mp4" />
-            </video>
-
-            {/* Subtle inner glow ring */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle at 30% 25%, rgba(96,165,250,0.08) 0%, transparent 60%)',
-              pointerEvents: 'none',
-            }} />
-          </div>
-
-          {/* Close Button */}
-          <button
-            onClick={(e) => { e.stopPropagation(); setIsVisible(false); }}
+          {/* ── MASCOT VIDEO ── */}
+          <motion.div
+            drag
+            dragConstraints={{ left: -80, right: 20, top: -100, bottom: 10 }}
+            onHoverStart={() => setIsHovered(true)}
+            onHoverEnd={() => setIsHovered(false)}
+            onClick={handleMascotClick}
+            animate={{
+              y: [0, -6, 0],
+              scale: isHovered ? 1.05 : 1,
+            }}
+            transition={{
+              y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+              scale: { duration: 0.2 },
+            }}
             style={{
-              position: 'absolute',
-              top: '4px',
-              right: '4px',
-              width: '26px',
-              height: '26px',
+              cursor: 'grab',
+            }}
+          >
+            {/* Circular Brutalist Frame */}
+            <div className="mascot-frame" style={{
               borderRadius: '50%',
-              background: 'rgba(255,255,255,0.95)',
-              border: '1px solid rgba(0,0,0,0.1)',
-              fontSize: '11px',
-              cursor: 'pointer',
-              zIndex: 10,
-              opacity: isHovered ? 1 : 0.3,
-              transition: 'opacity 0.2s',
+              overflow: 'hidden',
+              background: '#000000',
+              border: '3px solid #000000',
+              boxShadow: '4px 4px 0px 0px #000000',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              color: '#374151',
-              fontWeight: 700,
-            }}
-          >
-            ✕
-          </button>
-        </motion.div>
+              position: 'relative',
+            }}>
+              <video
+                ref={videoRef}
+                key={currentVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                }}
+              >
+                <source src={currentVideo} type="video/mp4" />
+              </video>
+            </div>
 
-        {/* Status Indicator Dot */}
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          style={{
-            position: 'absolute',
-            bottom: '12px',
-            left: '12px',
-            width: '12px',
-            height: '12px',
-            background: '#10b981',
-            borderRadius: '50%',
-            boxShadow: '0 0 12px #10b981',
-            zIndex: 11,
-          }}
-        />
+            {/* Close Button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsVisible(false); }}
+              style={{
+                position: 'absolute',
+                top: '0px',
+                right: '0px',
+                width: '24px',
+                height: '24px',
+                background: '#FF5500',
+                color: '#FFFFFF',
+                border: '2px solid #000000',
+                fontSize: '11px',
+                cursor: 'pointer',
+                zIndex: 10,
+                opacity: isHovered ? 1 : 0.4,
+                transition: 'opacity 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 900,
+                fontFamily: 'Space Mono, monospace'
+              }}
+            >
+              ✕
+            </button>
+          </motion.div>
+
+          {/* Status Indicator Dot */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '8px',
+              width: '12px',
+              height: '12px',
+              background: '#00FF00',
+              border: '2px solid #000000',
+              zIndex: 11,
+            }}
+          />
+        </div>
       </div>
-    </div>
     </>
   );
 };

@@ -4,21 +4,21 @@ import { GitMerge, Copy, Check, AlertTriangle, ZoomIn, Maximize2, X } from 'luci
 
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'default',
+  theme: 'neutral',
   securityLevel: 'loose',
-  fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
+  fontFamily: 'Space Mono, Fira Code, monospace',
   themeVariables: {
-    primaryColor: '#3b82f6',
-    primaryTextColor: '#0f2040',
-    primaryBorderColor: '#60a5fa',
-    lineColor: '#64748b',
-    background: '#ffffff',
-    mainBkg: '#f8fafc',
-    nodeBorder: '#bfdbfe',
-    clusterBkg: '#eff6ff',
-    titleColor: '#0f2040',
-    edgeLabelBackground: '#f8fafc',
-    fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
+    primaryColor: '#FFE600',
+    primaryTextColor: '#000000',
+    primaryBorderColor: '#000000',
+    lineColor: '#000000',
+    background: '#FFFFFF',
+    mainBkg: '#FDF6E3',
+    nodeBorder: '#000000',
+    clusterBkg: '#FFFFFF',
+    titleColor: '#000000',
+    edgeLabelBackground: '#FFFFFF',
+    fontFamily: 'Space Mono, Fira Code, monospace',
   },
 });
 
@@ -35,7 +35,6 @@ async function renderMermaid(code) {
 }
 
 function DiagramPanel({ title, code }) {
-  const Icon = GitMerge;
   const containerRef = useRef(null);
   const modalContainerRef = useRef(null);
   const [renderError, setRenderError] = useState(null);
@@ -68,7 +67,6 @@ function DiagramPanel({ title, code }) {
       if (svgEl) {
         svgEl.style.maxWidth = '100%';
         svgEl.style.height = 'auto';
-        svgEl.style.borderRadius = '0.75rem';
       }
     }
     if (svgHtml && fullscreen && modalContainerRef.current) {
@@ -90,93 +88,93 @@ function DiagramPanel({ title, code }) {
 
   return (
     <>
-      <div className="card-premium overflow-hidden fade-in">
+      <div className="card-premium overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-surface-100 gap-2">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="section-icon flex-shrink-0">
-              <Icon size={16} />
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-black gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="section-icon bg-[#FF00FF] text-white flex-shrink-0">
+              <GitMerge size={18} className="stroke-[2.5]" />
             </div>
-            <h2 className="section-title text-sm sm:text-base truncate">{title}</h2>
+            <h2 className="section-title text-sm sm:text-lg truncate uppercase">{title}</h2>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 font-mono text-xs font-bold">
             <button
               onClick={() => setFullscreen(true)}
               aria-label="Fullscreen view"
-              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] uppercase transition-all"
             >
-              <Maximize2 size={13} />
-              <span className="hidden sm:inline">Fullscreen</span>
+              <Maximize2 size={13} className="stroke-[2.5]" />
+              <span className="hidden sm:inline">FULLSCREEN</span>
             </button>
             <button
               onClick={() => setZoomed(z => !z)}
               aria-label="Toggle Zoom"
-              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#00FFFF] active:translate-x-[1px] active:translate-y-[1px] uppercase transition-all"
             >
-              <ZoomIn size={13} />
-              <span>{zoomed ? 'Fit' : 'Zoom'}</span>
+              <ZoomIn size={13} className="stroke-[2.5]" />
+              <span>{zoomed ? 'FIT' : 'ZOOM'}</span>
             </button>
             <button
               onClick={handleCopy}
               aria-label="Copy Mermaid Code"
-              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#00FF00] active:translate-x-[1px] active:translate-y-[1px] uppercase transition-all"
             >
-              {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-              <span className="hidden sm:inline">{copied ? 'Copied!' : 'Copy Code'}</span>
+              {copied ? <Check size={13} className="text-black stroke-[3]" /> : <Copy size={13} className="stroke-[2.5]" />}
+              <span className="hidden sm:inline">{copied ? 'COPIED!' : 'COPY CODE'}</span>
             </button>
           </div>
         </div>
 
         {/* Diagram area */}
-        <div className="p-3 sm:p-6">
+        <div className="p-4 sm:p-6 bg-[#FDF6E3]">
           {renderError ? (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-              <AlertTriangle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-amber-800 text-sm mb-2">Unable to render diagram — showing raw Mermaid code:</p>
-                <pre className="text-xs text-amber-700 bg-amber-100/70 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">{code}</pre>
+            <div className="p-4 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0px_0px_#000000]">
+              <div className="flex items-center gap-2 mb-2 font-mono font-black text-xs uppercase text-black">
+                <AlertTriangle size={16} className="stroke-[3]" />
+                UNABLE TO RENDER DIAGRAM — RAW MERMAID CODE:
               </div>
+              <pre className="text-xs text-black bg-white p-3 border-2 border-black overflow-x-auto whitespace-pre-wrap font-mono">{code}</pre>
             </div>
           ) : (
             <div
-              className={`overflow-x-auto overflow-y-auto rounded-xl bg-gradient-to-br from-surface-50 to-white border border-surface-200 flex items-center justify-center transition-all duration-300 touch-pan-x ${
-                zoomed ? 'p-2 min-h-[300px]' : 'p-3 sm:p-6 min-h-[160px]'
+              className={`overflow-x-auto overflow-y-auto bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000000] flex items-center justify-center transition-all ${
+                zoomed ? 'p-2 min-h-[300px]' : 'p-4 sm:p-6 min-h-[160px]'
               }`}
             >
               <div
                 ref={containerRef}
-                className={`w-full overflow-x-auto transition-transform duration-300 ${zoomed ? 'scale-125 sm:scale-150 origin-top-left p-4' : ''}`}
+                className={`w-full overflow-x-auto transition-transform ${zoomed ? 'scale-125 sm:scale-150 origin-top-left p-4' : ''}`}
               />
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Fullscreen Modal for mobile & desktop ── */}
+      {/* ── Fullscreen Modal ── */}
       {fullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col p-3 sm:p-6">
-          <div className="flex items-center justify-between text-white pb-3 border-b border-white/10">
-            <h3 className="font-bold text-sm sm:text-base">{title}</h3>
+        <div className="fixed inset-0 z-50 bg-black/80 flex flex-col p-4 sm:p-8">
+          <div className="flex items-center justify-between bg-[#FDF6E3] border-3 border-black p-3 shadow-[4px_4px_0px_0px_#000000] mb-4">
+            <h3 className="font-display font-black text-base uppercase text-black">{title}</h3>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition-all"
+                className="flex items-center gap-1 px-3 py-1 font-mono text-xs font-bold bg-[#00FF00] text-black border-2 border-black shadow-[2px_2px_0px_0px_#000000] uppercase"
               >
-                {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                <span>Copy</span>
+                {copied ? <Check size={14} className="stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+                <span>COPY</span>
               </button>
               <button
                 onClick={() => setFullscreen(false)}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all"
+                className="p-1 font-mono font-bold bg-[#FF5500] text-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]"
               >
-                <X size={18} />
+                <X size={18} className="stroke-[3]" />
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+          <div className="flex-1 overflow-auto flex items-center justify-center p-2">
             <div
               ref={modalContainerRef}
-              className="bg-white p-4 sm:p-8 rounded-2xl shadow-2xl max-w-5xl w-full overflow-auto max-h-[85vh]"
+              className="bg-white p-4 sm:p-8 border-3 border-black shadow-[8px_8px_0px_0px_#000000] max-w-6xl w-full overflow-auto max-h-[85vh]"
             />
           </div>
         </div>
@@ -187,7 +185,7 @@ function DiagramPanel({ title, code }) {
 
 function DiagramSection({ erDiagram, architectureDiagram }) {
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {erDiagram && <DiagramPanel title="Entity Relationship Diagram" code={erDiagram} />}
       {architectureDiagram && <DiagramPanel title="Architecture Diagram" code={architectureDiagram} />}
     </div>

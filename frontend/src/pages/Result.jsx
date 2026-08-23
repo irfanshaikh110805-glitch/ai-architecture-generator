@@ -22,8 +22,8 @@ import AIAssistant from '../components/AIAssistant';
 import useAppStore from '../store/useAppStore';
 import toast from 'react-hot-toast';
 import {
-  Home as HomeIcon, Clock, Share2, Sparkles, Zap, ChevronRight,
-  Layout, Database, Globe, Code2, BarChart3, GitMerge, Map, Cpu,
+  Clock, Share2, Sparkles,
+  Layout, Database, Globe, Code2, BarChart3, GitMerge, Map, Cpu, ArrowLeft
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -38,14 +38,17 @@ const NAV_SECTIONS = [
   { id: 'code',          label: 'Code',       icon: Code2 },
 ];
 
-// Loading component for lazy-loaded sections
+// Loading component for lazy-loaded sections (Neo-Brutalist)
 const SectionLoader = () => (
-  <div className="bg-white rounded-2xl p-8 shadow-sm border border-surface-200 animate-pulse">
-    <div className="h-6 bg-surface-100 rounded w-1/4 mb-4"></div>
-    <div className="space-y-3">
-      <div className="h-4 bg-surface-100 rounded w-full"></div>
-      <div className="h-4 bg-surface-100 rounded w-5/6"></div>
-      <div className="h-4 bg-surface-100 rounded w-4/6"></div>
+  <div className="bg-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] p-6">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-5 h-5 border-2 border-black border-t-transparent animate-spin" />
+      <span className="font-mono text-xs font-black uppercase text-black">COMPILING SECTION...</span>
+    </div>
+    <div className="space-y-2">
+      <div className="h-4 bg-[#F4ECC8] border border-black w-full" />
+      <div className="h-4 bg-[#F4ECC8] border border-black w-5/6" />
+      <div className="h-4 bg-[#F4ECC8] border border-black w-3/5" />
     </div>
   </div>
 );
@@ -60,10 +63,9 @@ function Result() {
   const navigate                      = useNavigate();
   const { setCurrentResult }          = useAppStore();
 
-  // Light theme always
   useEffect(() => {
     document.documentElement.classList.remove('dark');
-    document.body.style.background = '#f8f9fc';
+    document.body.style.backgroundColor = '#FDF6E3';
   }, []);
 
   useEffect(() => {
@@ -74,7 +76,6 @@ function Result() {
       return; 
     }
     const parsedResult = JSON.parse(savedResult);
-    // Load data from localStorage on mount
     Promise.resolve().then(() => {
       setResult(parsedResult);
       setIdea(savedIdea || '');
@@ -120,41 +121,50 @@ function Result() {
 
   if (!result) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #eff6ff, #ecfeff)' }}>
-        <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-5">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-400 to-accent-500 animate-ping opacity-20" />
-            <img src="/logo.jpg" alt="ArchitechAI" className="relative w-20 h-20 rounded-2xl object-cover shadow-btn" />
-          </div>
-          <p className="text-gray-500 font-medium">Loading your architecture...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#FDF6E3]">
+        <div className="bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000] p-8 text-center max-w-sm">
+          <div className="w-12 h-12 border-3 border-black border-t-[#FF00FF] border-r-[#00FF00] animate-spin mx-auto mb-4" />
+          <p className="font-mono text-sm font-bold uppercase text-black">Loading your architecture...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f8f9fc' }}>
+    <div className="min-h-screen bg-[#FDF6E3] text-black font-sans selection:bg-[#00FF00] selection:text-black pb-24">
 
       {/* ── Sticky Top Bar ── */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-surface-200 shadow-sm"
-              style={{ boxShadow: '0 2px 16px rgba(37,99,235,0.06)' }}>
+      <header className="sticky top-0 z-30 bg-[#FDF6E3] border-b-[3px] border-black shadow-[0_4px_0px_0px_#000000]">
         {/* Main Header Row */}
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
-          {/* Logo + Brand */}
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-brand-50 transition-all duration-200 flex-shrink-0"
-          >
-            <img src="/logo.jpg" alt="ArchitechAI" className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-cover shadow-sm" />
-            <span className="font-display font-bold text-base sm:text-lg tracking-tight text-gray-900">
-              Architech<span className="gradient-text">AI</span>
-            </span>
-          </button>
+          
+          {/* Logo + Back */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => navigate('/generate')}
+              className="flex items-center gap-1 font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-2 py-1 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all uppercase"
+            >
+              <ArrowLeft size={14} className="stroke-[3]" />
+              <span className="hidden sm:inline">NEW</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 p-1 hover:bg-[#FFE600] transition-colors"
+            >
+              <div className="w-8 h-8 border-2 border-black bg-[#FF00FF] p-0.5 shadow-[2px_2px_0px_0px_#000000]">
+                <img src="/logo.jpg" alt="ArchitechAI" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-display font-black text-base sm:text-lg tracking-tight text-black">
+                ARCHITECH<span className="bg-[#00FF00] px-1 ml-1 text-black border border-black text-xs">AI</span>
+              </span>
+            </button>
+          </div>
 
-          {/* Project title preview (desktop/tablet only) */}
-          <div className="flex-1 min-w-0 hidden md:flex items-center gap-2 max-w-md">
-            <Sparkles size={13} className="text-brand-500 flex-shrink-0" />
-            <p className="text-xs font-medium text-gray-600 truncate">{idea}</p>
+          {/* Project title preview */}
+          <div className="flex-1 min-w-0 hidden md:flex items-center gap-2 max-w-md bg-white border-2 border-black px-3 py-1 shadow-[2px_2px_0px_0px_#000000]">
+            <Sparkles size={13} className="text-[#FF00FF] flex-shrink-0 stroke-[3]" />
+            <p className="font-mono text-xs font-bold text-black truncate">{idea}</p>
           </div>
 
           {/* Actions */}
@@ -162,39 +172,42 @@ function Result() {
             <button
               onClick={() => setShowHistory(true)}
               aria-label="View Version History"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-surface-200 hover:border-brand-200"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#00FFFF] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all uppercase"
             >
-              <Clock size={15} />
-              <span className="hidden sm:inline">History</span>
+              <Clock size={14} className="stroke-[2.5]" />
+              <span className="hidden sm:inline">HISTORY</span>
             </button>
+            
             <button
               onClick={() => setShowShare(true)}
               aria-label="Share Architecture"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-surface-200 hover:border-brand-200"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all uppercase"
             >
-              <Share2 size={15} />
-              <span className="hidden sm:inline">Share</span>
+              <Share2 size={14} className="stroke-[2.5]" />
+              <span className="hidden sm:inline">SHARE</span>
             </button>
+            
             <ExportMenu result={result} idea={idea} />
           </div>
         </div>
 
-        {/* Subnav Section Pills (Horizontally scrollable on mobile) */}
-        <div className="border-t border-surface-100 bg-surface-50/80">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-hide touch-pan-x">
+        {/* Subnav Section Pills */}
+        <div className="border-t-2 border-black bg-[#F4ECC8]">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-hide touch-pan-x">
             {NAV_SECTIONS.map((sec) => {
               const Icon = sec.icon;
+              const isActive = activeSection === sec.id;
               return (
                 <button
                   key={sec.id}
                   onClick={() => scrollTo(sec.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 active:scale-95 ${
-                    activeSection === sec.id
-                      ? 'bg-brand-600 text-white shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/80 bg-white/40 border border-surface-200/50'
+                  className={`flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-bold uppercase whitespace-nowrap transition-all flex-shrink-0 border-2 border-black ${
+                    isActive
+                      ? 'bg-[#FF00FF] text-white shadow-[2px_2px_0px_0px_#000000] transform -translate-y-0.5'
+                      : 'bg-white text-black hover:bg-[#00FF00] shadow-[1px_1px_0px_0px_#000000]'
                   }`}
                 >
-                  <Icon size={12} />
+                  <Icon size={12} className="stroke-[2.5]" />
                   {sec.label}
                 </button>
               );
@@ -203,49 +216,39 @@ function Result() {
         </div>
       </header>
 
-      {/* ── Project Hero Card ── */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 pb-1 sm:pb-2">
-        <div
-          className="rounded-2xl p-4 sm:p-6 overflow-hidden relative"
-          style={{
-            background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%)',
-            boxShadow: '0 8px 32px rgba(37,99,235,0.2), 0 2px 8px rgba(37,99,235,0.1)',
-          }}
-        >
-          {/* Background decorations */}
-          <div className="absolute top-0 right-0 w-72 h-72 opacity-10 pointer-events-none"
-               style={{ background: 'radial-gradient(circle, white, transparent 70%)', transform: 'translate(30%, -30%)' }} />
-          <div className="absolute bottom-0 left-1/3 w-40 h-40 opacity-10 pointer-events-none"
-               style={{ background: 'radial-gradient(circle, white, transparent 70%)', transform: 'translateY(50%)' }} />
+      {/* ── Project Hero Banner Card ── */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-6 pb-2">
+        <div className="bg-[#FFE600] border-3 border-black shadow-[6px_6px_0px_0px_#000000] p-5 sm:p-7 relative overflow-hidden">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="font-mono text-xs font-black bg-black text-[#00FF00] px-2.5 py-0.5 border border-black uppercase tracking-wider">
+              SPEC COMPILATION OUTPUT
+            </span>
+          </div>
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
-                <Sparkles size={12} className="text-white" />
-                <span className="text-[11px] sm:text-xs font-semibold text-white/90">Generated Architecture</span>
-              </div>
-            </div>
-            <h2 className="text-base sm:text-xl md:text-2xl font-display font-bold text-white mb-3 sm:mb-4 leading-snug break-words">
-              {idea}
-            </h2>
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              {[
-                { label: result.architecture?.type, bg: 'bg-white/25' },
-                { label: `${result.features?.length || 0} features`, bg: 'bg-emerald-400/25' },
-                { label: `${result.apis?.length || 0} APIs`, bg: 'bg-blue-400/25' },
-                { label: `${result.database?.length || 0} tables`, bg: 'bg-cyan-400/25' },
-              ].filter(b => b.label).map((badge, i) => (
-                <span key={i} className={`inline-flex items-center px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/20 ${badge.bg} backdrop-blur-sm`}>
-                  {badge.label}
-                </span>
-              ))}
-            </div>
+          <h1 className="font-display font-black text-xl sm:text-3xl md:text-4xl uppercase tracking-tight text-black mb-4 leading-snug break-words">
+            {idea}
+          </h1>
+
+          {/* Key Metric Tags */}
+          <div className="flex items-center gap-2 flex-wrap font-mono text-xs font-bold">
+            <span className="bg-white text-black px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] uppercase">
+              ⚡ {result.architecture?.type}
+            </span>
+            <span className="bg-[#00FF00] text-black px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] uppercase">
+              ✓ {result.features?.length || 0} FEATURES
+            </span>
+            <span className="bg-[#00FFFF] text-black px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] uppercase">
+              🌐 {result.apis?.length || 0} APIS
+            </span>
+            <span className="bg-[#FF00FF] text-white px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] uppercase">
+              🗄️ {result.database?.length || 0} TABLES
+            </span>
           </div>
         </div>
       </div>
 
       {/* ── Main Content with Lazy Loading ── */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 sm:pb-12">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6">
         <Suspense fallback={<SectionLoader />}>
           <div id="features">   <FeaturesSection features={result.features} /> </div>
         </Suspense>

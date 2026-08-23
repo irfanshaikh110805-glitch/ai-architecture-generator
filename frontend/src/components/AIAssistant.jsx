@@ -4,7 +4,7 @@ import { generateArchitecture } from '../services/api';
 import toast from 'react-hot-toast';
 
 const SUGGESTIONS = [
-  '✨ Add security layer',
+  '⚡ Add security layer',
   '📈 Make it scalable',
   '📱 Optimize for mobile',
   '💸 Reduce costs',
@@ -39,43 +39,33 @@ function AIAssistant({ idea, onUpdate }) {
       const result = await generateArchitecture(refinedPrompt);
       setMsgs(m => [...m, {
         role: 'assistant',
-        text: `Done! ✅ I've updated the architecture based on: "${query}"`,
+        text: `Done! ⚡ I've updated the architecture based on: "${query}"`,
         hasUpdate: true,
         result,
       }]);
       if (onUpdate) onUpdate(result, `${idea} (${query})`);
-      toast.success('Architecture updated!', { icon: '✨' });
+      toast.success('Architecture updated!', { icon: '⚡' });
     } catch (err) {
       console.error('[AIAssistant] Error:', err);
       setMsgs(m => [...m, {
         role: 'assistant',
-        text: '😕 Sorry, I ran into an error. Please try again.',
+        text: '❌ Error updating architecture. Please try again.',
       }]);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ── Closed state: floating FAB / pill ── */
+  /* ── Closed state: floating FAB ── */
   if (!open) {
     return (
       <button
         onClick={() => setOpen(true)}
         aria-label="Open AI assistant"
-        className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 group flex items-center justify-center gap-2 w-11 h-11 sm:w-auto sm:h-auto p-0 sm:px-4 sm:py-3 text-white rounded-full sm:rounded-2xl font-semibold text-xs sm:text-sm shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
-        style={{
-          background: 'linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)',
-          boxShadow: '0 6px 20px rgba(37,99,235,0.35)',
-        }}
+        className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center gap-2 p-3 sm:px-4 sm:py-3 bg-[#FF00FF] text-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-mono text-xs sm:text-sm font-black uppercase"
       >
-        {/* Ping ring */}
-        <span className="absolute top-0 right-0 flex h-2.5 w-2.5 -translate-y-0.5 translate-x-0.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
-        </span>
-
-        <Sparkles size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-        <span className="hidden sm:inline">AI Assistant</span>
+        <Sparkles size={18} className="stroke-[3]" />
+        <span className="hidden sm:inline">AI COPILOT</span>
       </button>
     );
   }
@@ -85,99 +75,83 @@ function AIAssistant({ idea, onUpdate }) {
     <>
       {/* Mobile backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 sm:hidden transition-opacity"
+        className="fixed inset-0 bg-black/60 z-50 sm:hidden"
         onClick={() => setOpen(false)}
       />
 
       <div
-        className={`fixed z-50 flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`fixed z-50 flex flex-col overflow-hidden bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000] transition-all ${
           minimized
-            ? 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-80 h-14 rounded-2xl shadow-xl'
-            : 'inset-x-0 bottom-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96 h-[80vh] sm:h-[500px] rounded-t-3xl sm:rounded-2xl shadow-2xl'
+            ? 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-80 h-14'
+            : 'inset-x-0 bottom-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96 h-[80vh] sm:h-[500px]'
         }`}
-        style={{
-          background: 'white',
-          boxShadow: '0 24px 64px rgba(37,99,235,0.25), 0 8px 24px rgba(37,99,235,0.15)',
-        }}
       >
-        {/* ── Mobile Drag Pill Handle ── */}
-        <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mt-2 sm:hidden flex-shrink-0" />
-
         {/* ── Panel Header ── */}
         <div
-          className="flex items-center justify-between px-4 py-3 flex-shrink-0 cursor-pointer select-none"
-          style={{ background: 'linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)' }}
+          className="flex items-center justify-between px-4 py-3 bg-[#00FF00] border-b-2 border-black flex-shrink-0 cursor-pointer select-none text-black"
           onClick={() => setMin(m => !m)}
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Bot size={15} className="text-white" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-black text-white border border-black flex items-center justify-center">
+              <Bot size={16} className="stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-semibold text-white text-sm">AI Architecture Assistant</p>
-              <p className="text-white/70 text-[11px]">{loading ? 'Thinking...' : 'Ready to help'}</p>
+              <p className="font-mono font-black text-xs uppercase text-black">AI COPILOT</p>
+              <p className="font-mono text-[10px] font-bold text-gray-800">{loading ? 'COMPILING REVISION...' : 'SYSTEM READY'}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={e => { e.stopPropagation(); setMin(m => !m); }}
               aria-label={minimized ? "Expand AI assistant" : "Minimize AI assistant"}
-              className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+              className="p-1 bg-white border border-black hover:bg-[#FFE600] text-black"
             >
-              <ChevronDown size={17} className={`transition-transform duration-300 ${minimized ? 'rotate-180' : ''}`} />
+              <ChevronDown size={16} className={`stroke-[3] transition-transform ${minimized ? 'rotate-180' : ''}`} />
             </button>
             <button
               onClick={e => { e.stopPropagation(); setOpen(false); }}
               aria-label="Close AI assistant"
-              className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+              className="p-1 bg-white border border-black hover:bg-[#FF5500] hover:text-white text-black"
             >
-              <X size={17} />
+              <X size={16} className="stroke-[3]" />
             </button>
           </div>
         </div>
 
-        {/* ── Body (hidden when minimized) ── */}
+        {/* ── Body ── */}
         {!minimized && (
           <>
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 scrollbar-thin">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FDF6E3]">
               {messages.map((msg, i) => (
-                <div key={i} className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} fade-in`}>
+                <div key={i} className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
-                    <div className="w-6 h-6 rounded-xl flex-shrink-0 flex items-center justify-center mb-0.5"
-                         style={{ background: 'linear-gradient(135deg, #2563eb, #06b6d4)' }}>
-                      <Bot size={12} className="text-white" />
+                    <div className="w-6 h-6 bg-black text-[#00FF00] border border-black flex-shrink-0 flex items-center justify-center font-mono font-bold text-xs">
+                      AI
                     </div>
                   )}
                   <div
-                    className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                    className={`max-w-[85%] p-3 font-mono text-xs font-bold leading-relaxed border-2 border-black ${
                       msg.role === 'user'
-                        ? 'text-white rounded-br-md'
-                        : 'bg-surface-50 text-gray-700 rounded-bl-md border border-surface-200'
+                        ? 'bg-[#FF00FF] text-white shadow-[2px_2px_0px_0px_#000000]'
+                        : 'bg-white text-black shadow-[2px_2px_0px_0px_#000000]'
                     }`}
-                    style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' } : {}}
                   >
                     {msg.text}
                     {msg.hasUpdate && (
-                      <span className="flex items-center gap-1 mt-1.5 text-xs font-semibold text-emerald-600">
-                        <span>✓</span> Architecture updated above
-                      </span>
+                      <div className="mt-2 pt-1 border-t border-black text-[10px] text-black bg-[#00FF00] px-1.5 py-0.5 inline-block">
+                        ✓ ARCHITECTURE REVISED
+                      </div>
                     )}
                   </div>
                 </div>
               ))}
               {loading && (
-                <div className="flex items-end gap-2">
-                  <div className="w-6 h-6 rounded-xl flex-shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2563eb, #06b6d4)' }}>
-                    <Bot size={12} className="text-white" />
-                  </div>
-                  <div className="bg-surface-50 border border-surface-200 px-4 py-3 rounded-2xl rounded-bl-md">
-                    <div className="flex gap-1.5 items-center">
-                      {[0,1,2].map(i => (
-                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-bounce"
-                              style={{ animationDelay: `${i * 0.15}s` }} />
-                      ))}
-                    </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-black text-white flex items-center justify-center font-mono text-xs">AI</div>
+                  <div className="bg-white border-2 border-black p-2 font-mono text-xs font-bold flex items-center gap-2">
+                    <Loader size={12} className="animate-spin" />
+                    COMPILING...
                   </div>
                 </div>
               )}
@@ -185,15 +159,14 @@ function AIAssistant({ idea, onUpdate }) {
             </div>
 
             {/* Quick Suggestions */}
-            <div className="px-3 py-2 border-t border-surface-100 bg-surface-50/50">
-              <p className="text-[11px] font-semibold text-gray-400 mb-1.5">Quick suggestions</p>
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1 touch-pan-x">
+            <div className="p-2 border-t-2 border-black bg-[#F4ECC8]">
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
                 {SUGGESTIONS.map(s => (
                   <button
                     key={s}
                     onClick={() => handleSend(s)}
                     disabled={loading}
-                    className="flex-shrink-0 px-2.5 py-1.5 bg-white text-brand-600 border border-brand-200/80 rounded-lg text-xs font-medium hover:bg-brand-50 active:scale-95 disabled:opacity-50 transition-all whitespace-nowrap shadow-xs"
+                    className="flex-shrink-0 px-2 py-1 bg-white text-black border border-black font-mono text-[11px] font-bold uppercase hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-50 transition-all whitespace-nowrap shadow-[1px_1px_0px_0px_#000000]"
                   >
                     {s}
                   </button>
@@ -202,25 +175,24 @@ function AIAssistant({ idea, onUpdate }) {
             </div>
 
             {/* Input Bar */}
-            <div className="p-3 border-t border-surface-100 bg-white">
+            <div className="p-3 border-t-2 border-black bg-white">
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && !loading && handleSend()}
-                  placeholder="Ask to refine architecture..."
+                  placeholder="Ask to modify architecture..."
                   disabled={loading}
-                  className="flex-1 px-3.5 py-2.5 text-xs sm:text-sm bg-surface-50 border border-surface-200 rounded-xl focus:outline-none focus:border-brand-400 focus:bg-white text-gray-800 placeholder-gray-400 transition-all"
+                  className="flex-1 px-3 py-2 font-mono text-xs font-bold bg-[#FDF6E3] border-2 border-black shadow-[2px_2px_0px_0px_#000000] focus:outline-none focus:bg-white text-black placeholder-gray-500"
                 />
                 <button
                   onClick={() => handleSend()}
                   disabled={loading || !input.trim()}
                   aria-label="Send message"
-                  className="flex-shrink-0 px-3.5 py-2.5 rounded-xl text-white disabled:opacity-40 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-sm"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #06b6d4)' }}
+                  className="px-3 py-2 bg-[#00FF00] text-black border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:opacity-40 transition-all flex items-center justify-center font-bold"
                 >
-                  {loading ? <Loader size={16} className="animate-spin" /> : <Send size={16} />}
+                  {loading ? <Loader size={16} className="animate-spin" /> : <Send size={16} className="stroke-[2.5]" />}
                 </button>
               </div>
             </div>

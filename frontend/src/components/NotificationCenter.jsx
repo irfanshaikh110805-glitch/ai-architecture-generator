@@ -14,21 +14,20 @@ const NotificationCenter = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-black stroke-[3]" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return <AlertCircle className="w-4 h-4 text-white stroke-[3]" />;
       case 'warning':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle className="w-4 h-4 text-black stroke-[3]" />;
       case 'info':
       default:
-        return <Info className="w-5 h-5 text-blue-500" />;
+        return <Info className="w-4 h-4 text-black stroke-[3]" />;
     }
   };
 
   useEffect(() => {
     if (!user) return;
 
-    // Load initial notifications inline to avoid setState in effect warning
     (async () => {
       try {
         const data = await dbHelpers.getUserNotifications(user.id, false, 50);
@@ -36,52 +35,32 @@ const NotificationCenter = () => {
         setUnreadCount(data?.filter((n) => !n.read).length || 0);
       } catch (error) {
         console.error('Failed to load notifications:', error);
-        // If notifications table doesn't exist yet, just set empty array
         setNotifications([]);
         setUnreadCount(0);
       }
     })();
 
-    // Subscribe to real-time notifications
     const channel = realtimeHelpers.subscribeToNotifications(
       user.id,
       (payload) => {
-        console.log('New notification:', payload);
         const newNotification = payload.new;
-        
         setNotifications((prev) => [newNotification, ...prev]);
         setUnreadCount((prev) => prev + 1);
         
-        // Show toast notification
         toast.custom((t) => (
           <div
-            className={`${
-              t.visible ? 'animate-enter' : 'animate-leave'
-            } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            className={`max-w-md w-full bg-white border-3 border-black shadow-[4px_4px_0px_0px_#000000] p-3 flex items-start justify-between gap-3 font-mono text-xs`}
           >
-            <div className="flex-1 w-0 p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 pt-0.5">
-                  {getNotificationIcon(newNotification.type)}
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    {newNotification.title}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {newNotification.message}
-                  </p>
-                </div>
-              </div>
+            <div>
+              <p className="font-black text-black uppercase">{newNotification.title}</p>
+              <p className="text-gray-700 mt-0.5">{newNotification.message}</p>
             </div>
-            <div className="flex border-l border-gray-200">
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-2 py-0.5 bg-[#FFE600] border border-black font-bold uppercase"
+            >
+              OK
+            </button>
           </div>
         ));
       }
@@ -115,7 +94,7 @@ const NotificationCenter = () => {
         prev.map((n) => ({ ...n, read: true }))
       );
       setUnreadCount(0);
-      toast.success('All notifications marked as read');
+      toast.success('All marked read');
     } catch (error) {
       console.error('Failed to mark all as read:', error);
       toast.error('Failed to mark all as read');
@@ -130,10 +109,10 @@ const NotificationCenter = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return 'JUST NOW';
+    if (minutes < 60) return `${minutes}M AGO`;
+    if (hours < 24) return `${hours}H AGO`;
+    if (days < 7) return `${days}D AGO`;
     return date.toLocaleDateString();
   };
 
@@ -145,11 +124,11 @@ const NotificationCenter = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle notifications panel"
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="relative p-2 bg-white text-black border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all"
       >
-        <Bell className="w-6 h-6" />
+        <Bell className="w-5 h-5 stroke-[2.5]" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
+          <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center px-1.5 py-0.2 font-mono text-[9px] font-black text-white bg-[#FF5500] border border-black">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -159,87 +138,76 @@ const NotificationCenter = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <div
               className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Panel */}
             <div
-              className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[600px] flex flex-col"
+              className="absolute right-0 mt-2 w-96 bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000] z-50 max-h-[500px] flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Notifications
+              <div className="flex items-center justify-between p-4 bg-[#FFE600] border-b-2 border-black">
+                <h3 className="font-display font-black text-sm uppercase text-black">
+                  SYSTEM NOTIFICATIONS
                 </h3>
                 <div className="flex items-center gap-2">
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      className="font-mono text-[10px] font-black text-black bg-white px-2 py-0.5 border border-black hover:bg-[#00FF00] uppercase"
                     >
-                      Mark all read
+                      READ ALL
                     </button>
                   )}
                   <button
                     onClick={() => setIsOpen(false)}
                     aria-label="Close notifications panel"
-                    className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                    className="p-1 bg-white border border-black hover:bg-[#FF5500] hover:text-white"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
               </div>
 
               {/* Notifications List */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-[#FDF6E3]">
                 {notifications.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 px-4">
-                    <Bell className="w-12 h-12 text-gray-300 mb-3" />
-                    <p className="text-gray-500 text-center">
-                      No notifications yet
-                    </p>
+                  <div className="flex flex-col items-center justify-center py-10 px-4 font-mono text-xs font-bold text-gray-500 uppercase">
+                    <Bell className="w-8 h-8 stroke-[2] mb-2 text-black" />
+                    <p>NO ACTIVE ALERTS</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                          !notification.read ? 'bg-blue-50' : ''
-                        }`}
-                        onClick={() => {
-                          if (!notification.read) {
-                            markAsRead(notification.id);
-                          }
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 mt-0.5">
-                            {getNotificationIcon(notification.type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <p className="text-sm font-medium text-gray-900">
-                                {notification.title}
-                              </p>
-                              {!notification.read && (
-                                <span className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-1.5" />
-                              )}
-                            </div>
-                            <p className="mt-1 text-sm text-gray-600">
-                              {notification.message}
-                            </p>
-                            <p className="mt-1 text-xs text-gray-400">
-                              {formatTime(notification.created_at)}
-                            </p>
-                          </div>
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-3 border-2 border-black shadow-[2px_2px_0px_0px_#000000] transition-all cursor-pointer ${
+                        !notification.read ? 'bg-[#00FFFF]' : 'bg-white'
+                      }`}
+                      onClick={() => {
+                        if (!notification.read) {
+                          markAsRead(notification.id);
+                        }
+                      }}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div className="flex-1 min-w-0 font-mono">
+                          <p className="text-xs font-black text-black uppercase">
+                            {notification.title}
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-800 font-medium">
+                            {notification.message}
+                          </p>
+                          <p className="mt-1 text-[9px] font-bold text-gray-600 uppercase">
+                            {formatTime(notification.created_at)}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))
                 )}
               </div>
             </div>

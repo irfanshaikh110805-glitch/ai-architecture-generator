@@ -10,11 +10,11 @@ const METHOD_STYLES = {
 };
 
 const METHOD_COLORS = {
-  GET:    { from: '#10b981', to: '#34d399' },
-  POST:   { from: '#3b82f6', to: '#60a5fa' },
-  PUT:    { from: '#f59e0b', to: '#fcd34d' },
-  PATCH:  { from: '#06b6d4', to: '#67e8f9' },
-  DELETE: { from: '#ef4444', to: '#f87171' },
+  GET:    'bg-[#00FF00] text-black',
+  POST:   'bg-[#FF00FF] text-white',
+  PUT:    'bg-[#FFE600] text-black',
+  PATCH:  'bg-[#00FFFF] text-black',
+  DELETE: 'bg-[#FF5500] text-white',
 };
 
 function APIsSection({ apis }) {
@@ -35,39 +35,39 @@ function APIsSection({ apis }) {
   };
 
   return (
-    <div className="card-premium p-4 sm:p-6 fade-in">
+    <div className="card-premium p-5 sm:p-7">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="section-icon">
-            <Globe size={16} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-black">
+        <div className="flex items-center gap-3">
+          <div className="section-icon bg-[#FFE600] text-black">
+            <Globe size={18} className="stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="section-title text-base sm:text-lg">
-              REST APIs
-              <span className="text-gray-400 font-normal text-xs sm:text-sm ml-1.5">({apis.length} endpoints)</span>
+            <h2 className="section-title text-base sm:text-xl">
+              REST APIS
+              <span className="font-mono text-xs font-bold text-gray-700 ml-2">[{apis.length} ENDPOINTS]</span>
             </h2>
+            <p className="font-mono text-xs font-bold text-gray-600 mt-0.5">
+              OPENAPI 3.0 SPECIFICATION
+            </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           {/* Method filter pills */}
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide touch-pan-x max-w-[calc(100vw-120px)] sm:max-w-none">
+          <div className="flex items-center gap-1 bg-[#FDF6E3] p-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] overflow-x-auto scrollbar-hide">
             {methods.map(m => {
-              const c = METHOD_COLORS[m];
               const isActive = filter === m;
+              const col = METHOD_COLORS[m] || 'bg-black text-white';
               return (
                 <button
                   key={m}
                   onClick={() => setFilter(m)}
-                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 active:scale-95 ${
-                    isActive && m !== 'ALL'
-                      ? 'text-white shadow-xs'
-                      : isActive
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-surface-100 text-gray-500 hover:bg-surface-200'
+                  className={`font-mono text-xs font-bold px-2.5 py-1 uppercase whitespace-nowrap transition-all ${
+                    isActive
+                      ? `${col} border border-black shadow-[1px_1px_0px_0px_#000000]`
+                      : 'text-black hover:bg-white'
                   }`}
-                  style={isActive && c ? { background: `linear-gradient(135deg, ${c.from}, ${c.to})` } : {}}
                 >
                   {m}
                 </button>
@@ -77,29 +77,31 @@ function APIsSection({ apis }) {
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all border border-surface-200 hover:border-brand-200 flex-shrink-0"
+            className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1 flex-shrink-0 uppercase"
           >
-            {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            {copied ? <Check size={14} className="stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+            <span>{copied ? 'COPIED' : 'COPY'}</span>
           </button>
         </div>
       </div>
 
       {/* API list */}
-      <div className="space-y-2 stagger">
+      <div className="space-y-2.5">
         {filtered.map((api, idx) => (
           <div
             key={idx}
-            className="group flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-xl border border-surface-200 bg-white hover:border-brand-200 hover:shadow-sm transition-all duration-200 hover:-translate-y-0.5 fade-in"
+            className="flex items-start gap-3 p-3 sm:p-4 bg-[#FDF6E3] border-2 border-black shadow-[3px_3px_0px_0px_#000000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_#000000] transition-all"
           >
-            <span className={`px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg font-mono font-bold text-[10px] sm:text-xs flex-shrink-0 uppercase tracking-wide mt-0.5 ${METHOD_STYLES[api.method] || METHOD_STYLES.GET}`}>
+            <span className={`px-2.5 py-1 border-2 border-black text-xs font-mono font-black flex-shrink-0 uppercase ${METHOD_STYLES[api.method] || METHOD_STYLES.GET}`}>
               {api.method}
             </span>
             <div className="flex-1 min-w-0">
-              <code className="text-brand-600 font-mono text-xs sm:text-sm font-semibold block break-all group-hover:text-brand-700 transition-colors">
+              <code className="font-mono text-xs sm:text-sm font-bold text-black block break-all">
                 {api.endpoint}
               </code>
-              <p className="text-gray-500 text-xs mt-0.5 leading-relaxed break-words">{api.description}</p>
+              <p className="font-mono text-xs text-gray-700 mt-1 leading-relaxed break-words font-medium">
+                {api.description}
+              </p>
             </div>
           </div>
         ))}

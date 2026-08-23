@@ -2,18 +2,18 @@ import { Palette } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
 
 const THEMES = [
-  { id: 'blue',    label: 'Ocean Blue', from: '#2563eb', to: '#06b6d4' },
-  { id: 'sky',     label: 'Sky',        from: '#0ea5e9', to: '#38bdf8' },
-  { id: 'emerald', label: 'Forest',     from: '#10b981', to: '#0ea5e9' },
-  { id: 'amber',   label: 'Sunset',     from: '#f59e0b', to: '#f97316' },
+  { id: 'neo-magenta', label: 'Magenta / Lime', bg: '#FF00FF' },
+  { id: 'neo-yellow',  label: 'Yellow / Cyan',   bg: '#FFE600' },
+  { id: 'neo-green',   label: 'High-Vis Green',  bg: '#00FF00' },
+  { id: 'neo-cyan',    label: 'Cyber Cyan',      bg: '#00FFFF' },
 ];
 
 function ThemeToggle() {
   const { colorTheme, setColorTheme } = useAppStore();
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-surface-50 rounded-xl border border-surface-200">
-      <Palette size={13} className="text-gray-400 flex-shrink-0" />
+    <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000]">
+      <Palette size={14} className="text-black stroke-[2.5] flex-shrink-0" />
       <div className="flex items-center gap-1.5">
         {THEMES.map(t => (
           <button
@@ -21,12 +21,12 @@ function ThemeToggle() {
             onClick={() => setColorTheme(t.id)}
             title={t.label}
             aria-label={`Switch theme to ${t.label}`}
-            className={`w-5 h-5 rounded-full transition-all duration-200 ${
+            className={`w-4 h-4 border border-black transition-all ${
               colorTheme === t.id
-                ? 'ring-2 ring-offset-1 ring-blue-400 scale-110 shadow-md'
-                : 'opacity-60 hover:opacity-100 hover:scale-105'
+                ? 'scale-125 shadow-[1px_1px_0px_0px_#000000]'
+                : 'opacity-70 hover:opacity-100'
             }`}
-            style={{ background: `linear-gradient(135deg, ${t.from}, ${t.to})` }}
+            style={{ backgroundColor: t.bg }}
           />
         ))}
       </div>

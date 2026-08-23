@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Sparkles, Copy, Check } from 'lucide-react';
 
 const PRIORITY_STYLES = {
-  'Must':   { pill: 'priority-must',   dot: 'bg-red-500',    bar: 'bg-red-400' },
-  'Should': { pill: 'priority-should', dot: 'bg-orange-500', bar: 'bg-orange-400' },
-  'Could':  { pill: 'priority-could',  dot: 'bg-amber-500',  bar: 'bg-amber-400' },
-  "Won't":  { pill: 'priority-wont',   dot: 'bg-gray-400',   bar: 'bg-gray-300' },
+  'Must':   { pill: 'priority-must',   dot: 'bg-[#FF00FF]', border: 'border-black' },
+  'Should': { pill: 'priority-should', dot: 'bg-[#FFE600]', border: 'border-black' },
+  'Could':  { pill: 'priority-could',  dot: 'bg-[#00FFFF]', border: 'border-black' },
+  "Won't":  { pill: 'priority-wont',   dot: 'bg-white',     border: 'border-black' },
 };
 
 function FeaturesSection({ features }) {
@@ -31,43 +31,40 @@ function FeaturesSection({ features }) {
   const filtered = filter === 'All' ? features : features.filter(f => f.priority === filter);
 
   return (
-    <div className="card-premium p-4 sm:p-6 fade-in">
+    <div className="card-premium p-5 sm:p-7">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="section-icon">
-            <Sparkles size={16} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-black">
+        <div className="flex items-center gap-3">
+          <div className="section-icon bg-[#FF00FF] text-white">
+            <Sparkles size={18} className="stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="section-title text-base sm:text-lg">
-              Features
-              <span className="text-gray-400 font-normal text-xs sm:text-sm ml-1.5">(MoSCoW)</span>
+            <h2 className="section-title text-base sm:text-xl">
+              SYSTEM FEATURES
+              <span className="font-mono text-xs font-bold text-gray-700 ml-2">[MoSCoW]</span>
             </h2>
-            <div className="flex items-center gap-2 sm:gap-3 mt-0.5 flex-wrap">
-              {Object.entries(counts).map(([priority, count]) => {
-                const st = PRIORITY_STYLES[priority];
-                return (
-                  <span key={priority} className="flex items-center gap-1 text-[11px] sm:text-xs text-gray-500">
-                    <span className={`inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${st?.dot || 'bg-gray-400'}`} />
-                    {count} {priority}
-                  </span>
-                );
-              })}
+            <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
+              {Object.entries(counts).map(([priority, count]) => (
+                <span key={priority} className="font-mono text-xs font-bold flex items-center gap-1.5 bg-[#FDF6E3] px-2 py-0.5 border border-black">
+                  <span className={`w-2.5 h-2.5 border border-black ${PRIORITY_STYLES[priority]?.dot || 'bg-white'}`} />
+                  {count} {priority}
+                </span>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           {/* Filter pills */}
-          <div className="flex items-center gap-1 bg-surface-50 rounded-xl p-1 border border-surface-200 overflow-x-auto scrollbar-hide touch-pan-x max-w-[calc(100vw-120px)] sm:max-w-none">
+          <div className="flex items-center gap-1 bg-[#FDF6E3] p-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] overflow-x-auto scrollbar-hide">
             {priorities.map(p => (
               <button
                 key={p}
                 onClick={() => setFilter(p)}
-                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
+                className={`font-mono text-xs font-bold px-2.5 py-1 uppercase whitespace-nowrap transition-all ${
                   filter === p
-                    ? 'bg-white text-brand-600 shadow-xs border border-brand-200/60'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-[#00FF00] text-black border border-black shadow-[1px_1px_0px_0px_#000000]'
+                    : 'text-black hover:bg-white'
                 }`}
               >
                 {p}
@@ -77,27 +74,32 @@ function FeaturesSection({ features }) {
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200 border border-surface-200 hover:border-brand-200 flex-shrink-0"
+            className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1 flex-shrink-0 uppercase"
           >
-            {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            {copied ? <Check size={14} className="stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+            <span>{copied ? 'COPIED' : 'COPY'}</span>
           </button>
         </div>
       </div>
 
       {/* Feature Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 stagger">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {filtered.map((feature, idx) => {
           const st = PRIORITY_STYLES[feature.priority] || PRIORITY_STYLES["Won't"];
           return (
             <div
               key={idx}
-              className="group flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border bg-white hover:shadow-sm transition-all duration-200 hover:-translate-y-0.5 fade-in"
-              style={{ borderColor: 'rgba(66,99,235,0.08)' }}
+              className="flex items-center justify-between gap-3 p-3.5 bg-[#FDF6E3] border-2 border-black shadow-[3px_3px_0px_0px_#000000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_#000000] transition-all"
             >
-              <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full flex-shrink-0 ${st.dot}`} />
-              <span className="font-medium text-gray-800 text-xs sm:text-sm flex-1 leading-snug break-words group-hover:text-brand-700 transition-colors">{feature.name}</span>
-              <span className={`badge text-[10px] sm:text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${st.pill}`}>{feature.priority}</span>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className={`w-3 h-3 border-2 border-black flex-shrink-0 ${st.dot}`} />
+                <span className="font-mono text-xs sm:text-sm font-bold text-black leading-snug break-words">
+                  {feature.name}
+                </span>
+              </div>
+              <span className={`text-[10px] sm:text-xs px-2 py-0.5 flex-shrink-0 ${st.pill}`}>
+                {feature.priority}
+              </span>
             </div>
           );
         })}
