@@ -43,7 +43,12 @@ function AIAssistant({ idea, onUpdate }) {
         hasUpdate: true,
         result,
       }]);
-      if (onUpdate) onUpdate(result, `${idea} (${query})`);
+      const baseIdea = (idea || 'System Architecture')
+        .replace(/\n\nUser's follow-up request:[\s\S]*$/i, '')
+        .replace(/User's follow-up request:[\s\S]*$/i, '')
+        .trim();
+      const updatedIdea = `${baseIdea} [${query}]`;
+      if (onUpdate) onUpdate(result, updatedIdea);
       toast.success('Architecture updated!', { icon: '⚡' });
     } catch (err) {
       console.error('[AIAssistant] Error:', err);

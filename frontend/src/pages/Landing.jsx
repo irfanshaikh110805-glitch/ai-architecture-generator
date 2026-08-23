@@ -78,13 +78,6 @@ function NavBar({ onCTA }) {
         {/* Right Side Controls */}
         <div className="hidden md:flex items-center gap-2.5">
           <button
-            onClick={() => navigate('/app')}
-            className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:bg-[#00FFFF] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase flex items-center gap-1"
-          >
-            <Clock size={13} className="stroke-[2.5]" />
-            HISTORY
-          </button>
-          <button
             onClick={() => navigate('/login')}
             className="font-mono text-xs font-bold text-black bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000000] px-3 py-1.5 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase"
           >

@@ -1,502 +1,540 @@
-/**
- * PDF Export utility with diagrams
- * Exports architecture as professional PDF with all sections and diagrams
- */
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
+import mermaid from 'mermaid';
 
 /**
- * Export architecture to PDF
- * @param {Object} result - Architecture result object
- * @param {string} idea - Project idea
+ * Normalization helpers to handle any data shape from local storage,
+ * live LLM generation, or Supabase cloud backend.
  */
-export async function exportToPDF(result, idea) {
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 20;
-  const contentWidth = pageWidth - (margin * 2);
-  let yPosition = margin;
+function extractTables(res) {
+  if (!res) return [];
+  if (Array.isArray(res.database)) return res.database;
+  if (Array.isArray(res.database?.tables)) return res.database.tables;
+  if (Array.isArray(res.database_tables)) return res.database_tables;
+  if (Array.isArray(res.tables)) return res.tables;
+  return [];
+}
 
-  // Helper to add new page if needed
-  const checkPageBreak = (requiredSpace = 20) => {
-    if (yPosition + requiredSpace > pageHeight - margin) {
-      pdf.addPage();
-      yPosition = margin;
+function extractFeatures(res) {
+  if (!res) return [];
+  if (Array.isArray(res.features)) return res.features;
+  if (Array.isArray(res.requirements)) return res.requirements;
+  return [];
+}
+
+function extractAPIs(res) {
+  if (!res) return [];
+  if (Array.isArray(res.apis)) return res.apis;
+  if (Array.isArray(res.endpoints)) return res.endpoints;
+  return [];
+}
+
+function extractRoadmap(res) {
+  if (!res) return [];
+  if (Array.isArray(res.roadmap)) return res.roadmap;
+  if (Array.isArray(res.roadmap?.phases)) return res.roadmap.phases;
+  if (Array.isArray(res.roadmap_phases)) return res.roadmap_phases;
+  if (Array.isArray(res.phases)) return res.phases;
+  return [];
+}
+
+function sanitizeIdea(rawIdea = '') {
+  if (!rawIdea) return 'SYSTEM ARCHITECTURE SPECIFICATION';
+  return String(rawIdea)
+    .replace(/\n\nUser's follow-up request:[\s\S]*$/i, '')
+    .replace(/User's follow-up request:[\s\S]*$/i, '')
+    .replace(/Please generate an updated architecture[\s\S]*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Executive Whitepaper-Grade Monochrome PDF Specification Generator
+ * Pure white background, clean hairline rules, balanced typography,
+ * zero black block backgrounds, and natural page structure.
+ */
+export async function exportToPDF(result, idea, onProgress = () => {}) {
+  if (!result) throw new Error('Architecture data is required');
+
+  onProgress(10);
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 16;
+  const contentWidth = pageWidth - (margin * 2);
+  let y = margin;
+
+  // Extract normalized data structures
+  const tables = extractTables(result);
+  const features = extractFeatures(result);
+  const apis = extractAPIs(result);
+  const roadmap = extractRoadmap(result);
+  const cleanTitle = sanitizeIdea(idea);
+
+  // Initialize Mermaid for diagram rendering
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'neutral',
+    securityLevel: 'loose',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+  });
+
+  // Helper: check space and break page safely
+  const ensureSpace = (neededHeight) => {
+    if (y + neededHeight > pageHeight - margin - 15) {
+      doc.addPage();
+      y = margin + 14;
       return true;
     }
     return false;
   };
 
-  // Helper to add text with word wrap (reserved for future use)
-  const _addText = (text, fontSize = 10, isBold = false, color = [0, 0, 0]) => {
-    pdf.setFontSize(fontSize);
-    pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
-    pdf.setTextColor(...color);
-    const lines = pdf.splitTextToSize(text, contentWidth);
-    lines.forEach(line => {
-      checkPageBreak();
-      pdf.text(line, margin, yPosition);
-      yPosition += fontSize * 0.5;
-    });
-    yPosition += 5;
+  // Helper: Section Title Header with clean, refined typography
+  const addSectionHeader = (title, subtitle, minRequiredSpace = 55) => {
+    ensureSpace(minRequiredSpace);
+
+    doc.setDrawColor(30, 41, 59); // Dark slate rule
+    doc.setLineWidth(0.6);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 5;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text(title.toUpperCase(), margin, y);
+    y += 4.5;
+
+    if (subtitle) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text(subtitle, margin, y);
+      y += 4.5;
+    }
+
+    y += 2;
+  };
+
+  // Table styling tokens (clean executive grayscale)
+  const tableHeadStyles = {
+    fillColor: [241, 245, 249], // Soft refined slate/gray
+    textColor: [15, 23, 42],     // Dark text
+    fontSize: 8.5,
+    fontStyle: 'bold',
+    halign: 'left',
+    cellPadding: 3,
+    lineColor: [203, 213, 225],
+    lineWidth: 0.2,
+  };
+
+  const tableBaseStyles = {
+    fontSize: 8,
+    cellPadding: 2.8,
+    textColor: [30, 41, 59],
+    lineColor: [226, 232, 240],
+    lineWidth: 0.2,
   };
 
   // ============================================================================
-  // COVER PAGE
+  // 1. EXECUTIVE COVER / HEADER (PAGE 1)
   // ============================================================================
-  
-  // Logo/Title
-  pdf.setFillColor(37, 99, 235); // Brand blue
-  pdf.rect(0, 0, pageWidth, 80, 'F');
-  
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(32);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('ArchitechAI', pageWidth / 2, 35, { align: 'center' });
-  
-  pdf.setFontSize(16);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('System Architecture Document', pageWidth / 2, 50, { align: 'center' });
-  
-  // Project idea
-  yPosition = 100;
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Overview', margin, yPosition);
-  yPosition += 10;
-  
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-  const ideaLines = pdf.splitTextToSize(idea, contentWidth);
-  ideaLines.forEach(line => {
-    pdf.text(line, margin, yPosition);
-    yPosition += 6;
-  });
-  
-  // Metadata
-  yPosition += 10;
-  pdf.setFontSize(10);
-  pdf.setTextColor(100, 100, 100);
-  pdf.text(`Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
-  yPosition += 5;
-  pdf.text(`Architecture Type: ${result.architecture?.type || 'N/A'}`, margin, yPosition);
-  yPosition += 5;
-  pdf.text(`Features: ${result.features?.length || 0} | APIs: ${result.apis?.length || 0} | Tables: ${result.database?.length || 0}`, margin, yPosition);
-  
-  // Table of Contents
-  yPosition += 20;
-  pdf.setFontSize(16);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0, 0, 0);
-  pdf.text('Table of Contents', margin, yPosition);
-  yPosition += 10;
-  
-  const toc = [
-    '1. Features & Prioritization',
-    '2. Database Schema',
-    '3. API Endpoints',
-    '4. System Architecture',
-    '5. ER Diagram',
-    '6. Architecture Diagram',
-    '7. Development Roadmap',
-    '8. Cost Estimation',
+  onProgress(20);
+
+  // Top Clean Double Hairline Brand Header (No black background)
+  doc.setDrawColor(15, 23, 42);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, margin + contentWidth, y);
+  y += 1.5;
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, margin + contentWidth, y);
+  y += 6;
+
+  // Header Brand & Document Metadata Line
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(15, 23, 42);
+  doc.text('ARCHITECH.AI', margin, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text(' |  SYSTEM DESIGN & ARCHITECTURE SPECIFICATION', margin + 26, y);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text(`DATE: ${new Date().toLocaleDateString()}`, pageWidth - margin, y, { align: 'right' });
+  y += 10;
+
+  // Project Title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.setTextColor(15, 23, 42);
+  const titleLines = doc.splitTextToSize(cleanTitle.toUpperCase(), contentWidth);
+  doc.text(titleLines, margin, y);
+  y += (titleLines.length * 6) + 5;
+
+  // Executive Metadata Summary Grid (4 Columns)
+  const metaBoxY = y;
+  const colWidth = contentWidth / 4;
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.4);
+  doc.setFillColor(248, 250, 252);
+  doc.rect(margin, metaBoxY, contentWidth, 14, 'FD');
+
+  const metaItems = [
+    { label: 'TOPOLOGY', value: result.architecture?.type || 'Modular System' },
+    { label: 'REQUIREMENTS', value: `${features.length} Features` },
+    { label: 'API ENDPOINTS', value: `${apis.length} Endpoints` },
+    { label: 'DATA ENTITIES', value: `${tables.length} Tables` },
   ];
-  
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-  toc.forEach((item, index) => {
-    pdf.text(item, margin + 5, yPosition);
-    pdf.text(`${index + 2}`, pageWidth - margin - 10, yPosition, { align: 'right' });
-    yPosition += 7;
+
+  metaItems.forEach((item, index) => {
+    const colX = margin + (index * colWidth);
+    if (index > 0) {
+      doc.setDrawColor(226, 232, 240);
+      doc.line(colX, metaBoxY, colX, metaBoxY + 14);
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(item.label, colX + 3.5, metaBoxY + 4.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text(String(item.value), colX + 3.5, metaBoxY + 10.5);
   });
-  
+  y += 19;
+
   // ============================================================================
-  // SECTION 1: FEATURES
+  // 2. EXECUTIVE OVERVIEW & TECHNOLOGY STACK (PAGE 1)
   // ============================================================================
-  
-  pdf.addPage();
-  yPosition = margin;
-  
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(37, 99, 235);
-  pdf.text('1. Features & Prioritization', margin, yPosition);
-  yPosition += 15;
-  
-  if (result.features && result.features.length > 0) {
-    const featuresByPriority = {
-      'Must': result.features.filter(f => f.priority === 'Must'),
-      'Should': result.features.filter(f => f.priority === 'Should'),
-      'Could': result.features.filter(f => f.priority === 'Could'),
-      "Won't": result.features.filter(f => f.priority === "Won't"),
-    };
-    
-    Object.entries(featuresByPriority).forEach(([priority, features]) => {
-      if (features.length > 0) {
-        checkPageBreak(30);
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`${priority}-Have (${features.length})`, margin, yPosition);
-        yPosition += 8;
-        
-        features.forEach((feature, index) => {
-          checkPageBreak(15);
-          pdf.setFontSize(10);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(`${index + 1}. ${feature.name}`, margin + 5, yPosition);
-          yPosition += 6;
-          
-          if (feature.description) {
-            pdf.setFont('helvetica', 'normal');
-            pdf.setTextColor(80, 80, 80);
-            const descLines = pdf.splitTextToSize(feature.description, contentWidth - 10);
-            descLines.forEach(line => {
-              checkPageBreak();
-              pdf.text(line, margin + 10, yPosition);
-              yPosition += 5;
-            });
-          }
-          yPosition += 3;
-        });
-        yPosition += 5;
-      }
-    });
-  }
-  
-  // ============================================================================
-  // SECTION 2: DATABASE SCHEMA
-  // ============================================================================
-  
-  pdf.addPage();
-  yPosition = margin;
-  
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(37, 99, 235);
-  pdf.text('2. Database Schema', margin, yPosition);
-  yPosition += 15;
-  
-  if (result.database && result.database.length > 0) {
-    result.database.forEach((table, index) => {
-      checkPageBreak(40);
-      
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`${index + 1}. ${table.table}`, margin, yPosition);
-      yPosition += 8;
-      
-      // Fields table
-      const tableData = table.fields.map(field => [field]);
-      
-      pdf.autoTable({
-        startY: yPosition,
-        head: [['Fields']],
-        body: tableData,
-        margin: { left: margin + 5 },
-        theme: 'grid',
-        headStyles: { fillColor: [37, 99, 235], fontSize: 10 },
-        bodyStyles: { fontSize: 9 },
-        columnStyles: { 0: { cellWidth: contentWidth - 10 } },
-      });
-      
-      yPosition = pdf.lastAutoTable.finalY + 5;
-      
-      // Relationships
-      if (table.relationships && table.relationships.length > 0) {
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Relationships:', margin + 5, yPosition);
-        yPosition += 6;
-        
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(9);
-        table.relationships.forEach(rel => {
-          checkPageBreak();
-          pdf.text(`• ${rel}`, margin + 10, yPosition);
-          yPosition += 5;
-        });
-      }
-      yPosition += 8;
-    });
-  }
-  
-  // ============================================================================
-  // SECTION 3: API ENDPOINTS
-  // ============================================================================
-  
-  pdf.addPage();
-  yPosition = margin;
-  
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(37, 99, 235);
-  pdf.text('3. API Endpoints', margin, yPosition);
-  yPosition += 15;
-  
-  if (result.apis && result.apis.length > 0) {
-    const apiData = result.apis.map(api => [
-      api.method,
-      api.endpoint,
-      api.description || 'N/A'
-    ]);
-    
-    pdf.autoTable({
-      startY: yPosition,
-      head: [['Method', 'Endpoint', 'Description']],
-      body: apiData,
-      margin: { left: margin },
-      theme: 'grid',
-      headStyles: { fillColor: [37, 99, 235], fontSize: 10 },
-      bodyStyles: { fontSize: 9 },
-      columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 60 },
-        2: { cellWidth: contentWidth - 80 }
-      },
-    });
-    
-    yPosition = pdf.lastAutoTable.finalY + 10;
-  }
-  
-  // ============================================================================
-  // SECTION 4: SYSTEM ARCHITECTURE
-  // ============================================================================
-  
-  pdf.addPage();
-  yPosition = margin;
-  
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(37, 99, 235);
-  pdf.text('4. System Architecture', margin, yPosition);
-  yPosition += 15;
-  
-  if (result.architecture) {
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Architecture Type', margin, yPosition);
-    yPosition += 7;
-    
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(result.architecture.type || 'N/A', margin + 5, yPosition);
-    yPosition += 12;
-    
-    // Tech Stack
-    if (result.architecture.tech_stack) {
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Technology Stack', margin, yPosition);
-      yPosition += 7;
-      
-      const techStack = [
-        ['Frontend', result.architecture.tech_stack.frontend || 'N/A'],
-        ['Backend', result.architecture.tech_stack.backend || 'N/A'],
-        ['Database', result.architecture.tech_stack.database || 'N/A'],
-      ];
-      
-      pdf.autoTable({
-        startY: yPosition,
-        body: techStack,
-        margin: { left: margin + 5 },
-        theme: 'plain',
-        bodyStyles: { fontSize: 10 },
-        columnStyles: {
-          0: { cellWidth: 40, fontStyle: 'bold' },
-          1: { cellWidth: contentWidth - 45 }
-        },
-      });
-      
-      yPosition = pdf.lastAutoTable.finalY + 10;
-    }
-    
-    // Components
-    if (result.architecture.components && result.architecture.components.length > 0) {
-      checkPageBreak(30);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('System Components', margin, yPosition);
-      yPosition += 7;
-      
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      result.architecture.components.forEach((component, index) => {
-        checkPageBreak();
-        pdf.text(`${index + 1}. ${component}`, margin + 5, yPosition);
-        yPosition += 6;
-      });
-    }
-  }
-  
-  // ============================================================================
-  // SECTION 5 & 6: DIAGRAMS
-  // ============================================================================
-  
-  // Try to capture diagrams if they exist in DOM
-  const erDiagramElement = document.getElementById('er-diagram-svg');
-  const archDiagramElement = document.getElementById('arch-diagram-svg');
-  
-  if (erDiagramElement) {
-    pdf.addPage();
-    yPosition = margin;
-    
-    pdf.setFontSize(20);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(37, 99, 235);
-    pdf.text('5. ER Diagram', margin, yPosition);
-    yPosition += 15;
-    
-    try {
-      const canvas = await html2canvas(erDiagramElement, {
-        scale: 2,
-        backgroundColor: '#ffffff'
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = contentWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      if (yPosition + imgHeight > pageHeight - margin) {
-        pdf.addPage();
-        yPosition = margin;
-      }
-      
-      pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
-      yPosition += imgHeight + 10;
-    } catch (error) {
-      console.error('Failed to capture ER diagram:', error);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'italic');
-      pdf.text('Diagram could not be captured', margin, yPosition);
-    }
-  }
-  
-  if (archDiagramElement) {
-    pdf.addPage();
-    yPosition = margin;
-    
-    pdf.setFontSize(20);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(37, 99, 235);
-    pdf.text('6. Architecture Diagram', margin, yPosition);
-    yPosition += 15;
-    
-    try {
-      const canvas = await html2canvas(archDiagramElement, {
-        scale: 2,
-        backgroundColor: '#ffffff'
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = contentWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      if (yPosition + imgHeight > pageHeight - margin) {
-        pdf.addPage();
-        yPosition = margin;
-      }
-      
-      pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
-      yPosition += imgHeight + 10;
-    } catch (error) {
-      console.error('Failed to capture architecture diagram:', error);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'italic');
-      pdf.text('Diagram could not be captured', margin, yPosition);
-    }
-  }
-  
-  // ============================================================================
-  // SECTION 7: ROADMAP
-  // ============================================================================
-  
-  pdf.addPage();
-  yPosition = margin;
-  
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(37, 99, 235);
-  pdf.text('7. Development Roadmap', margin, yPosition);
-  yPosition += 15;
-  
-  if (result.roadmap && result.roadmap.length > 0) {
-    result.roadmap.forEach((phase, index) => {
-      checkPageBreak(30);
-      
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`${index + 1}. ${phase.phase}`, margin, yPosition);
-      yPosition += 8;
-      
-      if (phase.tasks && phase.tasks.length > 0) {
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
-        phase.tasks.forEach(task => {
-          checkPageBreak();
-          pdf.text(`• ${task}`, margin + 5, yPosition);
-          yPosition += 6;
-        });
-      }
-      yPosition += 8;
-    });
-  }
-  
-  // ============================================================================
-  // SECTION 8: COST ESTIMATION
-  // ============================================================================
-  
-  pdf.addPage();
-  yPosition = margin;
-  
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(37, 99, 235);
-  pdf.text('8. Cost Estimation', margin, yPosition);
-  yPosition += 15;
-  
+  addSectionHeader('1. Executive Overview & Technology Stack', 'Core architectural pattern and selected infrastructure components', 40);
+
+  const techRows = [
+    ['Frontend Layer', result.architecture?.tech_stack?.frontend || 'React / Next.js', 'Client application, state management, and user interaction'],
+    ['Backend Layer', result.architecture?.tech_stack?.backend || 'Node.js / Express', 'Core microservices, business logic execution, and API routing'],
+    ['Database Layer', result.architecture?.tech_stack?.database || 'PostgreSQL', 'Transactional persistence, relational schemas, and indexing'],
+    ['System Pattern', result.architecture?.type || 'Modular Architecture', 'Top-level architecture pattern and scaling topology'],
+  ];
+
+  doc.autoTable({
+    startY: y,
+    head: [['System Layer', 'Technology / Framework', 'Architectural Role & Scope']],
+    body: techRows,
+    theme: 'grid',
+    headStyles: tableHeadStyles,
+    styles: tableBaseStyles,
+    columnStyles: {
+      0: { cellWidth: 36, fontStyle: 'bold' },
+      1: { cellWidth: 54 },
+      2: { cellWidth: contentWidth - 90 },
+    },
+    alternateRowStyles: { fillColor: [255, 255, 255] },
+    margin: { top: margin + 12, bottom: margin + 10, left: margin, right: margin },
+  });
+
+  y = doc.lastAutoTable.finalY + 6;
+
+  // Project Estimation Summary Box (Bottom of Page 1)
   if (result.estimation) {
-    const estimationData = [
-      ['Development Hours', result.estimation.hours || 'N/A'],
-      ['Team Size', result.estimation.team_size || 'N/A'],
-      ['Estimated Cost', result.estimation.cost || 'N/A'],
+    const estRows = [
+      ['Estimated Dev Effort', result.estimation?.hours || result.estimation?.dev_hours || '120-180 Hours'],
+      ['Recommended Squad', result.estimation?.team_size || result.estimation?.estimation_team_size || '3-5 Engineers'],
+      ['Project Budget Range', result.estimation?.cost || result.estimation?.estimated_cost || '$15,000 - $30,000'],
     ];
-    
-    pdf.autoTable({
-      startY: yPosition,
-      body: estimationData,
-      margin: { left: margin },
+
+    doc.autoTable({
+      startY: y,
+      body: estRows,
       theme: 'grid',
-      bodyStyles: { fontSize: 11 },
+      styles: tableBaseStyles,
       columnStyles: {
-        0: { cellWidth: 60, fontStyle: 'bold', fillColor: [240, 240, 240] },
-        1: { cellWidth: contentWidth - 60 }
+        0: { cellWidth: 48, fontStyle: 'bold', fillColor: [248, 250, 252] },
+        1: { cellWidth: contentWidth - 48 },
       },
+      margin: { top: margin + 12, bottom: margin + 10, left: margin, right: margin },
     });
-    
-    yPosition = pdf.lastAutoTable.finalY + 10;
+    y = doc.lastAutoTable.finalY + 8;
   }
-  
+
   // ============================================================================
-  // FOOTER ON LAST PAGE
+  // 3. FUNCTIONAL REQUIREMENTS (MoSCoW) -> STARTS ON PAGE 2
   // ============================================================================
-  
-  yPosition += 20;
-  checkPageBreak(30);
-  
-  pdf.setFontSize(9);
-  pdf.setFont('helvetica', 'italic');
-  pdf.setTextColor(150, 150, 150);
-  pdf.text('Generated by ArchitechAI - AI-Powered Architecture Generator', pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 5;
-  pdf.text('https://architech.ai', pageWidth / 2, yPosition, { align: 'center' });
-  
-  // Save PDF
-  const filename = `architecture-${new Date().toISOString().split('T')[0]}.pdf`;
-  pdf.save(filename);
-  
+  onProgress(40);
+  if (features.length > 0) {
+    doc.addPage();
+    y = margin + 14;
+    addSectionHeader('2. Functional Specifications & Prioritization (MoSCoW)', 'Categorized requirements matrix with business priority allocation', 40);
+
+    const featureRows = features.map(f => {
+      const priority = String(f.priority || 'Must').toUpperCase();
+      const name = f.name || f.feature_name || 'System Feature';
+      let desc = f.description || f.desc || f.details || f.specification || '';
+      if (!desc.trim()) {
+        desc = `Implements ${name} with operational workflows and validations.`;
+      }
+
+      return [priority, name, desc];
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['Priority', 'Feature Name', 'Functional Specification & Scope']],
+      body: featureRows,
+      theme: 'grid',
+      headStyles: tableHeadStyles,
+      styles: tableBaseStyles,
+      columnStyles: {
+        0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+        1: { cellWidth: 50, fontStyle: 'bold' },
+        2: { cellWidth: contentWidth - 72 },
+      },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      margin: { top: margin + 12, bottom: margin + 10, left: margin, right: margin },
+    });
+
+    y = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ============================================================================
+  // 4. DATABASE SCHEMA & ENTITY MODELS
+  // ============================================================================
+  onProgress(60);
+  if (tables.length > 0) {
+    addSectionHeader('3. Database Schema & Data Models', 'Relational entity structures, fields definition, and relational constraints', 55);
+
+    const dbRows = tables.map((t, idx) => {
+      const tableName = t.table || t.table_name || t.name || `table_${idx + 1}`;
+      const fields = Array.isArray(t.fields) 
+        ? t.fields.join(', ') 
+        : (typeof t.fields === 'string' ? t.fields : 'id, created_at, updated_at');
+      const rels = Array.isArray(t.relationships) && t.relationships.length > 0 
+        ? t.relationships.join('; ') 
+        : (t.relationships || 'None (Standalone Entity)');
+
+      return [tableName, fields, rels];
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['Entity / Table', 'Schema Fields & Attributes', 'Foreign Key Relationships']],
+      body: dbRows,
+      theme: 'grid',
+      headStyles: tableHeadStyles,
+      styles: {
+        ...tableBaseStyles,
+        fontSize: 7.5,
+      },
+      columnStyles: {
+        0: { cellWidth: 36, fontStyle: 'bold' },
+        1: { cellWidth: 84 },
+        2: { cellWidth: contentWidth - 120 },
+      },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      margin: { top: margin + 12, bottom: margin + 10, left: margin, right: margin },
+    });
+
+    y = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ============================================================================
+  // 5. REST API ENDPOINTS
+  // ============================================================================
+  onProgress(75);
+  if (apis.length > 0) {
+    addSectionHeader('4. RESTful API Contracts & Endpoints', 'Interface routes, supported HTTP verbs, and endpoint specifications', 55);
+
+    const apiRows = apis.map(api => [
+      String(api.method || 'GET').toUpperCase(),
+      api.endpoint || api.path || '/api/v1/resource',
+      api.description || api.desc || 'API contract endpoint'
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [['Method', 'Endpoint URI Path', 'Contract Description & Handler']],
+      body: apiRows,
+      theme: 'grid',
+      headStyles: tableHeadStyles,
+      styles: {
+        ...tableBaseStyles,
+        fontSize: 7.5,
+      },
+      columnStyles: {
+        0: { cellWidth: 20, fontStyle: 'bold', halign: 'center' },
+        1: { cellWidth: 62, fontStyle: 'bold' },
+        2: { cellWidth: contentWidth - 82 },
+      },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      margin: { top: margin + 12, bottom: margin + 10, left: margin, right: margin },
+    });
+
+    y = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ============================================================================
+  // 6. DEVELOPMENT ROADMAP & MILESTONES
+  // ============================================================================
+  onProgress(85);
+  if (roadmap.length > 0) {
+    addSectionHeader('5. Development Roadmap & Milestones', 'Phased delivery schedule, sprint breakdown, and critical path deliverables', 55);
+
+    roadmap.forEach((phase, idx) => {
+      let rawPhaseName = phase.phase || phase.phase_name || `Phase ${idx + 1}`;
+      rawPhaseName = rawPhaseName.replace(/^Phase\s*\d+\s*:\s*Phase\s*\d+\s*:\s*/i, `Phase ${idx + 1}: `);
+      rawPhaseName = rawPhaseName.replace(/^Phase\s*\d+\s*:\s*/i, `Phase ${idx + 1}: `);
+      if (!rawPhaseName.toLowerCase().startsWith('phase')) {
+        rawPhaseName = `Phase ${idx + 1}: ${rawPhaseName}`;
+      }
+
+      const taskItems = Array.isArray(phase.tasks) ? phase.tasks : [];
+      const phaseNeededSpace = 10 + (taskItems.length * 5.5);
+      ensureSpace(Math.min(phaseNeededSpace, 35));
+
+      // Phase Header Banner (Soft, refined border and fill)
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, y, contentWidth, 6.5, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(rawPhaseName.toUpperCase(), margin + 3, y + 4.5);
+      y += 9.5;
+
+      // Tasks Checklist
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(51, 65, 85);
+
+      taskItems.forEach((task) => {
+        ensureSpace(7);
+        const cleanTask = String(task).replace(/^\[[ x]\]\s*/i, '');
+        const taskLines = doc.splitTextToSize(`[  ]  ${cleanTask}`, contentWidth - 8);
+        doc.text(taskLines, margin + 4, y);
+        y += (taskLines.length * 4) + 1.2;
+      });
+
+      y += 3;
+    });
+
+    y += 6;
+  }
+
+  // ============================================================================
+  // 7. DIAGRAMS (ER & ARCHITECTURE)
+  // ============================================================================
+  onProgress(90);
+
+  const renderDiagramToImage = async (mermaidCode) => {
+    if (!mermaidCode || !mermaidCode.trim()) return null;
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.background = '#ffffff';
+    container.style.padding = '30px';
+    container.style.width = '1000px';
+    container.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
+    document.body.appendChild(container);
+
+    try {
+      await mermaid.run({ nodes: container.querySelectorAll('.mermaid') });
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+      });
+      return canvas.toDataURL('image/png');
+    } catch (err) {
+      console.warn('Diagram rendering failed in PDF:', err);
+      return null;
+    } finally {
+      if (document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
+    }
+  };
+
+  // ER Diagram Section
+  if (result.erDiagram) {
+    const erImage = await renderDiagramToImage(result.erDiagram);
+    if (erImage) {
+      doc.addPage();
+      y = margin + 12;
+      addSectionHeader('6. Entity-Relationship Data Model Diagram', 'Entity schema visualization and cardinality mapping', 30);
+
+      const imgWidth = contentWidth;
+      const imgHeight = 140;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.rect(margin, y, imgWidth, imgHeight);
+      doc.addImage(erImage, 'PNG', margin + 2, y + 2, imgWidth - 4, imgHeight - 4, undefined, 'FAST');
+      y += imgHeight + 8;
+    }
+  }
+
+  // System Architecture Diagram Section
+  if (result.architectureDiagram) {
+    const archImage = await renderDiagramToImage(result.architectureDiagram);
+    if (archImage) {
+      doc.addPage();
+      y = margin + 12;
+      addSectionHeader('7. System Architecture Flow Diagram', 'Component topology, network gateways, and inter-service communications', 30);
+
+      const imgWidth = contentWidth;
+      const imgHeight = 140;
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.4);
+      doc.rect(margin, y, imgWidth, imgHeight);
+      doc.addImage(archImage, 'PNG', margin + 2, y + 2, imgWidth - 4, imgHeight - 4, undefined, 'FAST');
+      y += imgHeight + 8;
+    }
+  }
+
+  // ============================================================================
+  // 8. TWO-PASS RUNNING HEADER & FOOTER
+  // ============================================================================
+  onProgress(95);
+  const totalPages = doc.internal.getNumberOfPages();
+  const headerTitle = cleanTitle.length > 50 ? cleanTitle.substring(0, 47) + '...' : cleanTitle;
+
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+
+    // Running Header (Pages 2+)
+    if (i > 1) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('SYSTEM SPECIFICATION', margin, margin + 4);
+      doc.text(headerTitle.toUpperCase(), pageWidth - margin, margin + 4, { align: 'right' });
+
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(margin, margin + 6, margin + contentWidth, margin + 6);
+    }
+
+    // Running Footer (All Pages)
+    const footerY = pageHeight - margin + 5;
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.3);
+    doc.line(margin, footerY - 3, margin + contentWidth, footerY - 3);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`ARCHITECH.AI COMPILED SPECIFICATION — CONFIDENTIAL`, margin, footerY);
+    doc.text(`PAGE ${i} OF ${totalPages}`, pageWidth - margin, footerY, { align: 'right' });
+  }
+
+  onProgress(100);
+  const sanitizedTitle = cleanTitle.substring(0, 30).replace(/[^a-z0-9]/gi, '_');
+  const filename = `${sanitizedTitle}_Specification.pdf`;
+  doc.save(filename);
   return filename;
 }
